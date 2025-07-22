@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/game/*": ["packages/game/src/*"],
+      "@/ui/*": ["apps/web/src/components/*"],
+      "@/lib/*": ["apps/web/src/lib/*"]
+    },
+    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "target": "ES2020",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["apps", "packages"]
+}
