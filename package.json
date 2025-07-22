@@ -6,7 +6,7 @@
     "dev": "pnpm --filter ./apps/web dev",
     "build": "pnpm --filter ./apps/web build",
     "lint": "eslint \"**/*.{ts,tsx}\" --fix",
-    "prepare": "husky install"
+    "prepare": "npx husky install"
   },
   "devDependencies": {
     "eslint": "^8",
