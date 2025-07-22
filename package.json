@@ -1,7 +1,7 @@
 {
   "name": "highspeed-otsukai-rogue",
   "private": true,
-  "packageManager": "pnpm@8",
+  "packageManager": "pnpm@8.6.0",
   "scripts": {
     "dev": "pnpm --filter ./apps/web dev",
     "build": "pnpm --filter ./apps/web build",

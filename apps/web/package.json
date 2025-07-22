@@ -1,5 +1,5 @@
 {
-  "name": "@web",
+  "name": "web",
   "private": true,
   "dependencies": {
     "next": "14",
