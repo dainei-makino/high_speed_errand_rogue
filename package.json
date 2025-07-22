@@ -1,0 +1,13 @@
+{
+  "name": "high-speed-errand-rogue",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "npm run build -w @highspeed/game && npm run build -w web",
+    "dev": "npm run dev -w web",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.40.1"
+  }
+}
