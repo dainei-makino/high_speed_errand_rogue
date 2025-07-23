@@ -1,7 +1,14 @@
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: 480,
+  height: 270,
+  parent: 'game-container',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 480,
+    height: 270
+  },
   scene: {
     preload,
     create,
@@ -14,11 +21,12 @@ function preload() {
 }
 
 function create() {
-  this.add.text(300, 280, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+  this.add.text(240, 135, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 }
 
 function update() {
   // game loop logic
 }
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
+window.addEventListener('resize', () => game.scale.refresh());
