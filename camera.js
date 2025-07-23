@@ -12,8 +12,9 @@ export default class CameraManager {
    */
   panToChunk(info, duration = 400) {
     const size = this.mazeManager.tileSize;
-    const cx = info.offsetX + (info.chunk.width * size) / 2;
-    const cy = info.offsetY + (info.chunk.height * size) / 2;
+    const chunkSize = info.chunk.size || info.chunk.width || 0;
+    const cx = info.offsetX + (chunkSize * size) / 2;
+    const cy = info.offsetY + (chunkSize * size) / 2;
     this.cam.pan(cx, cy, duration, 'Sine.easeInOut');
   }
 
