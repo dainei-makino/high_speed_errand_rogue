@@ -1,4 +1,4 @@
-class HeroState {
+export default class HeroState {
   constructor() {
     this.health = 3; // プレイヤーの残りHP
     this.speed = 200; // 移動速度(px/s)
@@ -24,5 +24,3 @@ class HeroState {
     this.powerUps.push(powerUp);
   }
 }
-
-window.HeroState = HeroState;
