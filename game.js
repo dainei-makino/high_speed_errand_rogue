@@ -38,7 +38,7 @@ class GameScene extends Phaser.Scene {
     this.worldLayer.add(this.heroSprite);
 
     // Persistent key display above the hero
-    this.keyDisplay = this.add.container(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
+    this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
     this.keyIcon = Characters.createKey(this);
     this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
     this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
@@ -164,7 +164,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    this.keyDisplay.x = this.heroSprite.x;
+    this.keyDisplay.x = this.heroSprite.x - 10;
     this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
