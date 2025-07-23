@@ -5,7 +5,8 @@ const SPRITES = {
   wall: 'wall.svg',
   exit: 'exit.svg',
   treasure: 'treasure.svg',
-  hero: 'hero.svg'
+  hero: 'hero.svg',
+  arrow: 'arrow.svg'
 };
 
 const canvases = {};
@@ -60,6 +61,10 @@ function createHero(scene) {
   return scene.add.image(0, 0, 'hero').setOrigin(0.5);
 }
 
+function createArrow(scene) {
+  return scene.add.image(0, 0, 'arrow').setOrigin(0.5);
+}
+
 export default {
   ready,
   registerTextures,
@@ -67,5 +72,6 @@ export default {
   createWall,
   createExit,
   createTreasure,
-  createHero
+  createHero,
+  createArrow
 };
