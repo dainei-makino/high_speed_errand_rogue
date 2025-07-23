@@ -1,3 +1,6 @@
+import GameState from './game-state.js';
+import HeroState from './hero_state.js';
+
 // Global state for tracking overall game progress
 const gameState = new GameState();
 
@@ -27,7 +30,6 @@ let hero;
 
 function create() {
   hero = new HeroState();
-  this.add.text(240, 135, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
   this.mazeText = this.add.text(10, 10, `Mazes Cleared: ${gameState.clearedMazes}`, {
     fontSize: '16px',
     color: '#ffffff'
