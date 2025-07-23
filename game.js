@@ -130,6 +130,15 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
+      if (
+        curTile.cell === TILE.SILVER_DOOR &&
+        !curTile.chunk.chunk.silverOpened &&
+        this.hero.keys > 0
+      ) {
+        curTile.chunk.chunk.silverOpened = true;
+        this.mazeManager.openSilverDoor(curTile.chunk);
+      }
+
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
         if (this.hero.useKey()) {
           this.mazeManager.openDoor(curTile.chunk);

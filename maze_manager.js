@@ -73,6 +73,8 @@ export default class MazeManager {
             break;
           case TILE.SILVER_DOOR:
             sprite = Characters.createSilverDoor(this.scene);
+            info.silverDoorSprite = sprite;
+            info.silverDoorPosition = { x, y };
             break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
@@ -268,12 +270,19 @@ export default class MazeManager {
     if (walls.length) {
       const spot = walls[Math.floor(Math.random() * walls.length)];
       chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
+      chunk.silverDoor = spot;
     }
   }
 
   openDoor(info) {
     if (info && info.doorSprite) {
       info.doorSprite.setTexture('door_open');
+    }
+  }
+
+  openSilverDoor(info) {
+    if (info && info.silverDoorSprite) {
+      info.silverDoorSprite.setTexture('door_silver_open');
     }
   }
 
