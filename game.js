@@ -132,8 +132,9 @@ class GameScene extends Phaser.Scene {
           curTile.chunk.chunk.exited = true;
 
           // celebratory effects when exiting a chunk
-          this.cameraManager.cam.flash(120, 255, 255, 255);
-          this.cameraManager.cam.shake(120, 0.005);
+          // use a gentler flash and shake to reduce eye strain
+          this.cameraManager.cam.flash(200, 180, 180, 180);
+          this.cameraManager.cam.shake(150, 0.003);
 
           if (!this.textures.exists('spark')) {
             const tex = this.textures.createCanvas('spark', 4, 4);
