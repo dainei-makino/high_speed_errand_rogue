@@ -37,6 +37,19 @@ class GameScene extends Phaser.Scene {
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.worldLayer.add(this.heroSprite);
 
+    // Persistent key display above the hero
+    this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
+    this.keyIcon = Characters.createKey(this);
+    this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
+    this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#ffffff'
+    }).setOrigin(0, 0.5);
+    this.keyDisplay.add([this.keyIcon, this.keyCountText]);
+    this.worldLayer.add(this.keyDisplay);
+    this.updateKeyDisplay();
+
     this.cameras.main.setBounds(-1000, -1000, 10000, 10000);
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.cameraManager.panToChunk(firstInfo, 0);
@@ -116,6 +129,7 @@ class GameScene extends Phaser.Scene {
         curTile.chunk.chunk.chestOpened = true;
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
+        this.updateKeyDisplay();
         const icon = Characters.createKey(this);
         icon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
         icon.setPosition(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
@@ -141,6 +155,7 @@ class GameScene extends Phaser.Scene {
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
         if (this.hero.useKey()) {
+          this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
@@ -162,7 +177,25 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    this.keyDisplay.x = this.heroSprite.x - 10;
+    this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
+
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+  }
+
+  updateKeyDisplay() {
+    const count = this.hero.keys;
+    if (count <= 0) {
+      this.keyDisplay.setVisible(false);
+    } else {
+      this.keyDisplay.setVisible(true);
+      if (count === 1) {
+        this.keyCountText.setVisible(false);
+      } else {
+        this.keyCountText.setVisible(true);
+        this.keyCountText.setText('x' + count);
+      }
+    }
   }
 }
 
