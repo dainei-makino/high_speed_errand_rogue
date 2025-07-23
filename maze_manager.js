@@ -7,14 +7,21 @@ export default class MazeManager {
     this.tileSize = 16;
     this.activeChunks = [];
     this.chunkSpacing = 16;
+    // Use a random base for seeds so mazes differ each run
+    this.seedBase = Math.random().toString(36).slice(2);
+    this.seedCount = 0;
     // Doubled the initial TTL so mazes last longer before fading
     this.fadeDelay = 18000; // ms until fade starts
     this.fadeDuration = 2000; // fade time
     this.events = new Phaser.Events.EventEmitter();
   }
 
+  _nextSeed() {
+    return `${this.seedBase}-${this.seedCount++}`;
+  }
+
   spawnInitial() {
-    const chunk = createChunk('start', 13, 'W');
+    const chunk = createChunk(this._nextSeed(), 13, 'W');
     this._ensureEntrance(chunk);
     return this.addChunk(chunk, 0, 0);
   }
@@ -138,7 +145,7 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const chunk = createChunk(`chunk${progress}`, 13, entryDir);
+    const chunk = createChunk(this._nextSeed(), 13, entryDir);
 
     const { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
 
