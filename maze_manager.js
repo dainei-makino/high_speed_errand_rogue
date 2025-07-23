@@ -134,16 +134,73 @@ export default class MazeManager {
   }
 
   spawnNext(progress, fromObj, heroSprite) {
-    const last = this.activeChunks[this.activeChunks.length - 1];
-    const offsetX = last.offsetX + last.chunk.size * this.tileSize + this.chunkSpacing;
-    const offsetY = last.offsetY;
-    const chunk = createChunk(`chunk${progress}`, 13, 'W');
+    const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
+    const doorDir = door.dir;
+    const entryDir = this._oppositeDir(doorDir);
+    const chunk = createChunk(`chunk${progress}`, 13, entryDir);
+
+    const { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+
+    const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+    chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
+    chunk.entrance = entrance;
     this._ensureEntrance(chunk);
+
     const info = this.addChunk(chunk, offsetX, offsetY);
 
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
     heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
     return info;
+  }
+
+  _oppositeDir(dir) {
+    switch (dir) {
+      case 'N':
+        return 'S';
+      case 'S':
+        return 'N';
+      case 'W':
+        return 'E';
+      case 'E':
+      default:
+        return 'W';
+    }
+  }
+
+  _calcOffset(fromObj, newSize, dir) {
+    const size = this.tileSize;
+    let offsetX = fromObj.offsetX;
+    let offsetY = fromObj.offsetY;
+    switch (dir) {
+      case 'N':
+        offsetY = fromObj.offsetY - (newSize - 1) * size;
+        break;
+      case 'S':
+        offsetY = fromObj.offsetY + (fromObj.chunk.size - 1) * size;
+        break;
+      case 'W':
+        offsetX = fromObj.offsetX - (newSize - 1) * size;
+        break;
+      case 'E':
+      default:
+        offsetX = fromObj.offsetX + (fromObj.chunk.size - 1) * size;
+        break;
+    }
+    return { offsetX, offsetY };
+  }
+
+  _calcEntrance(dir, doorX, doorY, newSize) {
+    switch (dir) {
+      case 'N':
+        return { x: doorX, y: newSize - 1 };
+      case 'S':
+        return { x: doorX, y: 0 };
+      case 'W':
+        return { x: newSize - 1, y: doorY };
+      case 'E':
+      default:
+        return { x: 0, y: doorY };
+    }
   }
 
   _ensureEntrance(chunk) {
