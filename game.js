@@ -20,7 +20,10 @@ function preload() {
   // preload assets here (none for minimal setup)
 }
 
+let hero;
+
 function create() {
+  hero = new HeroState();
   this.add.text(240, 135, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
 }
 
