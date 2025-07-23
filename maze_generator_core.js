@@ -51,7 +51,8 @@ function index(x, y, size) {
 }
 
 export class MazeChunk {
-  constructor(seed = 'seed', size = 12, entry = 'W') {
+  constructor(seed = 'seed', size = 13, entry = 'W') {
+    if (size % 2 === 0) size += 1; // ensure odd size to avoid double walls
     this.size = size;
     this.seed = seed;
     this.entry = entry;
@@ -200,6 +201,7 @@ export class MazeChunk {
   }
 }
 
-export function createChunk(seed, size = 12, entry = 'W') {
+export function createChunk(seed, size = 13, entry = 'W') {
+  if (size % 2 === 0) size += 1; // enforce odd sizes consistently
   return new MazeChunk(seed, size, entry);
 }
