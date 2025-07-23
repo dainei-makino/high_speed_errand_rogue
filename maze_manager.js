@@ -73,6 +73,11 @@ export default class MazeManager {
             info.doorSprite = sprite;
             info.doorPosition = { x, y };
             break;
+          case TILE.SILVER_DOOR:
+            sprite = Characters.createSilverDoor(this.scene);
+            info.silverDoorSprite = sprite;
+            info.silverDoorPosition = { x, y };
+            break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
             sprite = Characters.createTreasure(this.scene);
@@ -180,6 +185,9 @@ export default class MazeManager {
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
+    if (progress >= 1) {
+      this._addSilverDoor(chunk);
+    }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
 
@@ -252,9 +260,40 @@ export default class MazeManager {
     chunk.entrance = floors[Math.floor(Math.random() * floors.length)] || { x: 1, y: 1 };
   }
 
+  _addSilverDoor(chunk) {
+    const candidates = [];
+    const size = chunk.size;
+    const t = chunk.tiles;
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        const n = t[(y - 1) * size + x];
+        const s = t[(y + 1) * size + x];
+        const e = t[y * size + (x + 1)];
+        const w = t[y * size + (x - 1)];
+        const horiz = e !== TILE.WALL && w !== TILE.WALL && n === TILE.WALL && s === TILE.WALL;
+        const vert = n !== TILE.WALL && s !== TILE.WALL && e === TILE.WALL && w === TILE.WALL;
+        if (horiz || vert) {
+          candidates.push({ x, y });
+        }
+      }
+    }
+    if (candidates.length) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
+      chunk.silverDoor = spot;
+    }
+  }
+
   openDoor(info) {
     if (info && info.doorSprite) {
       info.doorSprite.setTexture('door_open');
+    }
+  }
+
+  openSilverDoor(info) {
+    if (info && info.silverDoorSprite) {
+      info.silverDoorSprite.setTexture('door_silver_open');
     }
   }
 
