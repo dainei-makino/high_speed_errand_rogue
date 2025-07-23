@@ -71,6 +71,9 @@ export default class MazeManager {
             info.doorSprite = sprite;
             info.doorPosition = { x, y };
             break;
+          case TILE.SILVER_DOOR:
+            sprite = Characters.createSilverDoor(this.scene);
+            break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
             sprite = Characters.createTreasure(this.scene);
@@ -177,6 +180,9 @@ export default class MazeManager {
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
+    if (progress >= 1) {
+      this._addSilverDoor(chunk);
+    }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
 
@@ -247,6 +253,22 @@ export default class MazeManager {
       }
     }
     chunk.entrance = floors[Math.floor(Math.random() * floors.length)] || { x: 1, y: 1 };
+  }
+
+  _addSilverDoor(chunk) {
+    const walls = [];
+    const size = chunk.size;
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (chunk.tiles[y * size + x] === TILE.WALL) {
+          walls.push({ x, y });
+        }
+      }
+    }
+    if (walls.length) {
+      const spot = walls[Math.floor(Math.random() * walls.length)];
+      chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
+    }
   }
 
   openDoor(info) {

@@ -4,6 +4,7 @@ const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
   exit: 'door_closed.svg',
+  door_silver: 'door_silver.svg',
   door_open: 'door_open.svg',
   treasure: 'treasure.svg',
   hero: 'hero.svg',
@@ -55,6 +56,10 @@ function createExit(scene) {
   return scene.add.image(0, 0, 'exit').setOrigin(0);
 }
 
+function createSilverDoor(scene) {
+  return scene.add.image(0, 0, 'door_silver').setOrigin(0);
+}
+
 function createDoorOpen(scene) {
   return scene.add.image(0, 0, 'door_open').setOrigin(0);
 }
@@ -81,6 +86,7 @@ export default {
   createFloor,
   createWall,
   createExit,
+  createSilverDoor,
   createDoorOpen,
   createTreasure,
   createKey,

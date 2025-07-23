@@ -87,7 +87,11 @@ class GameScene extends Phaser.Scene {
         const targetX = this.heroSprite.x + dx * size;
         const targetY = this.heroSprite.y + dy * size;
         const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
-        if (!tileInfo || tileInfo.cell !== TILE.WALL) {
+        const blocked = tileInfo && (
+          tileInfo.cell === TILE.WALL ||
+          (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0)
+        );
+        if (!blocked) {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
