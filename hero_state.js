@@ -1,7 +1,9 @@
 export default class HeroState {
   constructor() {
     this.health = 3; // プレイヤーの残りHP
-    this.speed = 200; // 移動速度(px/s)
+    // Base movement speed in pixels per second
+    // Increased by five times from the original value
+    this.speed = 1000;
     this.position = { x: 0, y: 0 };
     this.inventory = [];
     this.powerUps = [];
