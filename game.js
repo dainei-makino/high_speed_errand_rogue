@@ -130,6 +130,32 @@ class GameScene extends Phaser.Scene {
         if (this.hero.useKey()) {
           this.mazeManager.openDoor(curTile.chunk);
           curTile.chunk.chunk.exited = true;
+
+          // celebratory effects when exiting a chunk
+          this.cameraManager.cam.flash(120, 255, 255, 255);
+          this.cameraManager.cam.shake(120, 0.005);
+
+          if (!this.textures.exists('spark')) {
+            const tex = this.textures.createCanvas('spark', 4, 4);
+            const ctx = tex.getContext();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 4, 4);
+            tex.refresh();
+          }
+          const part = this.add.particles('spark');
+          this.worldLayer.add(part);
+          part.createEmitter({
+            x: this.heroSprite.x,
+            y: this.heroSprite.y,
+            speed: { min: -80, max: 80 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 1, end: 0 },
+            lifespan: 400,
+            quantity: 20,
+            blendMode: 'ADD'
+          });
+          this.time.delayedCall(400, () => part.destroy());
+
           gameState.incrementMazeCount();
           gameState.addScore(100);
           this.events.emit('updateScore', gameState.score);
