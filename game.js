@@ -31,6 +31,7 @@ let hero;
 let heroSprite;
 let cursors;
 let cameraController;
+let uiLayer;
 
 function create() {
   hero = new HeroState();
@@ -38,6 +39,9 @@ function create() {
   this.worldLayer = this.add.container(0, 0);
   heroSprite = this.add.rectangle(0, 0, 32, 32, 0x00ff00);
   this.worldLayer.add(heroSprite);
+
+  uiLayer = this.add.container(0, 0);
+  uiLayer.setScrollFactor(0);
 
   this.cameras.main.setBounds(-500, -500, 1000, 1000);
   cameraController = new CameraController(this);
@@ -49,6 +53,8 @@ function create() {
     fontSize: '16px',
     color: '#ffffff'
   });
+  this.mazeText.setScrollFactor(0);
+  uiLayer.add(this.mazeText);
 
   this.input.keyboard.on('keydown-M', () => {
     gameState.incrementMazeCount();
