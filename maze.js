@@ -7,12 +7,12 @@ export class MazeChunk {
   constructor(width, height) {
     this.width = width;
     this.height = height;
-    this.tiles = this._generateMaze(width, height);
     this.age = 0;
     this.fading = false;
     this.entrance = null;
     this.exit = null;
     this.chest = null;
+    this.tiles = this._generateMaze(width, height);
   }
 
   _generateMaze(width, height) {
