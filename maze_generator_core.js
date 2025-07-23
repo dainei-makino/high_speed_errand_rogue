@@ -68,8 +68,12 @@ export class MazeChunk {
     tiles.fill(TILE.WALL);
 
     const stack = [];
-    const startX = rng.nextInt(size - 2) + 1;
-    const startY = rng.nextInt(size - 2) + 1;
+    // ensure starting position is on an odd tile so that the
+    // maze paths reach the very first interior row/column
+    // (avoids double-thick walls on the north and west edges)
+    const maxIdx = Math.floor((size - 1) / 2);
+    const startX = rng.nextInt(maxIdx) * 2 + 1;
+    const startY = rng.nextInt(maxIdx) * 2 + 1;
     stack.push({ x: startX, y: startY });
     tiles[index(startX, startY, size)] = TILE.FLOOR;
 
