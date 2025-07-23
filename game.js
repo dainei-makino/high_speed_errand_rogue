@@ -142,18 +142,20 @@ class GameScene extends Phaser.Scene {
             ctx.fillRect(0, 0, 4, 4);
             tex.refresh();
           }
-          const part = this.add.particles('spark');
+          const part = this.add.particles(
+            this.heroSprite.x,
+            this.heroSprite.y,
+            'spark',
+            {
+              speed: { min: -80, max: 80 },
+              angle: { min: 0, max: 360 },
+              scale: { start: 1, end: 0 },
+              lifespan: 400,
+              quantity: 20,
+              blendMode: 'ADD'
+            }
+          );
           this.worldLayer.add(part);
-          part.addEmitter({
-            x: this.heroSprite.x,
-            y: this.heroSprite.y,
-            speed: { min: -80, max: 80 },
-            angle: { min: 0, max: 360 },
-            scale: { start: 1, end: 0 },
-            lifespan: 400,
-            quantity: 20,
-            blendMode: 'ADD'
-          });
           this.time.delayedCall(400, () => part.destroy());
 
           gameState.incrementMazeCount();
