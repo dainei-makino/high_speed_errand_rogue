@@ -37,36 +37,32 @@ export class MazeChunk {
     ];
 
     const stack = [];
-    const startX = Math.floor(Math.random() * ((width - 1) / 2)) * 2 + 1;
-    const startY = Math.floor(Math.random() * ((height - 1) / 2)) * 2 + 1;
-    const idxStart = startY * width + startX;
-    this.tiles[idxStart] = TILE_TYPES.FLOOR;
-    stack.push({ x: startX, y: startY });
+    const visited = Array.from({ length: height }, () =>
+      Array(width).fill(false)
+    );
 
-    const visited = new Set([`${startX},${startY}`]);
+    const startX = Math.floor(Math.random() * (width - 2)) + 1;
+    const startY = Math.floor(Math.random() * (height - 2)) + 1;
+    this.tiles[startY * width + startX] = TILE_TYPES.FLOOR;
+    visited[startY][startX] = true;
+    stack.push({ x: startX, y: startY });
 
     while (stack.length) {
       const cur = stack[stack.length - 1];
       const neighbors = dirs
-        .map(d => ({
-          nx: cur.x + d.dx * 2,
-          ny: cur.y + d.dy * 2,
-          mx: cur.x + d.dx,
-          my: cur.y + d.dy
-        }))
+        .map(d => ({ nx: cur.x + d.dx, ny: cur.y + d.dy }))
         .filter(n =>
           n.nx > 0 &&
           n.ny > 0 &&
           n.nx < width - 1 &&
           n.ny < height - 1 &&
-          !visited.has(`${n.nx},${n.ny}`)
+          !visited[n.ny][n.nx]
         );
 
       if (neighbors.length) {
         const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-        this.tiles[next.my * width + next.mx] = TILE_TYPES.FLOOR;
+        visited[next.ny][next.nx] = true;
         this.tiles[next.ny * width + next.nx] = TILE_TYPES.FLOOR;
-        visited.add(`${next.nx},${next.ny}`);
         stack.push({ x: next.nx, y: next.ny });
       } else {
         stack.pop();
@@ -83,6 +79,47 @@ export class MazeChunk {
       y = Math.floor(Math.random() * (this.height - 2)) + 1;
     } while (this.tiles[y * this.width + x] === TILE_TYPES.WALL);
     return { x, y };
+  }
+
+  _randDoor() {
+    const { width, height } = this;
+    const sides = ['N', 'E', 'S', 'W'];
+    for (let i = 0; i < 50; i++) {
+      const side = sides[Math.floor(Math.random() * 4)];
+      if (side === 'N') {
+        const x = Math.floor(Math.random() * (width - 2)) + 1;
+        if (this.tiles[1 * width + x] === TILE_TYPES.FLOOR) {
+          return { x, y: 0 };
+        }
+      } else if (side === 'S') {
+        const x = Math.floor(Math.random() * (width - 2)) + 1;
+        if (this.tiles[(height - 2) * width + x] === TILE_TYPES.FLOOR) {
+          return { x, y: height - 1 };
+        }
+      } else if (side === 'E') {
+        const y = Math.floor(Math.random() * (height - 2)) + 1;
+        if (this.tiles[y * width + (width - 2)] === TILE_TYPES.FLOOR) {
+          return { x: width - 1, y };
+        }
+      } else {
+        const y = Math.floor(Math.random() * (height - 2)) + 1;
+        if (this.tiles[y * width + 1] === TILE_TYPES.FLOOR) {
+          return { x: 0, y };
+        }
+      }
+    }
+    // fallback search
+    for (let x = 1; x < width - 1; x++) {
+      if (this.tiles[1 * width + x] === TILE_TYPES.FLOOR) return { x, y: 0 };
+      if (this.tiles[(height - 2) * width + x] === TILE_TYPES.FLOOR)
+        return { x, y: height - 1 };
+    }
+    for (let y = 1; y < height - 1; y++) {
+      if (this.tiles[y * width + 1] === TILE_TYPES.FLOOR) return { x: 0, y };
+      if (this.tiles[y * width + (width - 2)] === TILE_TYPES.FLOOR)
+        return { x: width - 1, y };
+    }
+    return { x: 0, y: 1 };
   }
 
   _isReachable(from, to) {
@@ -125,7 +162,7 @@ export class MazeChunk {
     let valid = false;
     do {
       this.entrance = this._randInnerCell();
-      this.door = this._randInnerCell();
+      this.door = this._randDoor();
       this.chest = this._randInnerCell();
       valid = this.door.x !== this.entrance.x || this.door.y !== this.entrance.y;
       valid = valid && (this.chest.x !== this.entrance.x || this.chest.y !== this.entrance.y);
