@@ -258,17 +258,25 @@ export default class MazeManager {
   }
 
   _addSilverDoor(chunk) {
-    const walls = [];
+    const candidates = [];
     const size = chunk.size;
+    const t = chunk.tiles;
     for (let y = 1; y < size - 1; y++) {
       for (let x = 1; x < size - 1; x++) {
-        if (chunk.tiles[y * size + x] === TILE.WALL) {
-          walls.push({ x, y });
+        if (t[y * size + x] !== TILE.WALL) continue;
+        const n = t[(y - 1) * size + x];
+        const s = t[(y + 1) * size + x];
+        const e = t[y * size + (x + 1)];
+        const w = t[y * size + (x - 1)];
+        const horiz = e !== TILE.WALL && w !== TILE.WALL && n === TILE.WALL && s === TILE.WALL;
+        const vert = n !== TILE.WALL && s !== TILE.WALL && e === TILE.WALL && w === TILE.WALL;
+        if (horiz || vert) {
+          candidates.push({ x, y });
         }
       }
     }
-    if (walls.length) {
-      const spot = walls[Math.floor(Math.random() * walls.length)];
+    if (candidates.length) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
       chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
       chunk.silverDoor = spot;
     }
