@@ -3,7 +3,7 @@ const ASSET_PATH = 'assets/';
 const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
-  exit: 'exit.svg',
+  exit: 'door_closed.svg',
   treasure: 'treasure.svg',
   hero: 'hero.svg',
   arrow: 'arrow.svg'
