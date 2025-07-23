@@ -17,6 +17,8 @@ class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene');
     this.isMoving = false;
+    this.lastDir = null;
+    this.lastDirTime = 0;
   }
 
   preload() {
@@ -26,6 +28,8 @@ class GameScene extends Phaser.Scene {
   create() {
     this.hero = new HeroState();
     this.isMoving = false;
+    this.lastDir = null;
+    this.lastDirTime = 0;
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -82,6 +86,30 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  _dirToDelta(dir) {
+    switch (dir) {
+      case 'left':
+        return { dx: -1, dy: 0 };
+      case 'right':
+        return { dx: 1, dy: 0 };
+      case 'up':
+        return { dx: 0, dy: -1 };
+      case 'down':
+        return { dx: 0, dy: 1 };
+      default:
+        return { dx: 0, dy: 0 };
+    }
+  }
+
+  _isOpposite(a, b) {
+    return (
+      (a === 'left' && b === 'right') ||
+      (a === 'right' && b === 'left') ||
+      (a === 'up' && b === 'down') ||
+      (a === 'down' && b === 'up')
+    );
+  }
+
   update() {
     const delta = this.game.loop.delta;
 
@@ -107,18 +135,53 @@ class GameScene extends Phaser.Scene {
         );
         if (!blocked) {
           this.isMoving = true;
-          const pixelsPerSecond = this.hero.speed;
-          const duration = (size / pixelsPerSecond) * 1000;
-          this.tweens.add({
-            targets: this.heroSprite,
-            x: targetX,
-            y: targetY,
-            duration,
-            onComplete: () => {
-              this.isMoving = false;
-              this.inputBuffer.repeat(dir);
-            }
-          });
+          const moveTween = () => {
+            const pixelsPerSecond = this.hero.speed;
+            const duration = (size / pixelsPerSecond) * 1000;
+            this.tweens.add({
+              targets: this.heroSprite,
+              x: targetX,
+              y: targetY,
+              duration,
+              onComplete: () => {
+                this.isMoving = false;
+                this.lastDir = dir;
+                this.lastDirTime = entry.time;
+                this.inputBuffer.repeat(dir);
+              }
+            });
+          };
+
+          let needBrake = false;
+          let brakeDir = null;
+          if (entry.reversedFrom) {
+            needBrake = true;
+            brakeDir = entry.reversedFrom;
+          } else if (
+            this.lastDir &&
+            this._isOpposite(dir, this.lastDir) &&
+            entry.time - this.lastDirTime <= 200
+          ) {
+            needBrake = true;
+            brakeDir = this.lastDir;
+          }
+
+          if (needBrake) {
+            const { dx: bdx, dy: bdy } = this._dirToDelta(brakeDir);
+            const shakeDist = 4;
+            const brakeDuration = 60;
+            this.tweens.add({
+              targets: this.heroSprite,
+              x: this.heroSprite.x + bdx * shakeDist,
+              y: this.heroSprite.y + bdy * shakeDist,
+              duration: brakeDuration,
+              yoyo: true,
+              repeat: 1,
+              onComplete: moveTween
+            });
+          } else {
+            moveTween();
+          }
         }
       }
     }

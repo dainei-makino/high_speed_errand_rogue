@@ -56,9 +56,26 @@ export default class InputBuffer {
     }
   }
 
+  _isOpposite(a, b) {
+    return (
+      (a === 'left' && b === 'right') ||
+      (a === 'right' && b === 'left') ||
+      (a === 'up' && b === 'down') ||
+      (a === 'down' && b === 'up')
+    );
+  }
+
   consume() {
     const now = this.scene.time.now;
     this._cleanup(now);
+    if (this.buffer.length >= 2) {
+      const first = this.buffer[0];
+      const second = this.buffer[1];
+      if (second.time - first.time <= 200 && this._isOpposite(first.dir, second.dir)) {
+        this.buffer.splice(0, 2);
+        return { dir: second.dir, time: second.time, reversedFrom: first.dir };
+      }
+    }
     return this.buffer.shift();
   }
 
