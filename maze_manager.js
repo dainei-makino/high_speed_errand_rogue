@@ -7,7 +7,8 @@ export default class MazeManager {
     this.tileSize = 16;
     this.activeChunks = [];
     this.chunkSpacing = 16;
-    this.fadeDelay = 8000; // ms until fade starts
+    // Doubled the initial TTL so mazes last longer before fading
+    this.fadeDelay = 18000; // ms until fade starts
     this.fadeDuration = 2000; // fade time
     this.events = new Phaser.Events.EventEmitter();
   }
