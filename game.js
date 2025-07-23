@@ -135,8 +135,8 @@ class GameScene extends Phaser.Scene {
         );
         if (!blocked) {
           this.isMoving = true;
-          const moveTween = () => {
-            const pixelsPerSecond = this.hero.speed;
+          const moveTween = (speedFactor = 1) => {
+            const pixelsPerSecond = this.hero.speed * speedFactor;
             const duration = (size / pixelsPerSecond) * 1000;
             this.tweens.add({
               targets: this.heroSprite,
@@ -171,6 +171,7 @@ class GameScene extends Phaser.Scene {
             const overshoot = 6;
             const overshootTime = 40;
             const holdTime = 20;
+            const slowFactor = 0.5;
             const startX = this.heroSprite.x;
             const startY = this.heroSprite.y;
             this.tweens.add({
@@ -179,7 +180,7 @@ class GameScene extends Phaser.Scene {
               y: startY + bdy * overshoot,
               duration: overshootTime,
               onComplete: () => {
-                this.time.delayedCall(holdTime, moveTween);
+                this.time.delayedCall(holdTime, () => moveTween(slowFactor));
               }
             });
           } else {
