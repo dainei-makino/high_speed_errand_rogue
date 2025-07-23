@@ -151,6 +151,30 @@ export default class MazeManager {
 
     const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
+    const inner = { x: entrance.x, y: entrance.y };
+    switch (doorDir) {
+      case 'N':
+        inner.y = entrance.y - 1;
+        break;
+      case 'S':
+        inner.y = entrance.y + 1;
+        break;
+      case 'W':
+        inner.x = entrance.x - 1;
+        break;
+      case 'E':
+      default:
+        inner.x = entrance.x + 1;
+        break;
+    }
+    if (
+      inner.x >= 0 &&
+      inner.x < chunk.size &&
+      inner.y >= 0 &&
+      inner.y < chunk.size
+    ) {
+      chunk.tiles[inner.y * chunk.size + inner.x] = TILE.FLOOR;
+    }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
 
