@@ -3,6 +3,7 @@ import HeroState from './hero_state.js';
 import CameraController from './camera.js';
 import MazeManager from './maze_manager.js';
 import Characters from './characters.js';
+import InputBuffer from './input_buffer.js';
 
 // Global state for tracking overall game progress
 const gameState = new GameState();
@@ -33,6 +34,7 @@ let hero;
 let heroSprite;
 let cursors;
 let wasdKeys;
+let inputBuffer;
 let cameraController;
 let uiLayer;
 let mazeManager;
@@ -60,6 +62,7 @@ function create() {
 
   cursors = this.input.keyboard.createCursorKeys();
   wasdKeys = this.input.keyboard.addKeys('W,A,S,D');
+  inputBuffer = new InputBuffer(this);
 
   this.mazeText = this.add.text(10, 10, `Mazes Cleared: ${gameState.clearedMazes}`, {
     fontSize: '16px',
@@ -86,19 +89,16 @@ function update() {
   const delta = this.game.loop.delta;
 
   if (!isMoving) {
-    let dx = 0;
-    let dy = 0;
-    if (Phaser.Input.Keyboard.JustDown(cursors.left) || Phaser.Input.Keyboard.JustDown(wasdKeys.A)) {
-      dx = -1;
-    } else if (Phaser.Input.Keyboard.JustDown(cursors.right) || Phaser.Input.Keyboard.JustDown(wasdKeys.D)) {
-      dx = 1;
-    } else if (Phaser.Input.Keyboard.JustDown(cursors.up) || Phaser.Input.Keyboard.JustDown(wasdKeys.W)) {
-      dy = -1;
-    } else if (Phaser.Input.Keyboard.JustDown(cursors.down) || Phaser.Input.Keyboard.JustDown(wasdKeys.S)) {
-      dy = 1;
-    }
+    const entry = inputBuffer.consume();
+    if (entry) {
+      let dx = 0;
+      let dy = 0;
+      const dir = entry.dir;
+      if (dir === 'left') dx = -1;
+      else if (dir === 'right') dx = 1;
+      else if (dir === 'up') dy = -1;
+      else if (dir === 'down') dy = 1;
 
-    if (dx !== 0 || dy !== 0) {
       const size = mazeManager.tileSize;
       const targetX = heroSprite.x + dx * size;
       const targetY = heroSprite.y + dy * size;
@@ -112,6 +112,7 @@ function update() {
           duration: 120,
           onComplete: () => {
             isMoving = false;
+            inputBuffer.repeat(dir);
           }
         });
       }
