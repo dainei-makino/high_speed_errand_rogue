@@ -2,6 +2,7 @@ import GameState from './game-state.js';
 import HeroState from './hero_state.js';
 import CameraController from './camera.js';
 import MazeManager from './maze_manager.js';
+import Characters from './characters.js';
 
 // Global state for tracking overall game progress
 const gameState = new GameState();
