@@ -13,7 +13,7 @@ export default class MazeManager {
   }
 
   spawnInitial() {
-    const chunk = createChunk('start', 20, 'W');
+    const chunk = createChunk('start', 12, 'W');
     this._ensureEntrance(chunk);
     return this.addChunk(chunk, 0, 0);
   }
@@ -123,7 +123,7 @@ export default class MazeManager {
     const last = this.activeChunks[this.activeChunks.length - 1];
     const offsetX = last.offsetX + last.chunk.size * this.tileSize + this.chunkSpacing;
     const offsetY = last.offsetY;
-    const chunk = createChunk(`chunk${progress}`, 20, 'W');
+    const chunk = createChunk(`chunk${progress}`, 12, 'W');
     this._ensureEntrance(chunk);
     const info = this.addChunk(chunk, offsetX, offsetY);
 

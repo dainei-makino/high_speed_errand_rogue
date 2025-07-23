@@ -51,7 +51,7 @@ function index(x, y, size) {
 }
 
 export class MazeChunk {
-  constructor(seed = 'seed', size = 20, entry = 'W') {
+  constructor(seed = 'seed', size = 12, entry = 'W') {
     this.size = size;
     this.seed = seed;
     this.entry = entry;
@@ -101,6 +101,7 @@ export class MazeChunk {
     }
 
     this._placeSpecials(rng);
+    this._addDetours(rng);
   }
 
   _randomFloor(rng) {
@@ -139,6 +140,21 @@ export class MazeChunk {
     if (!this._isReachable(chest, door)) {
       this.seed += '_retry';
       this._generate();
+    }
+  }
+
+  _addDetours(rng) {
+    const size = this.size;
+    const tiles = this.tiles;
+    const max = Math.max(1, Math.floor(size / 3));
+    const count = rng.nextInt(max) + 1;
+    for (let i = 0; i < count; i++) {
+      const x = rng.nextInt(size - 2) + 1;
+      const y = rng.nextInt(size - 2) + 1;
+      const idx = index(x, y, size);
+      if (tiles[idx] === TILE.WALL) {
+        tiles[idx] = TILE.FLOOR;
+      }
     }
   }
 
@@ -184,6 +200,6 @@ export class MazeChunk {
   }
 }
 
-export function createChunk(seed, size = 20, entry = 'W') {
+export function createChunk(seed, size = 12, entry = 'W') {
   return new MazeChunk(seed, size, entry);
 }
