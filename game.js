@@ -1,3 +1,25 @@
+class GameScene extends Phaser.Scene {
+  constructor() {
+    super({ key: 'GameScene' });
+    this.renderer = null;
+    this.cameraController = null;
+  }
+
+  preload() {
+    this.renderer = new GameRenderer(this);
+    this.renderer.preload();
+  }
+
+  create() {
+    this.cameraController = new GameCamera(this.cameras.main);
+    this.renderer.create();
+  }
+
+  update(time, delta) {
+    this.renderer.update(time, delta);
+  }
+}
+
 const config = {
   type: Phaser.AUTO,
   width: 480,
@@ -9,24 +31,8 @@ const config = {
     width: 480,
     height: 270
   },
-  scene: {
-    preload,
-    create,
-    update
-  }
+  scene: GameScene
 };
-
-function preload() {
-  // preload assets here (none for minimal setup)
-}
-
-function create() {
-  this.add.text(240, 135, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-}
-
-function update() {
-  // game loop logic
-}
 
 const game = new Phaser.Game(config);
 window.addEventListener('resize', () => game.scale.refresh());
