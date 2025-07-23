@@ -23,7 +23,10 @@ function preload() {
   // preload assets here (none for minimal setup)
 }
 
+let hero;
+
 function create() {
+  hero = new HeroState();
   this.add.text(240, 135, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
   this.mazeText = this.add.text(10, 10, `Mazes Cleared: ${gameState.clearedMazes}`, {
     fontSize: '16px',
