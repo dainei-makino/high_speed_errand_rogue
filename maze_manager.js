@@ -6,7 +6,8 @@ export default class MazeManager {
     this.scene = scene;
     this.tileSize = 16;
     this.activeChunks = [];
-    this.chunkSpacing = 16;
+    // spacing between chunks; 0 keeps them connected
+    this.chunkSpacing = 0;
     this.fadeDelay = 8000; // ms until fade starts
     this.fadeDuration = 2000; // fade time
     this.events = new Phaser.Events.EventEmitter();

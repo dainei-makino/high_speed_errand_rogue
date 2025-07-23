@@ -76,7 +76,29 @@ export class MazeChunk {
     const startY = rng.nextInt(maxIdx) * 2 + 1;
     stack.push({ x: startX, y: startY });
     tiles[index(startX, startY, size)] = TILE.FLOOR;
+    this._dfs(stack, tiles, rng);
 
+    // second pass starting on even coordinates to reach the
+    // rows/columns skipped by the first pass (avoids double
+    // outer walls on the south/east sides when size is even)
+    const startX2 = rng.nextInt(maxIdx) * 2 + 2;
+    const startY2 = rng.nextInt(maxIdx) * 2 + 2;
+    if (
+      startX2 < size - 1 &&
+      startY2 < size - 1 &&
+      tiles[index(startX2, startY2, size)] === TILE.WALL
+    ) {
+      stack.push({ x: startX2, y: startY2 });
+      tiles[index(startX2, startY2, size)] = TILE.FLOOR;
+      this._dfs(stack, tiles, rng);
+    }
+
+    this._placeSpecials(rng);
+    this._addDetours(rng);
+  }
+
+  _dfs(stack, tiles, rng) {
+    const size = this.size;
     while (stack.length) {
       const { x, y } = stack[stack.length - 1];
       const neighbors = [];
@@ -99,9 +121,6 @@ export class MazeChunk {
         stack.pop();
       }
     }
-
-    this._placeSpecials(rng);
-    this._addDetours(rng);
   }
 
   _randomFloor(rng) {
