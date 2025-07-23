@@ -144,7 +144,7 @@ class GameScene extends Phaser.Scene {
           }
           const part = this.add.particles('spark');
           this.worldLayer.add(part);
-          part.addEmitter({
+          part.createEmitter({
             x: this.heroSprite.x,
             y: this.heroSprite.y,
             speed: { min: -80, max: 80 },
