@@ -134,12 +134,18 @@ export default class MazeManager {
   }
 
   spawnNext(progress, fromObj, heroSprite) {
-    const doorDir = fromObj.chunk.door ? fromObj.chunk.door.dir : 'E';
+    const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
+    const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
     const chunk = createChunk(`chunk${progress}`, 13, entryDir);
-    this._ensureEntrance(chunk);
 
     const { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+
+    const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+    chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
+    chunk.entrance = entrance;
+    this._ensureEntrance(chunk);
+
     const info = this.addChunk(chunk, offsetX, offsetY);
 
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
@@ -181,6 +187,20 @@ export default class MazeManager {
         break;
     }
     return { offsetX, offsetY };
+  }
+
+  _calcEntrance(dir, doorX, doorY, newSize) {
+    switch (dir) {
+      case 'N':
+        return { x: doorX, y: newSize - 1 };
+      case 'S':
+        return { x: doorX, y: 0 };
+      case 'W':
+        return { x: newSize - 1, y: doorY };
+      case 'E':
+      default:
+        return { x: 0, y: doorY };
+    }
   }
 
   _ensureEntrance(chunk) {
