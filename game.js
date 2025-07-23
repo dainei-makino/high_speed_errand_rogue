@@ -92,7 +92,8 @@ class GameScene extends Phaser.Scene {
             targets: this.heroSprite,
             x: targetX,
             y: targetY,
-            duration: 120,
+            // Move each tile much faster
+            duration: 24,
             onComplete: () => {
               this.isMoving = false;
               this.inputBuffer.repeat(dir);
