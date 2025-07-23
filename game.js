@@ -102,7 +102,8 @@ class GameScene extends Phaser.Scene {
         const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
         const blocked = tileInfo && (
           tileInfo.cell === TILE.WALL ||
-          (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0)
+          (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
+          (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited)
         );
         if (!blocked) {
           this.isMoving = true;
