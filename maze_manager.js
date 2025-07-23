@@ -150,9 +150,35 @@ export default class MazeManager {
     const { size } = pickMazeConfig(progress + 1);
     const chunk = createChunk(this._nextSeed(), size, entryDir);
 
-    const { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+    let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+
+    const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
+    const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
     const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+
+    // Adjust position so entrance never lands on a corner
+    if (doorDir === 'N' || doorDir === 'S') {
+      const minX = 1;
+      const maxX = chunk.size - 2;
+      let adjX = door.x;
+      if (adjX < minX) adjX = minX;
+      if (adjX > maxX) adjX = maxX;
+      if (adjX !== door.x) {
+        entrance.x = adjX;
+        offsetX = doorWorldX - adjX * this.tileSize;
+      }
+    } else {
+      const minY = 1;
+      const maxY = chunk.size - 2;
+      let adjY = door.y;
+      if (adjY < minY) adjY = minY;
+      if (adjY > maxY) adjY = maxY;
+      if (adjY !== door.y) {
+        entrance.y = adjY;
+        offsetY = doorWorldY - adjY * this.tileSize;
+      }
+    }
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
