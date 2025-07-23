@@ -1,31 +1,54 @@
-export default class CameraController {
-  constructor(scene) {
+export default class CameraManager {
+  constructor(scene, mazeManager) {
     this.scene = scene;
-    this.camera = scene.cameras.main;
+    this.mazeManager = mazeManager;
+    this.cam = scene.cameras.main;
   }
 
-  follow(target) {
-    if (target) {
-      this.camera.startFollow(target, true, 0.1, 0.1);
-    } else {
-      this.camera.stopFollow();
-    }
+  /**
+   * 新しいチャンクの中心へパン移動する
+   * @param {object} info - MazeManager が返すチャンク情報
+   * @param {number} duration - tween 時間 (ms)
+   */
+  panToChunk(info, duration = 400) {
+    const size = this.mazeManager.tileSize;
+    const cx = info.offsetX + (info.chunk.width * size) / 2;
+    const cy = info.offsetY + (info.chunk.height * size) / 2;
+    this.cam.pan(cx, cy, duration, 'Sine.easeInOut');
   }
 
+  /**
+   * 軽い揺れ演出 (ズームバンプ)
+   */
+  zoomBump() {
+    this.cam.zoomTo(0.95, 150)
+      .once('camerazoomcomplete', () => this.cam.zoomTo(1, 200));
+  }
+
+  /**
+   * 白フラッシュ
+   */
+  flashWhite() {
+    this.cam.flash(120, 255, 255, 255);
+  }
+
+  /**
+   * 任意位置へ直接パンするユーティリティ
+   */
   panTo(x, y, duration = 500) {
-    this.camera.pan(x, y, duration, 'Sine.easeInOut');
+    this.cam.pan(x, y, duration, 'Sine.easeInOut');
   }
 
   setZoom(zoom, duration = 0) {
     if (duration > 0) {
       this.scene.tweens.add({
-        targets: this.camera,
+        targets: this.cam,
         zoom,
         duration,
         ease: 'Sine.easeInOut'
       });
     } else {
-      this.camera.setZoom(zoom);
+      this.cam.setZoom(zoom);
     }
   }
 }

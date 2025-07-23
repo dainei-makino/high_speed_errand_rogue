@@ -9,12 +9,12 @@ export default class MazeManager {
     this.chunkSpacing = 16;
     this.fadeDelay = 8000; // ms until fade starts
     this.fadeDuration = 2000; // fade time
+    this.events = new Phaser.Events.EventEmitter();
   }
 
   spawnInitial() {
     const chunk = generateChunk(0);
-    this.addChunk(chunk, 0, 0);
-    return chunk;
+    return this.addChunk(chunk, 0, 0);
   }
 
   addChunk(chunk, offsetX, offsetY) {
@@ -26,7 +26,10 @@ export default class MazeManager {
     this.scene.tweens.add({ targets: container, alpha: 1, duration: 400 });
 
     this.renderChunk(chunk, container);
-    this.activeChunks.push({ chunk, container, offsetX, offsetY, age: 0, fading: false });
+    const info = { chunk, container, offsetX, offsetY, age: 0, fading: false };
+    this.activeChunks.push(info);
+    this.events.emit('chunk-added', info);
+    return info;
   }
 
   renderChunk(chunk, container) {
@@ -115,10 +118,10 @@ export default class MazeManager {
     const offsetX = last.offsetX + last.chunk.width * this.tileSize + this.chunkSpacing;
     const offsetY = last.offsetY;
     const chunk = generateChunk(progress);
-    this.addChunk(chunk, offsetX, offsetY);
+    const info = this.addChunk(chunk, offsetX, offsetY);
 
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
     heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
-    this.scene.cameras.main.pan(heroSprite.x, heroSprite.y, 400);
+    return info;
   }
 }
