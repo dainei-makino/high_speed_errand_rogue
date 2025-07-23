@@ -168,20 +168,19 @@ class GameScene extends Phaser.Scene {
 
           if (needBrake) {
             const { dx: bdx, dy: bdy } = this._dirToDelta(brakeDir);
-            const shakeDist = 4;
-            const totalBrake = 80;
-            const shakeTime = totalBrake * 0.7;
-            const holdTime = totalBrake - shakeTime;
-            const cycleDur = shakeTime / 4;
+            const overshoot = 6;
+            const overshootTime = 40;
+            const holdTime = 20;
+            const startX = this.heroSprite.x;
+            const startY = this.heroSprite.y;
             this.tweens.add({
               targets: this.heroSprite,
-              x: this.heroSprite.x + bdx * shakeDist,
-              y: this.heroSprite.y + bdy * shakeDist,
-              duration: cycleDur,
-              yoyo: true,
-              repeat: 1,
-              completeDelay: holdTime,
-              onComplete: moveTween
+              x: startX + bdx * overshoot,
+              y: startY + bdy * overshoot,
+              duration: overshootTime,
+              onComplete: () => {
+                this.time.delayedCall(holdTime, moveTween);
+              }
             });
           } else {
             moveTween();
