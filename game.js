@@ -1,6 +1,6 @@
 import GameState from './game-state.js';
 import HeroState from './hero_state.js';
-import CameraController from './camera.js';
+import CameraManager from './camera.js';
 import MazeManager from './maze_manager.js';
 import Characters from './characters.js';
 
@@ -33,7 +33,7 @@ let hero;
 let heroSprite;
 let cursors;
 let wasdKeys;
-let cameraController;
+let cameraManager;
 let uiLayer;
 let mazeManager;
 let isMoving = false;
@@ -44,19 +44,25 @@ function create() {
 
   this.worldLayer = this.add.container(0, 0);
   mazeManager = new MazeManager(this);
-  const firstChunk = mazeManager.spawnInitial();
+  const firstInfo = mazeManager.spawnInitial();
   heroSprite = Characters.createHero(this);
   heroSprite.setDisplaySize(mazeManager.tileSize, mazeManager.tileSize);
-  heroSprite.x = firstChunk.entrance.x * mazeManager.tileSize + mazeManager.tileSize / 2;
-  heroSprite.y = firstChunk.entrance.y * mazeManager.tileSize + mazeManager.tileSize / 2;
+  heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * mazeManager.tileSize + mazeManager.tileSize / 2;
+  heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * mazeManager.tileSize + mazeManager.tileSize / 2;
   this.worldLayer.add(heroSprite);
 
   uiLayer = this.add.container(0, 0);
   uiLayer.setScrollFactor(0);
 
   this.cameras.main.setBounds(-1000, -1000, 10000, 10000);
-  cameraController = new CameraController(this);
-  cameraController.follow(heroSprite);
+  cameraManager = new CameraManager(this, mazeManager);
+  cameraManager.panToChunk(firstInfo, 0);
+  mazeManager.events.on('chunk-added', info => {
+    if (info !== firstInfo) {
+      cameraManager.panToChunk(info);
+      cameraManager.zoomBump();
+    }
+  });
 
   cursors = this.input.keyboard.createCursorKeys();
   wasdKeys = this.input.keyboard.addKeys('W,A,S,D');
@@ -74,11 +80,11 @@ function create() {
   });
 
   this.input.keyboard.on('keydown-Q', () => {
-    cameraController.setZoom(Math.min(cameraController.camera.zoom + 0.1, 2), 100);
+    cameraManager.setZoom(Math.min(cameraManager.cam.zoom + 0.1, 2), 100);
   });
 
   this.input.keyboard.on('keydown-E', () => {
-    cameraController.setZoom(Math.max(cameraController.camera.zoom - 0.1, 0.5), 100);
+    cameraManager.setZoom(Math.max(cameraManager.cam.zoom - 0.1, 0.5), 100);
   });
 }
 
