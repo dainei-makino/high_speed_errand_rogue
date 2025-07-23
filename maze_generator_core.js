@@ -100,6 +100,7 @@ export class MazeChunk {
       }
     }
 
+    this._fixEvenSizeWalls();
     this._placeSpecials(rng);
     this._addDetours(rng);
   }
@@ -155,6 +156,22 @@ export class MazeChunk {
       if (tiles[idx] === TILE.WALL) {
         tiles[idx] = TILE.FLOOR;
       }
+    }
+  }
+
+  _fixEvenSizeWalls() {
+    const size = this.size;
+    if (size % 2 !== 0) return;
+    const tiles = this.tiles;
+    const bottomY = size - 2;
+    const aboveY = size - 3;
+    for (let x = 1; x < size - 1; x++) {
+      tiles[index(x, bottomY, size)] = tiles[index(x, aboveY, size)];
+    }
+    const rightX = size - 2;
+    const leftOfRightX = size - 3;
+    for (let y = 1; y < size - 1; y++) {
+      tiles[index(rightX, y, size)] = tiles[index(leftOfRightX, y, size)];
     }
   }
 
