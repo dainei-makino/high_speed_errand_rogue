@@ -9,10 +9,34 @@
     hero: 'hero.svg'
   };
 
-  function preload(scene) {
-    for (const [key, file] of Object.entries(SPRITES)) {
+  const canvases = {};
+
+  async function loadAll() {
+    const entries = Object.entries(SPRITES).map(async ([key, file]) => {
+      const svgText = await fetch(ASSET_PATH + file).then(r => r.text());
+      const img = new Image();
+      const loaded = new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+      img.src = 'data:image/svg+xml;base64,' + btoa(svgText);
+      await loaded;
+      const canvas = document.createElement('canvas');
+      canvas.width = TILE_SIZE;
+      canvas.height = TILE_SIZE;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, TILE_SIZE, TILE_SIZE);
+      canvases[key] = canvas;
+    });
+    await Promise.all(entries);
+  }
+
+  const ready = loadAll();
+
+  function registerTextures(scene) {
+    for (const key in canvases) {
       if (!scene.textures.exists(key)) {
-        scene.load.svg(key, ASSET_PATH + file, { width: TILE_SIZE, height: TILE_SIZE });
+        scene.textures.addCanvas(key, canvases[key]);
       }
     }
   }
@@ -38,7 +62,8 @@
   }
 
   window.Characters = {
-    preload,
+    ready,
+    registerTextures,
     createFloor,
     createWall,
     createExit,

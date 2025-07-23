@@ -17,7 +17,7 @@ const config = {
 };
 
 function preload() {
-  Characters.preload(this);
+  Characters.registerTextures(this);
 }
 
 function create() {
@@ -30,5 +30,7 @@ function update() {
   // game loop logic
 }
 
-const game = new Phaser.Game(config);
-window.addEventListener('resize', () => game.scale.refresh());
+Characters.ready.then(() => {
+  const game = new Phaser.Game(config);
+  window.addEventListener('resize', () => game.scale.refresh());
+});
