@@ -39,7 +39,6 @@ let mazeManager;
 let isMoving = false;
 
 function create() {
-  this.add.text(240, 40, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
   hero = new HeroState();
   isMoving = false;
 
