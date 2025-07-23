@@ -1,106 +1,142 @@
-// Maze generation utilities
+// Maze generation utilities following docs/maze_core_core mechanics.md
+export const TILE_TYPES = {
+  WALL: 0,
+  FLOOR: 1,
+  KEY_CHEST: 2,
+  DOOR: 3,
+  ITEM_CHEST: 4,
+  CONNECTOR: 5
+};
+
 const CHUNK_TABLE = [
   { width: 20, height: 20 }
 ];
 
 export class MazeChunk {
-  constructor(width, height) {
+  constructor(width, height, seed = Math.random().toString(36).slice(2)) {
     this.width = width;
     this.height = height;
+    this.seed = seed;
+    this.tiles = new Uint8Array(width * height);
     this.age = 0;
-    this.fading = false;
     this.entrance = null;
-    this.exit = null;
+    this.door = null;
     this.chest = null;
-    this.tiles = this._generateMaze(width, height);
+    this._generate();
   }
 
-  _generateMaze(width, height) {
-    const grid = Array.from({ length: height }, () =>
-      Array.from({ length: width }, () => ({
-        walls: { N: true, E: true, S: true, W: true },
-        type: 'floor',
-        visited: false
-      }))
-    );
-
-    const stack = [];
-    const startX = Math.floor(Math.random() * (width - 2)) + 1;
-    const startY = Math.floor(Math.random() * (height - 2)) + 1;
-    stack.push({ x: startX, y: startY });
-    grid[startY][startX].visited = true;
+  _generate() {
+    const { width, height } = this;
+    this.tiles.fill(TILE_TYPES.WALL);
 
     const dirs = [
-      { dx: 0, dy: -1, w: 'N', o: 'S' },
-      { dx: 1, dy: 0, w: 'E', o: 'W' },
-      { dx: 0, dy: 1, w: 'S', o: 'N' },
-      { dx: -1, dy: 0, w: 'W', o: 'E' }
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 }
     ];
+
+    const stack = [];
+    const startX = Math.floor(Math.random() * ((width - 1) / 2)) * 2 + 1;
+    const startY = Math.floor(Math.random() * ((height - 1) / 2)) * 2 + 1;
+    const idxStart = startY * width + startX;
+    this.tiles[idxStart] = TILE_TYPES.FLOOR;
+    stack.push({ x: startX, y: startY });
+
+    const visited = new Set([`${startX},${startY}`]);
 
     while (stack.length) {
       const cur = stack[stack.length - 1];
       const neighbors = dirs
         .map(d => ({
-          dir: d,
-          nx: cur.x + d.dx,
-          ny: cur.y + d.dy
+          nx: cur.x + d.dx * 2,
+          ny: cur.y + d.dy * 2,
+          mx: cur.x + d.dx,
+          my: cur.y + d.dy
         }))
         .filter(n =>
           n.nx > 0 &&
           n.ny > 0 &&
           n.nx < width - 1 &&
           n.ny < height - 1 &&
-          !grid[n.ny][n.nx].visited
+          !visited.has(`${n.nx},${n.ny}`)
         );
 
       if (neighbors.length) {
         const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-        grid[cur.y][cur.x].walls[next.dir.w] = false;
-        grid[next.ny][next.nx].walls[next.dir.o] = false;
-        grid[next.ny][next.nx].visited = true;
+        this.tiles[next.my * width + next.mx] = TILE_TYPES.FLOOR;
+        this.tiles[next.ny * width + next.nx] = TILE_TYPES.FLOOR;
+        visited.add(`${next.nx},${next.ny}`);
         stack.push({ x: next.nx, y: next.ny });
       } else {
         stack.pop();
       }
     }
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
-          grid[y][x] = { type: 'wall' };
-        } else {
-          delete grid[y][x].visited;
+    this._placeObjects();
+  }
+
+  _randInnerCell() {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * (this.width - 2)) + 1;
+      y = Math.floor(Math.random() * (this.height - 2)) + 1;
+    } while (this.tiles[y * this.width + x] === TILE_TYPES.WALL);
+    return { x, y };
+  }
+
+  _isReachable(from, to) {
+    const { width, height } = this;
+    const visited = Array.from({ length: height }, () => Array(width).fill(false));
+    const q = [from];
+    visited[from.y][from.x] = true;
+    while (q.length) {
+      const c = q.shift();
+      if (c.x === to.x && c.y === to.y) return true;
+      const dirs = [
+        { dx: 0, dy: -1 },
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: 0 }
+      ];
+      for (const d of dirs) {
+        const nx = c.x + d.dx;
+        const ny = c.y + d.dy;
+        if (
+          nx >= 0 &&
+          ny >= 0 &&
+          nx < width &&
+          ny < height &&
+          !visited[ny][nx] &&
+          this.tiles[ny * width + nx] !== TILE_TYPES.WALL
+        ) {
+          visited[ny][nx] = true;
+          q.push({ x: nx, y: ny });
         }
       }
     }
-
-    this._placeObjects(grid);
-    return grid;
+    return false;
   }
 
-  _placeObjects(grid) {
+  _placeObjects() {
     const width = this.width;
     const height = this.height;
-    const randCell = () => ({
-      x: Math.floor(Math.random() * (width - 2)) + 1,
-      y: Math.floor(Math.random() * (height - 2)) + 1
-    });
-
-    this.entrance = randCell();
-    grid[this.entrance.y][this.entrance.x].type = 'entrance';
-
+    let attempts = 0;
+    let valid = false;
     do {
-      this.exit = randCell();
-    } while (this.exit.x === this.entrance.x && this.exit.y === this.entrance.y);
-    grid[this.exit.y][this.exit.x].type = 'exit';
+      this.entrance = this._randInnerCell();
+      this.door = this._randInnerCell();
+      this.chest = this._randInnerCell();
+      valid = this.door.x !== this.entrance.x || this.door.y !== this.entrance.y;
+      valid = valid && (this.chest.x !== this.entrance.x || this.chest.y !== this.entrance.y);
+      valid = valid && (this.chest.x !== this.door.x || this.chest.y !== this.door.y);
+      valid = valid && this._isReachable(this.chest, this.door);
+      attempts++;
+    } while (!valid && attempts < 10);
 
-    do {
-      this.chest = randCell();
-    } while (
-      (this.chest.x === this.entrance.x && this.chest.y === this.entrance.y) ||
-      (this.chest.x === this.exit.x && this.chest.y === this.exit.y)
-    );
-    grid[this.chest.y][this.chest.x].type = Math.random() < 0.2 ? 'itemChest' : 'chest';
+    this.tiles[this.door.y * width + this.door.x] = TILE_TYPES.DOOR;
+    this.tiles[this.chest.y * width + this.chest.x] =
+      Math.random() < 0.2 ? TILE_TYPES.ITEM_CHEST : TILE_TYPES.KEY_CHEST;
   }
 }
 

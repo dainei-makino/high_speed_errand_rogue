@@ -2,6 +2,7 @@ import GameState from './game-state.js';
 import HeroState from './hero_state.js';
 import CameraController from './camera.js';
 import MazeManager from './maze_manager.js';
+import { TILE_TYPES } from './maze.js';
 import Characters from './characters.js';
 
 // Global state for tracking overall game progress
@@ -103,7 +104,7 @@ function update() {
       const targetX = heroSprite.x + dx * size;
       const targetY = heroSprite.y + dy * size;
       const tileInfo = mazeManager.worldToTile(targetX, targetY);
-      if (!tileInfo || tileInfo.cell.type !== 'wall') {
+      if (!tileInfo || tileInfo.cell !== TILE_TYPES.WALL) {
         isMoving = true;
         this.tweens.add({
           targets: heroSprite,
@@ -120,7 +121,7 @@ function update() {
 
   mazeManager.update(delta, heroSprite);
   const curTile = mazeManager.worldToTile(heroSprite.x, heroSprite.y);
-  if (curTile && curTile.cell.type === 'exit' && !curTile.chunk.chunk.exited) {
+  if (curTile && curTile.cell === TILE_TYPES.DOOR && !curTile.chunk.chunk.exited) {
     curTile.chunk.chunk.exited = true;
     gameState.incrementMazeCount();
     this.mazeText.setText(`Mazes Cleared: ${gameState.clearedMazes}`);
