@@ -132,9 +132,31 @@ class GameScene extends Phaser.Scene {
           curTile.chunk.chunk.exited = true;
 
           // celebratory effects when exiting a chunk
-          // use a gentler flash and shake to reduce eye strain
-          this.cameraManager.cam.flash(200, 180, 180, 180);
-          this.cameraManager.cam.shake(150, 0.003);
+          // soften the visual blast with shorter flash and subtle shake
+          this.cameraManager.cam.flash(150, 160, 160, 160, 0.3);
+          this.cameraManager.cam.shake(120, 0.002);
+
+          // a small expanding flash around the hero for a less intense effect
+          const flash = this.add.rectangle(
+            this.heroSprite.x,
+            this.heroSprite.y,
+            this.mazeManager.tileSize,
+            this.mazeManager.tileSize,
+            0xffffff,
+            0.6
+          );
+          flash.setOrigin(0.5);
+          flash.setScale(0.2);
+          flash.setBlendMode('ADD');
+          this.worldLayer.add(flash);
+          this.tweens.add({
+            targets: flash,
+            scaleX: 1,
+            scaleY: 1,
+            alpha: 0,
+            duration: 180,
+            onComplete: () => flash.destroy()
+          });
 
           if (!this.textures.exists('spark')) {
             const tex = this.textures.createCanvas('spark', 4, 4);
@@ -148,11 +170,11 @@ class GameScene extends Phaser.Scene {
             this.heroSprite.y,
             'spark',
             {
-              speed: { min: -80, max: 80 },
+              speed: { min: -60, max: 60 },
               angle: { min: 0, max: 360 },
-              scale: { start: 1, end: 0 },
-              lifespan: 400,
-              quantity: 20,
+              scale: { start: 0.8, end: 0 },
+              lifespan: 350,
+              quantity: 10,
               blendMode: 'ADD'
             }
           );
