@@ -1,4 +1,5 @@
 import { generateChunk } from './maze.js';
+import Characters from './characters.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -33,37 +34,32 @@ export default class MazeManager {
     for (let y = 0; y < chunk.height; y++) {
       for (let x = 0; x < chunk.width; x++) {
         const cell = chunk.tiles[y][x];
-        let color;
+        // always draw base floor
+        const floor = Characters.createFloor(this.scene);
+        floor.setDisplaySize(size, size);
+        floor.setPosition(x * size, y * size);
+        container.add(floor);
+
+        let sprite = null;
         switch (cell.type) {
           case 'wall':
-            color = 0x222222;
-            break;
-          case 'entrance':
-            color = 0x0000ff;
+            sprite = Characters.createWall(this.scene);
             break;
           case 'exit':
-            color = 0xff0000;
+            sprite = Characters.createExit(this.scene);
             break;
           case 'chest':
-            color = 0xffff00;
-            break;
           case 'itemChest':
-            color = 0xff00ff;
+            sprite = Characters.createTreasure(this.scene);
             break;
-          default:
-            color = 0x666666;
+          // entrance and floor just use floor graphic
         }
-        if (cell.type !== 'floor') {
-          const rect = this.scene.add.rectangle(
-            x * size + size / 2,
-            y * size + size / 2,
-            size,
-            size,
-            color
-          );
-          rect.setOrigin(0.5);
-          rect.setData('type', cell.type);
-          container.add(rect);
+
+        if (sprite) {
+          sprite.setDisplaySize(size, size);
+          sprite.setPosition(x * size, y * size);
+          sprite.setData('type', cell.type);
+          container.add(sprite);
         }
       }
     }
