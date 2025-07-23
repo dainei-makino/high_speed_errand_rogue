@@ -7,14 +7,14 @@ const gameState = new GameState();
 
 const config = {
   type: Phaser.AUTO,
-  width: 480,
-  height: 270,
+  width: 960,
+  height: 540,
   parent: 'game-container',
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 480,
-    height: 270
+    width: 960,
+    height: 540
   },
   scene: {
     preload,
@@ -37,7 +37,7 @@ function create() {
   hero = new HeroState();
 
   this.worldLayer = this.add.container(0, 0);
-  heroSprite = this.add.rectangle(0, 0, 32, 32, 0x00ff00);
+  heroSprite = this.add.rectangle(0, 0, 16, 16, 0x00ff00);
   this.worldLayer.add(heroSprite);
 
   uiLayer = this.add.container(0, 0);

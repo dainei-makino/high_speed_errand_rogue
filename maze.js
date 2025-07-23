@@ -1,10 +1,6 @@
 // Maze generation utilities
 const CHUNK_TABLE = [
-  { width: 5, height: 5 },
-  { width: 6, height: 5 },
-  { width: 7, height: 5 },
-  { width: 7, height: 7 },
-  { width: 10, height: 5 }
+  { width: 20, height: 20 }
 ];
 
 export class MazeChunk {
@@ -29,8 +25,8 @@ export class MazeChunk {
     );
 
     const stack = [];
-    const startX = Math.floor(Math.random() * width);
-    const startY = Math.floor(Math.random() * height);
+    const startX = Math.floor(Math.random() * (width - 2)) + 1;
+    const startY = Math.floor(Math.random() * (height - 2)) + 1;
     stack.push({ x: startX, y: startY });
     grid[startY][startX].visited = true;
 
@@ -50,10 +46,10 @@ export class MazeChunk {
           ny: cur.y + d.dy
         }))
         .filter(n =>
-          n.nx >= 0 &&
-          n.ny >= 0 &&
-          n.nx < width &&
-          n.ny < height &&
+          n.nx > 0 &&
+          n.ny > 0 &&
+          n.nx < width - 1 &&
+          n.ny < height - 1 &&
           !grid[n.ny][n.nx].visited
         );
 
@@ -68,9 +64,13 @@ export class MazeChunk {
       }
     }
 
-    for (const row of grid) {
-      for (const cell of row) {
-        delete cell.visited;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
+          grid[y][x] = { type: 'wall' };
+        } else {
+          delete grid[y][x].visited;
+        }
       }
     }
 
@@ -82,8 +82,8 @@ export class MazeChunk {
     const width = this.width;
     const height = this.height;
     const randCell = () => ({
-      x: Math.floor(Math.random() * width),
-      y: Math.floor(Math.random() * height)
+      x: Math.floor(Math.random() * (width - 2)) + 1,
+      y: Math.floor(Math.random() * (height - 2)) + 1
     });
 
     this.entrance = randCell();
