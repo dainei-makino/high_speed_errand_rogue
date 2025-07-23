@@ -6,11 +6,24 @@
   <title>Phaser 3 Minimal</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
   <style>
-    body { margin: 0; }
-    canvas { display: block; margin: 0 auto; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
   </style>
 </head>
 <body>
+  <div id="game-container"></div>
   <script src="game.js"></script>
 </body>
 </html>
