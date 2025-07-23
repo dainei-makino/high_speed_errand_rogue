@@ -2,6 +2,7 @@ import GameState from './game-state.js';
 import HeroState from './hero_state.js';
 import CameraManager from './camera.js';
 import MazeManager from './maze_manager.js';
+import { TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
@@ -85,7 +86,7 @@ class GameScene extends Phaser.Scene {
         const targetX = this.heroSprite.x + dx * size;
         const targetY = this.heroSprite.y + dy * size;
         const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
-        if (!tileInfo || tileInfo.cell.type !== 'wall') {
+        if (!tileInfo || tileInfo.cell !== TILE.WALL) {
           this.isMoving = true;
           this.tweens.add({
             targets: this.heroSprite,
@@ -103,7 +104,7 @@ class GameScene extends Phaser.Scene {
 
     this.mazeManager.update(delta, this.heroSprite);
     const curTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
-    if (curTile && curTile.cell.type === 'exit' && !curTile.chunk.chunk.exited) {
+    if (curTile && curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
       curTile.chunk.chunk.exited = true;
       gameState.incrementMazeCount();
       this.events.emit('updateScore', gameState.clearedMazes);

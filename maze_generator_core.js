@@ -30,7 +30,7 @@ export class RNG {
   }
 }
 
-const TILE = {
+export const TILE = {
   WALL: 0,
   FLOOR: 1,
   CHEST: 2,
