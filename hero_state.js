@@ -1,8 +1,8 @@
 export default class HeroState {
   constructor() {
     this.health = 3; // プレイヤーの残りHP
-    // Base movement speed in pixels per second
-    // Further reduced per user request
+    // Base movement speed in pixels per second.
+    // This value now directly controls move tween duration.
     this.speed = 200;
     this.position = { x: 0, y: 0 };
     this.inventory = [];

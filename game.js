@@ -89,12 +89,13 @@ class GameScene extends Phaser.Scene {
         const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
         if (!tileInfo || tileInfo.cell !== TILE.WALL) {
           this.isMoving = true;
+          const pixelsPerSecond = this.hero.speed;
+          const duration = (size / pixelsPerSecond) * 1000;
           this.tweens.add({
             targets: this.heroSprite,
             x: targetX,
             y: targetY,
-            // Move each tile much faster
-            duration: 24,
+            duration,
             onComplete: () => {
               this.isMoving = false;
               this.inputBuffer.repeat(dir);
