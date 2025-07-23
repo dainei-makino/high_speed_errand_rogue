@@ -7,6 +7,7 @@ export default class HeroState {
     this.position = { x: 0, y: 0 };
     this.inventory = [];
     this.powerUps = [];
+    this.keys = 0;
   }
 
   moveTo(x, y) {
@@ -20,6 +21,18 @@ export default class HeroState {
 
   addItem(item) {
     this.inventory.push(item);
+  }
+
+  addKey() {
+    this.keys += 1;
+  }
+
+  useKey() {
+    if (this.keys > 0) {
+      this.keys -= 1;
+      return true;
+    }
+    return false;
   }
 
   addPowerUp(powerUp) {

@@ -11,6 +11,10 @@ export default class GameState {
     this.clearedMazes += 1;
   }
 
+  addScore(amount) {
+    this.score += amount;
+  }
+
   // Reset the game progress
   reset() {
     this.clearedMazes = 0;
