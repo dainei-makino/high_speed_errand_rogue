@@ -40,17 +40,16 @@ let isMoving = false;
 
 function create() {
   this.add.text(240, 40, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-  this.hero = Characters.createHero(this);
-  this.hero.setPosition(240, 135);
   hero = new HeroState();
   isMoving = false;
 
   this.worldLayer = this.add.container(0, 0);
   mazeManager = new MazeManager(this);
   const firstChunk = mazeManager.spawnInitial();
-  heroSprite = this.add.rectangle(0, 0, 16, 16, 0x00ff00);
-  heroSprite.x = firstChunk.entrance.x * 16 + 8;
-  heroSprite.y = firstChunk.entrance.y * 16 + 8;
+  heroSprite = Characters.createHero(this);
+  heroSprite.setDisplaySize(mazeManager.tileSize, mazeManager.tileSize);
+  heroSprite.x = firstChunk.entrance.x * mazeManager.tileSize + mazeManager.tileSize / 2;
+  heroSprite.y = firstChunk.entrance.y * mazeManager.tileSize + mazeManager.tileSize / 2;
   this.worldLayer.add(heroSprite);
 
   uiLayer = this.add.container(0, 0);
