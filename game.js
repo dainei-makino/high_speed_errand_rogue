@@ -35,9 +35,11 @@ let wasdKeys;
 let cameraController;
 let uiLayer;
 let mazeManager;
+let isMoving = false;
 
 function create() {
   hero = new HeroState();
+  isMoving = false;
 
   this.worldLayer = this.add.container(0, 0);
   mazeManager = new MazeManager(this);
@@ -79,29 +81,39 @@ function create() {
 }
 
 function update() {
-  const speed = hero.speed;
   const delta = this.game.loop.delta;
-  let dx = 0;
-  let dy = 0;
-  if (cursors.left.isDown || wasdKeys.A.isDown) {
-    dx -= 1;
-  } else if (cursors.right.isDown || wasdKeys.D.isDown) {
-    dx += 1;
-  }
 
-  if (cursors.up.isDown || wasdKeys.W.isDown) {
-    dy -= 1;
-  } else if (cursors.down.isDown || wasdKeys.S.isDown) {
-    dy += 1;
-  }
+  if (!isMoving) {
+    let dx = 0;
+    let dy = 0;
+    if (Phaser.Input.Keyboard.JustDown(cursors.left) || Phaser.Input.Keyboard.JustDown(wasdKeys.A)) {
+      dx = -1;
+    } else if (Phaser.Input.Keyboard.JustDown(cursors.right) || Phaser.Input.Keyboard.JustDown(wasdKeys.D)) {
+      dx = 1;
+    } else if (Phaser.Input.Keyboard.JustDown(cursors.up) || Phaser.Input.Keyboard.JustDown(wasdKeys.W)) {
+      dy = -1;
+    } else if (Phaser.Input.Keyboard.JustDown(cursors.down) || Phaser.Input.Keyboard.JustDown(wasdKeys.S)) {
+      dy = 1;
+    }
 
-  const nextX = heroSprite.x + dx * speed * delta / 1000;
-  const nextY = heroSprite.y + dy * speed * delta / 1000;
-
-  const tileInfo = mazeManager.worldToTile(nextX, nextY);
-  if (!tileInfo || tileInfo.cell.type !== 'wall') {
-    heroSprite.x = nextX;
-    heroSprite.y = nextY;
+    if (dx !== 0 || dy !== 0) {
+      const size = mazeManager.tileSize;
+      const targetX = heroSprite.x + dx * size;
+      const targetY = heroSprite.y + dy * size;
+      const tileInfo = mazeManager.worldToTile(targetX, targetY);
+      if (!tileInfo || tileInfo.cell.type !== 'wall') {
+        isMoving = true;
+        this.tweens.add({
+          targets: heroSprite,
+          x: targetX,
+          y: targetY,
+          duration: 120,
+          onComplete: () => {
+            isMoving = false;
+          }
+        });
+      }
+    }
   }
 
   mazeManager.update(delta, heroSprite);
