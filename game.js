@@ -25,7 +25,7 @@ const config = {
 };
 
 function preload() {
-  // preload assets here (none for minimal setup)
+  Characters.registerTextures(this);
 }
 
 let hero;
@@ -37,6 +37,9 @@ let uiLayer;
 let mazeManager;
 
 function create() {
+  this.add.text(240, 40, 'Hello Phaser!', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+  this.hero = Characters.createHero(this);
+  this.hero.setPosition(240, 135);
   hero = new HeroState();
 
   this.worldLayer = this.add.container(0, 0);
@@ -116,5 +119,7 @@ function update() {
   hero.moveTo(heroSprite.x, heroSprite.y);
 }
 
-const game = new Phaser.Game(config);
-window.addEventListener('resize', () => game.scale.refresh());
+Characters.ready.then(() => {
+  const game = new Phaser.Game(config);
+  window.addEventListener('resize', () => game.scale.refresh());
+});
