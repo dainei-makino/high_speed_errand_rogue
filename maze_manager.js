@@ -207,7 +207,11 @@ export default class MazeManager {
       inner.y >= 0 &&
       inner.y < chunk.size
     ) {
-      chunk.tiles[inner.y * chunk.size + inner.x] = TILE.FLOOR;
+      const idx = inner.y * chunk.size + inner.x;
+      const t = chunk.tiles[idx];
+      if (t !== TILE.CHEST && t !== TILE.ITEM_CHEST) {
+        chunk.tiles[idx] = TILE.FLOOR;
+      }
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
