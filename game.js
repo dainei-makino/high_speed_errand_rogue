@@ -52,11 +52,12 @@ class GameScene extends Phaser.Scene {
     this.inputBuffer = new InputBuffer(this);
 
     this.scene.launch('UIScene');
-    this.events.emit('updateScore', gameState.clearedMazes);
+    this.events.emit('updateScore', gameState.score);
+    this.events.emit('updateKeys', this.hero.keys);
 
     this.input.keyboard.on('keydown-M', () => {
-      gameState.incrementMazeCount();
-      this.events.emit('updateScore', gameState.clearedMazes);
+      gameState.addScore(100);
+      this.events.emit('updateScore', gameState.score);
     });
 
     this.input.keyboard.on('keydown-Q', () => {
@@ -105,11 +106,46 @@ class GameScene extends Phaser.Scene {
 
     this.mazeManager.update(delta, this.heroSprite);
     const curTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
-    if (curTile && curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-      curTile.chunk.chunk.exited = true;
-      gameState.incrementMazeCount();
-      this.events.emit('updateScore', gameState.clearedMazes);
-      this.mazeManager.spawnNext(gameState.clearedMazes, curTile.chunk, this.heroSprite);
+    if (curTile) {
+      if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
+        curTile.chunk.chunk.chestOpened = true;
+        this.mazeManager.removeChest(curTile.chunk);
+        this.hero.addKey();
+        const icon = Characters.createKey(this);
+        icon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
+        icon.setPosition(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
+        this.worldLayer.add(icon);
+        this.tweens.add({
+          targets: icon,
+          y: icon.y - this.mazeManager.tileSize,
+          alpha: 0,
+          duration: 1000,
+          onComplete: () => icon.destroy()
+        });
+        this.events.emit('updateKeys', this.hero.keys);
+      }
+
+      if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
+        if (this.hero.useKey()) {
+          this.mazeManager.openDoor(curTile.chunk);
+          curTile.chunk.chunk.exited = true;
+          gameState.incrementMazeCount();
+          gameState.addScore(100);
+          this.events.emit('updateScore', gameState.score);
+          this.events.emit('updateKeys', this.hero.keys);
+          this.mazeManager.spawnNext(gameState.clearedMazes, curTile.chunk, this.heroSprite);
+        } else {
+          if (curTile.chunk.doorSprite) {
+            this.tweens.add({
+              targets: curTile.chunk.doorSprite,
+              x: '+=2',
+              yoyo: true,
+              duration: 50,
+              repeat: 1
+            });
+          }
+        }
+      }
     }
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);

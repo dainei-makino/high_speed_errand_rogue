@@ -26,14 +26,23 @@ export default class MazeManager {
     container.alpha = 0;
     this.scene.tweens.add({ targets: container, alpha: 1, duration: 400 });
 
-    this.renderChunk(chunk, container);
-    const info = { chunk, container, offsetX, offsetY, age: 0, fading: false };
+    const info = {
+      chunk,
+      container,
+      offsetX,
+      offsetY,
+      age: 0,
+      fading: false,
+      doorSprite: null,
+      chestSprite: null
+    };
+    this.renderChunk(chunk, container, info);
     this.activeChunks.push(info);
     this.events.emit('chunk-added', info);
     return info;
   }
 
-  renderChunk(chunk, container) {
+  renderChunk(chunk, container, info) {
     const size = this.tileSize;
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
@@ -50,10 +59,14 @@ export default class MazeManager {
             break;
           case TILE.DOOR:
             sprite = Characters.createExit(this.scene);
+            info.doorSprite = sprite;
+            info.doorPosition = { x, y };
             break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
             sprite = Characters.createTreasure(this.scene);
+            info.chestSprite = sprite;
+            info.chestPosition = { x, y };
             break;
         }
 
@@ -144,5 +157,25 @@ export default class MazeManager {
       }
     }
     chunk.entrance = floors[Math.floor(Math.random() * floors.length)] || { x: 1, y: 1 };
+  }
+
+  openDoor(info) {
+    if (info && info.doorSprite) {
+      info.doorSprite.setTexture('door_open');
+    }
+  }
+
+  removeChest(info) {
+    if (info && info.chestSprite) {
+      this.scene.tweens.add({
+        targets: info.chestSprite,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => {
+          info.chestSprite.destroy();
+          info.chestSprite = null;
+        }
+      });
+    }
   }
 }

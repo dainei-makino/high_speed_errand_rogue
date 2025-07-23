@@ -4,9 +4,11 @@ const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
   exit: 'door_closed.svg',
+  door_open: 'door_open.svg',
   treasure: 'treasure.svg',
   hero: 'hero.svg',
-  arrow: 'arrow.svg'
+  arrow: 'arrow.svg',
+  key: 'key.svg'
 };
 
 const canvases = {};
@@ -53,8 +55,16 @@ function createExit(scene) {
   return scene.add.image(0, 0, 'exit').setOrigin(0);
 }
 
+function createDoorOpen(scene) {
+  return scene.add.image(0, 0, 'door_open').setOrigin(0);
+}
+
 function createTreasure(scene) {
   return scene.add.image(0, 0, 'treasure').setOrigin(0);
+}
+
+function createKey(scene) {
+  return scene.add.image(0, 0, 'key').setOrigin(0);
 }
 
 function createHero(scene) {
@@ -71,7 +81,9 @@ export default {
   createFloor,
   createWall,
   createExit,
+  createDoorOpen,
   createTreasure,
+  createKey,
   createHero,
   createArrow
 };

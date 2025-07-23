@@ -19,6 +19,15 @@ export default class UIScene extends Phaser.Scene {
 
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateScore', this.updateScore, this);
+    gameScene.events.on('updateKeys', this.updateKeys, this);
+
+    this.keyIcon = this.add.image(160, 8, 'key').setOrigin(0, 0);
+    this.keyIcon.setDisplaySize(16, 16);
+    this.keyText = this.add.text(180, 8, 'x0', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#ffffff'
+    });
 
     this.fpsText = this.add.text(420, 8, '', {
       fontFamily: 'monospace',
@@ -39,5 +48,10 @@ export default class UIScene extends Phaser.Scene {
 
   updateScore(score) {
     this.scoreText.setText('SCORE ' + score.toString().padStart(6, '0'));
+  }
+
+  updateKeys(count) {
+    this.keyText.setText('x' + count);
+    this.keyIcon.setAlpha(count > 0 ? 1 : 0.5);
   }
 }
