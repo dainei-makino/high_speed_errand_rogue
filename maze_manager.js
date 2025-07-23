@@ -22,7 +22,8 @@ export default class MazeManager {
   addChunk(chunk, offsetX, offsetY) {
     const container = this.scene.add.container(offsetX, offsetY);
     if (this.scene.worldLayer) {
-      this.scene.worldLayer.add(container);
+      // Add new chunk containers behind the hero so the character remains visible
+      this.scene.worldLayer.addAt(container, 0);
     }
     container.alpha = 0;
     this.scene.tweens.add({ targets: container, alpha: 1, duration: 400 });
