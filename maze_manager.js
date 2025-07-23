@@ -1,5 +1,6 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
+import { pickMazeConfig } from './maze_table.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -21,7 +22,8 @@ export default class MazeManager {
   }
 
   spawnInitial() {
-    const chunk = createChunk(this._nextSeed(), 13, 'W');
+    const { size } = pickMazeConfig(1);
+    const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     return this.addChunk(chunk, 0, 0);
   }
@@ -145,7 +147,8 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const chunk = createChunk(this._nextSeed(), 13, entryDir);
+    const { size } = pickMazeConfig(progress + 1);
+    const chunk = createChunk(this._nextSeed(), size, entryDir);
 
     const { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
 
