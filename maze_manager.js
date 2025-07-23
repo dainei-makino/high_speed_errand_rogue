@@ -5,7 +5,7 @@ export default class MazeManager {
     this.scene = scene;
     this.tileSize = 16;
     this.activeChunks = [];
-    this.chunkSpacing = 16;
+    this.chunkSpacing = 0;
     this.fadeDelay = 8000; // ms until fade starts
     this.fadeDuration = 2000; // fade time
   }
@@ -115,14 +115,35 @@ export default class MazeManager {
   }
 
   spawnNext(progress, fromObj, heroSprite) {
-    const last = this.activeChunks[this.activeChunks.length - 1];
-    const offsetX = last.offsetX + last.chunk.width * this.tileSize + this.chunkSpacing;
-    const offsetY = last.offsetY;
-    const chunk = generateChunk(progress);
-    this.addChunk(chunk, offsetX, offsetY);
+    const prev = fromObj;
+    const { exitDir, exit } = prev.chunk;
+    const size = this.tileSize;
 
-    heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
-    heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
+    let offsetX = prev.offsetX;
+    let offsetY = prev.offsetY;
+    let entranceSpec;
+    const opposite = { N: 'S', E: 'W', S: 'N', W: 'E' };
+    const coord = exitDir === 'N' || exitDir === 'S' ? exit.x : exit.y;
+    entranceSpec = { dir: opposite[exitDir], coord };
+
+    const chunk = generateChunk(progress, entranceSpec);
+
+    switch (exitDir) {
+      case 'E':
+        offsetX = prev.offsetX + prev.chunk.width * size;
+        break;
+      case 'W':
+        offsetX = prev.offsetX - chunk.width * size;
+        break;
+      case 'S':
+        offsetY = prev.offsetY + prev.chunk.height * size;
+        break;
+      case 'N':
+        offsetY = prev.offsetY - chunk.height * size;
+        break;
+    }
+
+    this.addChunk(chunk, offsetX, offsetY);
     this.scene.cameras.main.pan(heroSprite.x, heroSprite.y, 400);
   }
 }
