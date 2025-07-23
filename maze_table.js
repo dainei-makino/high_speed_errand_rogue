@@ -1,5 +1,5 @@
 export const MAZE_TABLE = [
-  { stage: 1, sizes: [13] },
+  { stage: 1, sizes: [7] },
   { stage: 2, sizes: [9, 11, 13] }
 ];
 
