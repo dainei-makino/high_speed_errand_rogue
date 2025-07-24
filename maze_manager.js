@@ -178,7 +178,7 @@ export default class MazeManager {
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
-    const placement = this._findPlacement(
+    const result = this._findPlacement(
       fromObj,
       chunk,
       doorDir,
@@ -186,13 +186,21 @@ export default class MazeManager {
       doorWorldY
     );
 
-    if (!placement) {
-      console.error('Failed to place chunk', { progress, doorDir });
+    if (!result.success) {
+      console.error('Failed to place chunk', {
+        progress,
+        doorDir,
+        attempts: result.attempts,
+        rectCount: result.rects.length
+      });
+      if (result.rects.length) {
+        console.log('Rect sizes:', result.rects.map(r => `${r.width}x${r.height}`));
+      }
       this.scene.scene.pause();
       return null;
     }
 
-    const { offsetX, offsetY, entrance } = placement;
+    const { offsetX, offsetY, entrance } = result;
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
@@ -379,7 +387,10 @@ export default class MazeManager {
 
     const min = 1;
     const max = newSize - 2;
+    let attempts = 0;
+    const rects = [];
     for (let i = min; i <= max; i++) {
+      attempts++;
       let entrance;
       switch (doorDir) {
         case 'N':
@@ -430,11 +441,12 @@ export default class MazeManager {
         fromObj,
         candidateObj
       ]);
+      rects.push({ width: nextRect.width, height: nextRect.height });
       if (nextRect.width >= newSize * tile && nextRect.height >= newSize * tile) {
-        return { offsetX, offsetY, entrance };
+        return { success: true, offsetX, offsetY, entrance, attempts, rects };
       }
     }
-    return null;
+    return { success: false, attempts, rects };
   }
 
   _ensureEntrance(chunk) {
