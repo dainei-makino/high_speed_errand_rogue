@@ -26,7 +26,8 @@ export default class CameraManager {
     const { x: cx, y: cy } = this.mazeManager.getChunkCenter(info);
     this.expectedCenter.x = cx;
     this.expectedCenter.y = cy;
-    this.cam.pan(cx, cy, duration, 'Sine.easeInOut');
+    // Force a new pan so it isn't ignored if a previous pan is active
+    this.cam.pan(cx, cy, duration, 'Sine.easeInOut', true);
   }
 
   /**
@@ -58,7 +59,8 @@ export default class CameraManager {
   panTo(x, y, duration = 500) {
     this.expectedCenter.x = x;
     this.expectedCenter.y = y;
-    this.cam.pan(x, y, duration, 'Sine.easeInOut');
+    // Force the pan so it always completes even if another is running
+    this.cam.pan(x, y, duration, 'Sine.easeInOut', true);
   }
 
   /**
