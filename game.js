@@ -25,6 +25,7 @@ class GameScene extends Phaser.Scene {
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
     this.introLetters = null;
+    this.bgm = null;
   }
 
   preload() {
@@ -34,6 +35,9 @@ class GameScene extends Phaser.Scene {
   create() {
     this.hero = new HeroState();
     this.isMoving = false;
+
+    this.sound.stopAll();
+    this.bgm = this.sound.add('bgm', { loop: true });
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -84,6 +88,7 @@ class GameScene extends Phaser.Scene {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
       this.sound.play('chunk_generate_2');
       if (data.info && data.info.index === 1) {
+        this.bgm.play();
         this.destroyIntroText();
       }
     });
