@@ -153,14 +153,14 @@ export default class MazeManager {
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
     const { size } = pickMazeConfig(progress + 1);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
+    let chunk = createChunk(this._nextSeed(), size, entryDir);
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
 
-    const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
-    const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
+    let doorWorldX = fromObj.offsetX + door.x * this.tileSize;
+    let doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
-    const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+    let entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
 
     // Adjust position so entrance never lands on a corner
     if (doorDir === 'N' || doorDir === 'S') {
@@ -185,6 +185,26 @@ export default class MazeManager {
       }
     }
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
+
+    let attempts = 0;
+    while (attempts < 3 && this._isOverlapping(offsetX, offsetY, chunk.size, fromObj)) {
+      const res = this._adjustPosition(offsetX, offsetY, entrance, doorDir, doorWorldX, doorWorldY, chunk, attempts);
+      offsetX = res.offsetX;
+      offsetY = res.offsetY;
+      entrance = res.entrance;
+      attempts++;
+    }
+
+    if (this._isOverlapping(offsetX, offsetY, chunk.size, fromObj)) {
+      chunk = createChunk(this._nextSeed(), 5, entryDir);
+      ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
+      entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+      doorWorldX = fromObj.offsetX + door.x * this.tileSize;
+      doorWorldY = fromObj.offsetY + door.y * this.tileSize;
+      chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
+      this._removeOverlappedChunks(offsetX, offsetY, chunk.size, fromObj);
+    }
+
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
       case 'N':
@@ -313,6 +333,66 @@ export default class MazeManager {
       chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
       chunk.silverDoor = spot;
     }
+  }
+
+  _isOverlapping(offsetX, offsetY, size, ignore) {
+    const w = size * this.tileSize;
+    const h = size * this.tileSize;
+    for (const obj of this.activeChunks) {
+      if (obj === ignore) continue;
+      const ow = obj.chunk.size * this.tileSize;
+      const oh = obj.chunk.size * this.tileSize;
+      if (
+        offsetX < obj.offsetX + ow &&
+        offsetX + w > obj.offsetX &&
+        offsetY < obj.offsetY + oh &&
+        offsetY + h > obj.offsetY
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _removeOverlappedChunks(offsetX, offsetY, size, ignore) {
+    const w = size * this.tileSize;
+    const h = size * this.tileSize;
+    const remain = [];
+    for (const obj of this.activeChunks) {
+      if (obj === ignore) {
+        remain.push(obj);
+        continue;
+      }
+      const ow = obj.chunk.size * this.tileSize;
+      const oh = obj.chunk.size * this.tileSize;
+      if (
+        offsetX < obj.offsetX + ow &&
+        offsetX + w > obj.offsetX &&
+        offsetY < obj.offsetY + oh &&
+        offsetY + h > obj.offsetY
+      ) {
+        obj.container.destroy();
+      } else {
+        remain.push(obj);
+      }
+    }
+    this.activeChunks = remain;
+  }
+
+  _adjustPosition(offsetX, offsetY, entrance, dir, doorWorldX, doorWorldY, chunk, step) {
+    const delta = this.tileSize * (step + 1);
+    if (dir === 'N' || dir === 'S') {
+      offsetX += step % 2 === 0 ? delta : -delta;
+      entrance.x = Math.round((doorWorldX - offsetX) / this.tileSize);
+      entrance.x = Math.max(1, Math.min(chunk.size - 2, entrance.x));
+      offsetX = doorWorldX - entrance.x * this.tileSize;
+    } else {
+      offsetY += step % 2 === 0 ? delta : -delta;
+      entrance.y = Math.round((doorWorldY - offsetY) / this.tileSize);
+      entrance.y = Math.max(1, Math.min(chunk.size - 2, entrance.y));
+      offsetY = doorWorldY - entrance.y * this.tileSize;
+    }
+    return { offsetX, offsetY, entrance };
   }
 
   openDoor(info) {
