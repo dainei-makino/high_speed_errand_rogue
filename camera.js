@@ -15,16 +15,6 @@ export default class CameraManager {
       x: this.cam.midPoint.x,
       y: this.cam.midPoint.y
     };
-
-    // Debug markers for camera vs chunk center
-    this.debugCam = scene.add.circle(0, 0, 3, 0xffffff);
-    this.debugChunk = scene.add.circle(0, 0, 6, 0x0000ff, 0)
-      .setStrokeStyle(1, 0x0000ff);
-    this.debugCam.setDepth(1000);
-    this.debugChunk.setDepth(1000);
-    if (scene.worldLayer) {
-      scene.worldLayer.add([this.debugCam, this.debugChunk]);
-    }
   }
 
   /**
@@ -44,9 +34,6 @@ export default class CameraManager {
       this.expectedCenter.x = cx;
       this.expectedCenter.y = cy;
     });
-    if (this.debugChunk) {
-      this.debugChunk.setPosition(cx, cy);
-    }
   }
 
   /**
