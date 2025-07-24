@@ -43,4 +43,42 @@ export default class UIScene extends Phaser.Scene {
     // Right pad with spaces to keep label position stable
     this.chunkText.setText('CHUNK ' + count.toString());
   }
+
+  showMidpoint(num) {
+    const flash = this.add.rectangle(
+      VIRTUAL_WIDTH,
+      VIRTUAL_HEIGHT,
+      VIRTUAL_WIDTH * 2,
+      12,
+      0xffffff
+    ).setOrigin(0.5);
+    flash.setDepth(999);
+    flash.setBlendMode(Phaser.BlendModes.ADD);
+    this.tweens.add({
+      targets: flash,
+      scaleX: 2,
+      alpha: 0,
+      duration: 400,
+      ease: 'Cubic.easeOut',
+      onComplete: () => flash.destroy()
+    });
+
+    const text = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, num.toString(), {
+      fontFamily: 'monospace',
+      fontSize: '192px',
+      stroke: '#000000',
+      strokeThickness: 4
+    }).setOrigin(0.5);
+    text.setDepth(1000);
+    text.setShadow(4, 4, '#000000', 4, true, true);
+    text.setTintFill(0xffffff, 0xffffff, 0xffffff, 0xcd853f);
+    this.tweens.add({
+      targets: text,
+      scale: 2,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Quad.easeOut',
+      onComplete: () => text.destroy()
+    });
+  }
 }

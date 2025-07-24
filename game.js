@@ -8,6 +8,8 @@ import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
 import { newChunkTransition } from './effects.js';
 
+const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
+
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
@@ -232,9 +234,12 @@ class GameScene extends Phaser.Scene {
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
-          if (!this.midpointPlayed && gameState.clearedMazes >= 5) {
-            this.midpointPlayed = true;
+          if (MIDPOINTS.includes(gameState.clearedMazes)) {
             this.sound.play('midpoint');
+            const ui = this.scene.get('UIScene');
+            if (ui && ui.showMidpoint) {
+              ui.showMidpoint(gameState.clearedMazes);
+            }
           }
           this.events.emit('updateChunks', gameState.clearedMazes);
           this.events.emit('updateKeys', this.hero.keys);
