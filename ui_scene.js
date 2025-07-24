@@ -23,6 +23,11 @@ export default class UIScene extends Phaser.Scene {
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
 
     this.oxygenGfx = this.add.graphics();
+    this.o2Label = this.add.text(0, 0, 'O2 Timer', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
 
     this.updateOxygen(1);
 
@@ -50,20 +55,35 @@ export default class UIScene extends Phaser.Scene {
   }
 
   updateOxygen(ratio) {
-    const centerX = VIRTUAL_WIDTH * 2 - 40;
-    const centerY = VIRTUAL_HEIGHT * 2 - 40;
-    const radius = 30;
+    const centerX = VIRTUAL_WIDTH * 2 - 120;
+    const centerY = VIRTUAL_HEIGHT * 2 - 120;
+    const radius = 90;
     const thickness = 8;
     const start = Phaser.Math.DegToRad(-90);
+
+    this.o2Label.setPosition(centerX, centerY - radius - 16);
+
     this.oxygenGfx.clear();
     this.oxygenGfx.lineStyle(thickness, 0x333333, 0.5);
     this.oxygenGfx.beginPath();
     this.oxygenGfx.arc(centerX, centerY, radius, 0, Phaser.Math.PI2, false);
     this.oxygenGfx.strokePath();
+
+    const mainRatio = Math.min(ratio, 1);
+    const extraRatio = Math.max(Math.min(ratio - 1, 1), 0);
+
     this.oxygenGfx.lineStyle(thickness, 0xffff00, 1);
     this.oxygenGfx.beginPath();
-    this.oxygenGfx.arc(centerX, centerY, radius, start, start + Phaser.Math.DegToRad(360 * ratio), false);
+    this.oxygenGfx.arc(centerX, centerY, radius, start, start + Phaser.Math.DegToRad(360 * mainRatio), false);
     this.oxygenGfx.strokePath();
+
+    if (extraRatio > 0) {
+      const innerRadius = radius - thickness - 4;
+      this.oxygenGfx.lineStyle(thickness, 0x00ff00, 1);
+      this.oxygenGfx.beginPath();
+      this.oxygenGfx.arc(centerX, centerY, innerRadius, start, start + Phaser.Math.DegToRad(360 * extraRatio), false);
+      this.oxygenGfx.strokePath();
+    }
   }
 
   showMidpoint(num) {
