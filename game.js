@@ -27,6 +27,8 @@ class GameScene extends Phaser.Scene {
   create() {
     this.hero = new HeroState();
     this.isMoving = false;
+    this.lastMoveDir = null;
+    this.lastMoveTime = 0;
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -112,17 +114,53 @@ class GameScene extends Phaser.Scene {
         if (!blocked) {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
-          const duration = (size / pixelsPerSecond) * 1000;
-          this.tweens.add({
-            targets: this.heroSprite,
-            x: targetX,
-            y: targetY,
-            duration,
-            onComplete: () => {
-              this.isMoving = false;
-              this.inputBuffer.repeat(dir);
-            }
-          });
+          const baseDuration = (size / pixelsPerSecond) * 1000;
+
+          const now = this.time.now;
+          const quickChange =
+            this.lastMoveDir &&
+            this.lastMoveDir !== dir &&
+            now - this.lastMoveTime < 250;
+
+          const startMove = () => {
+            this.lastMoveDir = dir;
+            this.lastMoveTime = this.time.now;
+            const duration = quickChange ? baseDuration * 1.4 : baseDuration;
+            this.tweens.add({
+              targets: this.heroSprite,
+              x: targetX,
+              y: targetY,
+              duration,
+              ease: quickChange ? 'Quad.easeIn' : 'Linear',
+              onComplete: () => {
+                this.isMoving = false;
+                this.inputBuffer.repeat(dir);
+              }
+            });
+          };
+
+          if (quickChange) {
+            const overshoot = 3;
+            let ox = 0;
+            let oy = 0;
+            if (this.lastMoveDir === 'left') ox = -overshoot;
+            else if (this.lastMoveDir === 'right') ox = overshoot;
+            else if (this.lastMoveDir === 'up') oy = -overshoot;
+            else if (this.lastMoveDir === 'down') oy = overshoot;
+
+            this.tweens.add({
+              targets: this.heroSprite,
+              x: this.heroSprite.x + ox,
+              y: this.heroSprite.y + oy,
+              duration: 60,
+              ease: 'Sine.easeOut',
+              onComplete: () => {
+                this.time.delayedCall(60, startMove);
+              }
+            });
+          } else {
+            startMove();
+          }
         }
       }
     }
