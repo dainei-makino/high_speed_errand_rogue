@@ -3,6 +3,11 @@ export default class CameraManager {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.cam = scene.cameras.main;
+    // Keep track of where the camera should be centered
+    this.expectedCenter = {
+      x: this.cam.midPoint.x,
+      y: this.cam.midPoint.y
+    };
   }
 
   /**
@@ -15,6 +20,8 @@ export default class CameraManager {
     const chunkSize = info.chunk.size || info.chunk.width || 0;
     const cx = info.offsetX + (chunkSize * size) / 2;
     const cy = info.offsetY + (chunkSize * size) / 2;
+    this.expectedCenter.x = cx;
+    this.expectedCenter.y = cy;
     this.cam.pan(cx, cy, duration, 'Sine.easeInOut');
   }
 
@@ -37,7 +44,24 @@ export default class CameraManager {
    * 任意位置へ直接パンするユーティリティ
    */
   panTo(x, y, duration = 500) {
+    this.expectedCenter.x = x;
+    this.expectedCenter.y = y;
     this.cam.pan(x, y, duration, 'Sine.easeInOut');
+  }
+
+  /**
+   * Ensure the camera is perfectly centered after pans
+   * to avoid cumulative drift.
+   */
+  maintainCenter() {
+    if (!this.cam.panEffect || !this.cam.panEffect.isRunning) {
+      const { x, y } = this.expectedCenter;
+      const dx = x - this.cam.midPoint.x;
+      const dy = y - this.cam.midPoint.y;
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        this.cam.centerOn(x, y);
+      }
+    }
   }
 
   setZoom(zoom, duration = 0) {

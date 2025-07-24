@@ -182,6 +182,9 @@ class GameScene extends Phaser.Scene {
     this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+
+    // Prevent camera drift by re-centering if needed
+    this.cameraManager.maintainCenter();
   }
 
   updateKeyDisplay() {
