@@ -45,7 +45,8 @@ export default class MazeManager {
       age: 0,
       fading: false,
       doorSprite: null,
-      chestSprite: null
+      chestSprite: null,
+      silverDoors: []
     };
     this.renderChunk(chunk, container, info);
     this.activeChunks.push(info);
@@ -75,10 +76,13 @@ export default class MazeManager {
             break;
           case TILE.SILVER_DOOR:
             sprite = Characters.createSilverDoor(this.scene);
-            if (!info.silverDoorSprites) {
-              info.silverDoorSprites = [];
+            if (chunk.silverDoors) {
+              const d = chunk.silverDoors.find(v => v.x === x && v.y === y);
+              if (d) {
+                d.sprite = sprite;
+                info.silverDoors.push(d);
+              }
             }
-            info.silverDoorSprites.push(sprite);
             break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
@@ -326,7 +330,7 @@ export default class MazeManager {
         const idx = Math.floor(Math.random() * candidates.length);
         const spot = candidates.splice(idx, 1)[0];
         chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
-        doors.push(spot);
+        doors.push({ x: spot.x, y: spot.y, opened: false });
       }
     }
     chunk.silverDoors = doors;
@@ -338,10 +342,14 @@ export default class MazeManager {
     }
   }
 
-  openSilverDoor(info) {
-    if (info && info.silverDoorSprites) {
-      for (const sprite of info.silverDoorSprites) {
-        sprite.setTexture('door_silver_open');
+  openSilverDoor(info, x, y) {
+    if (info && info.silverDoors) {
+      const door = info.silverDoors.find(d => d.x === x && d.y === y);
+      if (door && !door.opened) {
+        if (door.sprite) {
+          door.sprite.setTexture('door_silver_open');
+        }
+        door.opened = true;
       }
     }
   }
