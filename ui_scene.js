@@ -16,7 +16,7 @@ export default class UIScene extends Phaser.Scene {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#ffffff'
-    });
+    }).setVisible(false);
 
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
@@ -26,7 +26,7 @@ export default class UIScene extends Phaser.Scene {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#ffffff'
-    });
+    }).setVisible(false);
 
     this.scale.on('resize', (gw, gh) => {
       this.cameras.main.setViewport((gw - VIRTUAL_WIDTH * 2) / 2, (gh - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
