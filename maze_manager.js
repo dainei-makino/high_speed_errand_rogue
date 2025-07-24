@@ -363,7 +363,7 @@ export default class MazeManager {
       doorWorldX + (doorDir === 'E' ? tile : doorDir === 'W' ? -tile : 0);
     const startY =
       doorWorldY + (doorDir === 'S' ? tile : doorDir === 'N' ? -tile : 0);
-    const rect = this._largestRect(startX, startY, doorDir, fromObj);
+    const rect = this._largestRect(startX, startY, doorDir);
 
     const min = 1;
     const max = newSize - 2;
