@@ -58,7 +58,7 @@ export default class UIScene extends Phaser.Scene {
     const centerX = VIRTUAL_WIDTH * 2 - 120;
     const centerY = VIRTUAL_HEIGHT * 2 - 120;
     const radius = 90;
-    const thickness = 8;
+    const thickness = 32;
     const start = Phaser.Math.DegToRad(-90);
 
     this.o2Label.setPosition(centerX, centerY - radius - 16);
