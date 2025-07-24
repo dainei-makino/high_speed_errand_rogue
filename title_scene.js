@@ -8,8 +8,14 @@ export default class TitleScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale.gameSize;
-    this.cameras.main.setViewport((width - VIRTUAL_WIDTH * 2) / 2, (height - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
-    this.cameras.main.setBackgroundColor('#000000');
+    this.cameras.main.setViewport(
+      (width - VIRTUAL_WIDTH * 2) / 2,
+      (height - VIRTUAL_HEIGHT * 2) / 2,
+      VIRTUAL_WIDTH * 2,
+      VIRTUAL_HEIGHT * 2
+    );
+    // Transparent background so the initial maze and hero from GameScene are visible
+    this.cameras.main.setBackgroundColor(null);
 
     this.scene.launch('GameScene');
     const gs = this.scene.get('GameScene');
