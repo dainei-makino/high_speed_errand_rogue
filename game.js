@@ -164,7 +164,7 @@ class GameScene extends Phaser.Scene {
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
           if (!this.firstMoveSoundPlayed) {
-            this.sound.play('chunk_generate_1');
+            this.sound.play('chunk_generate_1', { seek: 0.15 });
             this.firstMoveSoundPlayed = true;
           }
           this.sound.play('hero_walk');
