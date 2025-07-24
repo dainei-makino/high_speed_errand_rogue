@@ -51,7 +51,8 @@ class CameraManager {
   panToChunk(chunk: MazeChunk, dur=400){
     const cx = chunk.x + chunk.size*16; // 32pxタイル → 半分
     const cy = chunk.y + chunk.size*16;
-    this.cam.pan(cx, cy, dur, 'Sine.easeInOut');
+    // "force" オプションを有効にして常に最新の移動を適用
+    this.cam.pan(cx, cy, dur, 'Sine.easeInOut', true);
   }
 
   // 2. 軽い揺れ (ズームバンプ)
