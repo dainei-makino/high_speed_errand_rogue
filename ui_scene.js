@@ -47,15 +47,16 @@ export default class UIScene extends Phaser.Scene {
   showMidpoint(num) {
     const text = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, num.toString(), {
       fontFamily: 'monospace',
-      fontSize: '96px',
-      color: '#ffffff',
+      fontSize: '192px',
       stroke: '#000000',
-      strokeThickness: 8
+      strokeThickness: 16
     }).setOrigin(0.5);
     text.setDepth(1000);
+    text.setShadow(4, 4, '#000000', 4, true, true);
+    text.setTintFill(0xffffff, 0xffffff, 0xcd853f, 0xcd853f);
     this.tweens.add({
       targets: text,
-      scale: 1.6,
+      scale: 2,
       alpha: 0,
       duration: 1000,
       ease: 'Quad.easeOut',
