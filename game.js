@@ -51,13 +51,13 @@ class GameScene extends Phaser.Scene {
     this.worldLayer.add(this.keyDisplay);
     this.updateKeyDisplay();
 
-    this.cameras.main.setBounds(-1000, -1000, 10000, 10000);
     this.cameraManager = new CameraManager(this, this.mazeManager);
+    this.cameraManager.expandBounds(firstInfo);
     this.cameraManager.panToChunk(firstInfo, 0);
+    // Update bounds whenever a chunk is added
     this.mazeManager.events.on('chunk-added', info => {
       if (info !== firstInfo) {
-        this.cameraManager.panToChunk(info);
-        this.cameraManager.zoomBump();
+        this.cameraManager.expandBounds(info);
       }
     });
     this.mazeManager.events.on('spawn-next', data => {
@@ -192,7 +192,13 @@ class GameScene extends Phaser.Scene {
           gameState.addScore(100);
           this.events.emit('updateScore', gameState.score);
           this.events.emit('updateKeys', this.hero.keys);
-          this.mazeManager.spawnNext(gameState.clearedMazes, curTile.chunk, this.heroSprite);
+          const nextInfo = this.mazeManager.spawnNext(
+            gameState.clearedMazes,
+            curTile.chunk,
+            this.heroSprite
+          );
+          this.cameraManager.panToChunk(nextInfo);
+          this.cameraManager.zoomBump();
         } else {
           if (curTile.chunk.doorSprite) {
             this.tweens.add({
@@ -211,6 +217,9 @@ class GameScene extends Phaser.Scene {
     this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+
+    // Prevent camera drift by re-centering if needed
+    this.cameraManager.maintainCenter();
   }
 
   updateKeyDisplay() {

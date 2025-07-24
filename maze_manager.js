@@ -17,6 +17,20 @@ export default class MazeManager {
     this.events = new Phaser.Events.EventEmitter();
   }
 
+  /**
+   * Get the world-center position of a chunk info object
+   * @param {object} info
+   * @returns {{x:number,y:number}}
+   */
+  getChunkCenter(info) {
+    const size = this.tileSize;
+    const c = info.chunk.size || info.chunk.width || 0;
+    return {
+      x: info.offsetX + (c * size) / 2,
+      y: info.offsetY + (c * size) / 2
+    };
+  }
+
   _nextSeed() {
     return `${this.seedBase}-${this.seedCount++}`;
   }
