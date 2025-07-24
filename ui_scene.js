@@ -72,7 +72,14 @@ export default class UIScene extends Phaser.Scene {
     const mainRatio = Math.min(ratio, 1);
     const extraRatio = Math.max(Math.min(ratio - 1, 1), 0);
 
-    this.oxygenGfx.lineStyle(thickness, 0xffff00, 1);
+    let ringColor = 0xffff00;
+    if (mainRatio <= 0.25) {
+      ringColor = 0xff0000;
+    } else if (mainRatio <= 0.5) {
+      ringColor = 0xffa500;
+    }
+
+    this.oxygenGfx.lineStyle(thickness, ringColor, 1);
     this.oxygenGfx.beginPath();
     this.oxygenGfx.arc(centerX, centerY, radius, start, start + Phaser.Math.DegToRad(360 * mainRatio), false);
     this.oxygenGfx.strokePath();
