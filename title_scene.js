@@ -17,12 +17,12 @@ export default class TitleScene extends Phaser.Scene {
     // Transparent background so the initial maze and hero from GameScene are visible
     this.cameras.main.setBackgroundColor('rgba(0,0,0,0)');
 
-    this.scene.launch('GameScene');
     const gs = this.scene.get('GameScene');
     gs.events.once('create', () => {
       this.scene.pause('GameScene');
       this.scene.sendToBack('GameScene');
     });
+    this.scene.launch('GameScene');
 
     this.add.text(VIRTUAL_WIDTH, 40, 'HIGH SPEED MAZE RUNNER', {
       fontFamily: 'monospace',
