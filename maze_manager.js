@@ -186,14 +186,13 @@ export default class MazeManager {
       doorWorldY
     );
 
-    let offsetX, offsetY, entrance;
-    if (placement) {
-      ({ offsetX, offsetY, entrance } = placement);
-    } else {
-      // fallback to simple direct placement
-      ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
-      entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+    if (!placement) {
+      console.error('Failed to place chunk', { progress, doorDir });
+      this.scene.scene.pause();
+      return null;
     }
+
+    const { offsetX, offsetY, entrance } = placement;
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
@@ -316,8 +315,56 @@ export default class MazeManager {
     return true;
   }
 
+  _rectCollides(x, y, w, h, exclude = []) {
+    if (!Array.isArray(exclude)) exclude = [exclude];
+    exclude = exclude.filter(Boolean);
+    for (const obj of this.activeChunks) {
+      if (exclude.includes(obj)) continue;
+      const ow = obj.chunk.size * this.tileSize;
+      const oh = obj.chunk.size * this.tileSize;
+      if (x < obj.offsetX + ow && x + w > obj.offsetX &&
+          y < obj.offsetY + oh && y + h > obj.offsetY) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _scanDir(x, y, dx, dy, exclude) {
+    const tile = this.tileSize;
+    let dist = 0;
+    for (let i = 0; i < 50; i++) {
+      x += dx * tile;
+      y += dy * tile;
+      if (this._rectCollides(x, y, tile, tile, exclude)) break;
+      dist += tile;
+    }
+    return dist;
+  }
+
+  _largestRect(startX, startY, dir, exclude = []) {
+    const tile = this.tileSize;
+    const north = dir === 'S' ? 0 : this._scanDir(startX, startY, 0, -1, exclude);
+    const south = dir === 'N' ? 0 : this._scanDir(startX, startY, 0, 1, exclude);
+    const west = dir === 'E' ? 0 : this._scanDir(startX, startY, -1, 0, exclude);
+    const east = dir === 'W' ? 0 : this._scanDir(startX, startY, 1, 0, exclude);
+    return {
+      x: startX - west,
+      y: startY - north,
+      width: west + east + tile,
+      height: north + south + tile
+    };
+  }
+
   _findPlacement(fromObj, chunk, doorDir, doorWorldX, doorWorldY) {
     const newSize = chunk.size;
+    const tile = this.tileSize;
+    const startX =
+      doorWorldX + (doorDir === 'E' ? tile : doorDir === 'W' ? -tile : 0);
+    const startY =
+      doorWorldY + (doorDir === 'S' ? tile : doorDir === 'N' ? -tile : 0);
+    const rect = this._largestRect(startX, startY, doorDir, fromObj);
+
     const min = 1;
     const max = newSize - 2;
     for (let i = min; i <= max; i++) {
@@ -337,17 +384,26 @@ export default class MazeManager {
           entrance = { x: 0, y: i };
           break;
       }
-      const offsetX = doorWorldX - entrance.x * this.tileSize;
-      const offsetY = doorWorldY - entrance.y * this.tileSize;
+      const offsetX = doorWorldX - entrance.x * tile;
+      const offsetY = doorWorldY - entrance.y * tile;
+      if (
+        offsetX < rect.x ||
+        offsetY < rect.y ||
+        offsetX + newSize * tile > rect.x + rect.width ||
+        offsetY + newSize * tile > rect.y + rect.height
+      ) {
+        continue;
+      }
       if (!this._canPlace(offsetX, offsetY, newSize, fromObj)) continue;
 
-      // look ahead using this chunk's door
       const candidateObj = { chunk, offsetX, offsetY };
       const nextOffset = this._calcOffset(candidateObj, newSize, chunk.door.dir);
-      if (this._canPlace(nextOffset.offsetX, nextOffset.offsetY, newSize, [
-        fromObj,
-        candidateObj
-      ])) {
+      if (
+        this._canPlace(nextOffset.offsetX, nextOffset.offsetY, newSize, [
+          fromObj,
+          candidateObj
+        ])
+      ) {
         return { offsetX, offsetY, entrance };
       }
     }
