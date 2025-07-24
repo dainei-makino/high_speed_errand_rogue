@@ -69,12 +69,13 @@ class GameScene extends Phaser.Scene {
     this.inputBuffer = new InputBuffer(this);
 
     this.scene.launch('UIScene');
-    this.events.emit('updateScore', gameState.score);
+    this.events.emit('updateChunks', gameState.clearedMazes);
     this.events.emit('updateKeys', this.hero.keys);
 
+    // Debug: manually add a cleared chunk with M key
     this.input.keyboard.on('keydown-M', () => {
-      gameState.addScore(100);
-      this.events.emit('updateScore', gameState.score);
+      gameState.incrementMazeCount();
+      this.events.emit('updateChunks', gameState.clearedMazes);
     });
 
     this.input.keyboard.on('keydown-Q', () => {
@@ -187,10 +188,10 @@ class GameScene extends Phaser.Scene {
         if (this.hero.useKey()) {
           this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
+          this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
-          gameState.addScore(100);
-          this.events.emit('updateScore', gameState.score);
+          this.events.emit('updateChunks', gameState.clearedMazes);
           this.events.emit('updateKeys', this.hero.keys);
           const nextInfo = this.mazeManager.spawnNext(
             gameState.clearedMazes,
