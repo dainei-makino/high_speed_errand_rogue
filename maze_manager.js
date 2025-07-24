@@ -154,7 +154,7 @@ export default class MazeManager {
         this.activeChunks = this.activeChunks.filter(c => c !== obj);
         continue;
       }
-      if (obj.age > this.fadeDelay && !obj.fading) {
+      if (obj.index !== 0 && obj.age > this.fadeDelay && !obj.fading) {
         obj.fading = true;
         this.scene.tweens.add({
           targets: obj.container,
