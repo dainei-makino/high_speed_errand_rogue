@@ -104,25 +104,18 @@ export default class LoadingScene extends Phaser.Scene {
       'game_over'
     ];
 
-    let decodedCount = 0;
-    const onDecoded = key => {
-      if (audioKeys.includes(key)) {
-        decodedCount++;
-        if (decodedCount === audioKeys.length) {
-          this.sound.off('decoded', onDecoded);
-          startGame();
-        }
-      }
-    };
-
-    this.sound.on('decoded', onDecoded);
-
     // Decode each audio asset before starting the game
-    audioKeys.forEach(key => {
+    const decodePromises = audioKeys.map(key => {
       const audioData = this.cache.audio.get(key);
-      if (audioData && audioData.data) {
-        this.sound.decodeAudio(key, audioData.data);
+      if (audioData) {
+        const buffer = audioData.data || audioData;
+        return this.sound.decodeAudio(key, buffer);
       }
+      return Promise.resolve();
     });
+
+    Promise.all(decodePromises)
+      .catch(() => {})
+      .finally(startGame);
   }
 }
