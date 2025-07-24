@@ -180,7 +180,7 @@ export default class MazeManager {
 
     const placement = this._findPlacement(
       fromObj,
-      chunk.size,
+      chunk,
       doorDir,
       doorWorldX,
       doorWorldY
@@ -294,12 +294,14 @@ export default class MazeManager {
     }
   }
 
-  _canPlace(offsetX, offsetY, size, exclude) {
+  _canPlace(offsetX, offsetY, size, exclude = []) {
+    if (!Array.isArray(exclude)) exclude = [exclude];
+    exclude = exclude.filter(Boolean);
     const tile = this.tileSize;
     const w = size * tile;
     const h = size * tile;
     for (const obj of this.activeChunks) {
-      if (obj === exclude) continue;
+      if (exclude.includes(obj)) continue;
       const ow = obj.chunk.size * tile;
       const oh = obj.chunk.size * tile;
       if (
@@ -314,7 +316,8 @@ export default class MazeManager {
     return true;
   }
 
-  _findPlacement(fromObj, newSize, doorDir, doorWorldX, doorWorldY) {
+  _findPlacement(fromObj, chunk, doorDir, doorWorldX, doorWorldY) {
+    const newSize = chunk.size;
     const min = 1;
     const max = newSize - 2;
     for (let i = min; i <= max; i++) {
@@ -336,7 +339,15 @@ export default class MazeManager {
       }
       const offsetX = doorWorldX - entrance.x * this.tileSize;
       const offsetY = doorWorldY - entrance.y * this.tileSize;
-      if (this._canPlace(offsetX, offsetY, newSize, fromObj)) {
+      if (!this._canPlace(offsetX, offsetY, newSize, fromObj)) continue;
+
+      // look ahead using this chunk's door
+      const candidateObj = { chunk, offsetX, offsetY };
+      const nextOffset = this._calcOffset(candidateObj, newSize, chunk.door.dir);
+      if (this._canPlace(nextOffset.offsetX, nextOffset.offsetY, newSize, [
+        fromObj,
+        candidateObj
+      ])) {
         return { offsetX, offsetY, entrance };
       }
     }
