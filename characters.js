@@ -60,15 +60,15 @@ function createExit(scene) {
 }
 
 function createSilverDoor(scene) {
-  return scene.add.image(0, 0, 'airlock_silver').setOrigin(0);
+  return scene.add.image(0, 0, 'door_silver').setOrigin(0);
 }
 
 function createSilverDoorOpen(scene) {
-  return scene.add.image(0, 0, 'airlock_silver_open').setOrigin(0);
+  return scene.add.image(0, 0, 'door_silver_open').setOrigin(0);
 }
 
 function createDoorOpen(scene) {
-  return scene.add.image(0, 0, 'airlock_open').setOrigin(0);
+  return scene.add.image(0, 0, 'door_open').setOrigin(0);
 }
 
 function createTreasure(scene) {

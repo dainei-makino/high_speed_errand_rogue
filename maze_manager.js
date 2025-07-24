@@ -372,7 +372,7 @@ export default class MazeManager {
 
   openDoor(info) {
     if (info && info.doorSprite) {
-      info.doorSprite.setTexture('airlock_open');
+      info.doorSprite.setTexture('door_open');
     }
   }
 
@@ -381,7 +381,7 @@ export default class MazeManager {
       const door = info.silverDoors.find(d => d.x === x && d.y === y);
       if (door && !door.opened) {
         if (door.sprite) {
-          door.sprite.setTexture('airlock_silver_open');
+          door.sprite.setTexture('door_silver_open');
         }
         door.opened = true;
       }
