@@ -38,6 +38,14 @@ export default class CameraManager {
   }
 
   /**
+   * 一瞬だけズームインする演出
+   */
+  zoomHeroFocus() {
+    this.cam.zoomTo(1.2, 100)
+      .once('camerazoomcomplete', () => this.cam.zoomTo(1, 150));
+  }
+
+  /**
    * 白フラッシュ
    */
   flashWhite() {

@@ -188,6 +188,7 @@ class GameScene extends Phaser.Scene {
         if (this.hero.useKey()) {
           this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
+          this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
           this.events.emit('updateChunks', gameState.clearedMazes);
