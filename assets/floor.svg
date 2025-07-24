@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
     <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#a66b39"/>
-      <stop offset="100%" stop-color="#6b3f1a"/>
+      <stop offset="0%" stop-color="hsl(28,100%,50%)"/>
+      <stop offset="100%" stop-color="hsl(27,100%,50%)"/>
     </linearGradient>
   </defs>
   <rect width="32" height="32" fill="url(#floorGrad)"/>
-  <path d="M0 8H32M0 16H32M0 24H32" stroke="#5b3214" stroke-width="1"/>
-  <path d="M8 0V32M16 0V32M24 0V32" stroke="#5b3214" stroke-width="1"/>
-  <path d="M4 0V32M12 0V32M20 0V32M28 0V32" stroke="#7d4c26" stroke-width="0.5"/>
+  <path d="M0 8H32M0 16H32M0 24H32" stroke="hsl(25,100%,50%)" stroke-width="1"/>
+  <path d="M8 0V32M16 0V32M24 0V32" stroke="hsl(25,100%,50%)" stroke-width="1"/>
+  <path d="M4 0V32M12 0V32M20 0V32M28 0V32" stroke="hsl(26,100%,50%)" stroke-width="0.5"/>
 </svg>
