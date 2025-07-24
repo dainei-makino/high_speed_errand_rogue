@@ -223,6 +223,14 @@ export default class MazeManager {
 
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
     heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
+
+    this.events.emit('spawn-next', {
+      doorDir,
+      doorWorldX,
+      doorWorldY,
+      info
+    });
+
     return info;
   }
 

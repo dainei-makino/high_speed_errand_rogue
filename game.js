@@ -6,6 +6,7 @@ import { TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
+import { newChunkTransition } from './effects.js';
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
@@ -58,6 +59,9 @@ class GameScene extends Phaser.Scene {
         this.cameraManager.panToChunk(info);
         this.cameraManager.zoomBump();
       }
+    });
+    this.mazeManager.events.on('spawn-next', data => {
+      newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
     });
 
     this.cursors = this.input.keyboard.createCursorKeys();
