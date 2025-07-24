@@ -2,7 +2,8 @@
 
 ## ドキュメント
 - [ゲーム概要 (JA)](docs/game-overview-ja.md)
-- [実装ロードマップ (JA)](docs/implementation-roadmap-ja.md)
+- [新チャンク配置ロジック (JA)](docs/chunk_placement_logic.md)
+- [迷路関連ロジックまとめ](docs/maze_logic_index.md)
 
 ## Phaser 3 ミニマル環境
 本リポジトリには、ブラウザでそのまま動作する最小構成の Phaser 3 環境を同梱しています。
