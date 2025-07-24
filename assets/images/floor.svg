@@ -1,18 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
-    <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f7f7f7"/>
-      <stop offset="100%" stop-color="#cfcfcf"/>
+    <linearGradient id="floorBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f6f6fa"/>
+      <stop offset="100%" stop-color="#d3d4d8"/>
     </linearGradient>
-    <radialGradient id="floorHighlight" cx="0.4" cy="0.3" r="0.6">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.8"/>
+    <radialGradient id="floorShine" cx="0.3" cy="0.2" r="0.7">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="32" height="32" fill="url(#floorGrad)"/>
-  <rect width="32" height="32" fill="url(#floorHighlight)"/>
-  <path d="M0 8H32M0 16H32M0 24H32" stroke="#b0b0b0" stroke-width="1"/>
-  <path d="M8 0V32M16 0V32M24 0V32" stroke="#b0b0b0" stroke-width="1"/>
-  <path d="M4 0V32M12 0V32M20 0V32M28 0V32" stroke="#e6e6e6" stroke-width="0.5"/>
-  <path d="M0 0L32 32M32 0L0 32" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/>
+  <rect width="32" height="32" fill="url(#floorBase)"/>
+  <ellipse cx="10" cy="6" rx="20" ry="8" fill="url(#floorShine)" transform="rotate(-10 10 6)"/>
+  <path d="M0 22 Q16 30 32 22" stroke="#ffffff" stroke-opacity="0.2" stroke-width="2" fill="none"/>
 </svg>
