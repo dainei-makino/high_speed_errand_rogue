@@ -1,4 +1,3 @@
-const TILE_SIZE = 32;
 const ASSET_PATH = 'assets/';
 const SPRITES = {
   floor: 'floor.svg',
@@ -26,10 +25,10 @@ async function loadAll() {
     img.src = 'data:image/svg+xml;base64,' + btoa(svgText);
     await loaded;
     const canvas = document.createElement('canvas');
-    canvas.width = TILE_SIZE;
-    canvas.height = TILE_SIZE;
+    canvas.width = img.width;
+    canvas.height = img.height;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, TILE_SIZE, TILE_SIZE);
+    ctx.drawImage(img, 0, 0);
     canvases[key] = canvas;
   });
   await Promise.all(entries);
