@@ -20,6 +20,11 @@ export default class UIScene extends Phaser.Scene {
 
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
+    gameScene.events.on('updateOxygen', this.updateOxygen, this);
+
+    this.oxygenGfx = this.add.graphics();
+
+    this.updateOxygen(1);
 
 
     this.fpsText = this.add.text(420, 8, '', {
@@ -42,6 +47,23 @@ export default class UIScene extends Phaser.Scene {
   updateChunks(count) {
     // Right pad with spaces to keep label position stable
     this.chunkText.setText('CHUNK ' + count.toString());
+  }
+
+  updateOxygen(ratio) {
+    const centerX = VIRTUAL_WIDTH * 2 - 40;
+    const centerY = VIRTUAL_HEIGHT * 2 - 40;
+    const radius = 30;
+    const thickness = 8;
+    const start = Phaser.Math.DegToRad(-90);
+    this.oxygenGfx.clear();
+    this.oxygenGfx.lineStyle(thickness, 0x333333, 0.5);
+    this.oxygenGfx.beginPath();
+    this.oxygenGfx.arc(centerX, centerY, radius, 0, Phaser.Math.PI2, false);
+    this.oxygenGfx.strokePath();
+    this.oxygenGfx.lineStyle(thickness, 0xffff00, 1);
+    this.oxygenGfx.beginPath();
+    this.oxygenGfx.arc(centerX, centerY, radius, start, start + Phaser.Math.DegToRad(360 * ratio), false);
+    this.oxygenGfx.strokePath();
   }
 
   showMidpoint(num) {

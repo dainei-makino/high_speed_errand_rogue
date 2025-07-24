@@ -25,6 +25,7 @@ class GameScene extends Phaser.Scene {
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
     this.introLetters = null;
+    this.oxygenTimer = null;
   }
 
   preload() {
@@ -97,6 +98,7 @@ class GameScene extends Phaser.Scene {
     this.scene.launch('UIScene');
     this.events.emit('updateChunks', gameState.clearedMazes);
     this.events.emit('updateKeys', this.hero.keys);
+    this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
 
     // Debug: manually add a cleared chunk with M key
     this.input.keyboard.on('keydown-M', () => {
@@ -253,6 +255,9 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
+          if (gameState.clearedMazes === 1 && !this.oxygenTimer) {
+            this.startOxygenTimer();
+          }
         } else {
           if (curTile.chunk.doorSprite) {
             this.tweens.add({
@@ -289,6 +294,22 @@ class GameScene extends Phaser.Scene {
         this.keyCountText.setText('x' + count);
       }
     }
+  }
+
+  startOxygenTimer() {
+    this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
+    this.oxygenTimer = this.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: () => {
+        this.hero.oxygen -= 1;
+        this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
+        if (this.hero.oxygen <= 0) {
+          this.sound.play('game_over');
+          this.scene.restart();
+        }
+      }
+    });
   }
 
   createFloatingText(str, centerX, y) {
