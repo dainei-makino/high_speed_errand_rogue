@@ -92,23 +92,45 @@ class GameScene extends Phaser.Scene {
     if (!this.isMoving) {
       const entry = this.inputBuffer.consume();
       if (entry) {
-        let dx = 0;
-        let dy = 0;
-        const dir = entry.dir;
-        if (dir === 'left') dx = -1;
-        else if (dir === 'right') dx = 1;
-        else if (dir === 'up') dy = -1;
-        else if (dir === 'down') dy = 1;
-
         const size = this.mazeManager.tileSize;
-        const targetX = this.heroSprite.x + dx * size;
-        const targetY = this.heroSprite.y + dy * size;
-        const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
-        const blocked = tileInfo && (
-          tileInfo.cell === TILE.WALL ||
-          (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-          (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited)
-        );
+        const dir = entry.dir;
+
+        const calc = d => {
+          let dx = 0, dy = 0;
+          if (d === 'left') dx = -1;
+          else if (d === 'right') dx = 1;
+          else if (d === 'up') dy = -1;
+          else if (d === 'down') dy = 1;
+          const targetX = this.heroSprite.x + dx * size;
+          const targetY = this.heroSprite.y + dy * size;
+          const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
+          const blocked = tileInfo && (
+            tileInfo.cell === TILE.WALL ||
+            (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
+            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited)
+          );
+          return { blocked, targetX, targetY };
+        };
+
+        let { blocked, targetX, targetY } = calc(dir);
+        let moveDir = dir;
+
+        if (blocked && this.inputBuffer.holdOrder.length > 1) {
+          const isH = d => d === 'left' || d === 'right';
+          const isV = d => d === 'up' || d === 'down';
+          for (const d2 of this.inputBuffer.holdOrder) {
+            if (d2 === dir) continue;
+            if ((isH(d2) && isH(dir)) || (isV(d2) && isV(dir))) continue;
+            const alt = calc(d2);
+            if (!alt.blocked) {
+              ({ blocked, targetX, targetY } = alt);
+              moveDir = d2;
+              this.inputBuffer.promote(d2);
+              break;
+            }
+          }
+        }
+
         if (!blocked) {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
@@ -120,7 +142,7 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
-              this.inputBuffer.repeat(dir);
+              this.inputBuffer.repeat(moveDir);
             }
           });
         }

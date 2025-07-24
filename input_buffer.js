@@ -81,4 +81,12 @@ export default class InputBuffer {
       this.push(dir);
     }
   }
+
+  promote(dir) {
+    const index = this.holdOrder.indexOf(dir);
+    if (index > 0) {
+      this.holdOrder.splice(index, 1);
+      this.holdOrder.unshift(dir);
+    }
+  }
 }
