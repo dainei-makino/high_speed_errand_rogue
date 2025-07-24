@@ -319,8 +319,10 @@ class GameScene extends Phaser.Scene {
   setupIntro(firstInfo) {
     const center = this.mazeManager.getChunkCenter(firstInfo);
     const size = this.mazeManager.tileSize;
-    const topY = firstInfo.offsetY + size;
-    const bottomY = firstInfo.offsetY + firstInfo.chunk.size * size - size;
+    const offset = 100;
+    const topY = firstInfo.offsetY + size - offset;
+    const bottomY =
+      firstInfo.offsetY + firstInfo.chunk.size * size - size + offset;
     this.introLetters = [
       ...this.createFloatingText('HIGH SPEED MAZE RUNNER', center.x, topY),
       ...this.createFloatingText('MOVE TO WASD KEY', center.x, bottomY)
