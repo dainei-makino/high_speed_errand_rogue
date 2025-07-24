@@ -23,10 +23,7 @@ export default class CameraManager {
    * @param {number} duration - tween 時間 (ms)
    */
   panToChunk(info, duration = 400) {
-    const size = this.mazeManager.tileSize;
-    const chunkSize = info.chunk.size || info.chunk.width || 0;
-    const cx = info.offsetX + (chunkSize * size) / 2;
-    const cy = info.offsetY + (chunkSize * size) / 2;
+    const { x: cx, y: cy } = this.mazeManager.getChunkCenter(info);
     this.expectedCenter.x = cx;
     this.expectedCenter.y = cy;
     this.cam.pan(cx, cy, duration, 'Sine.easeInOut');

@@ -53,11 +53,10 @@ class GameScene extends Phaser.Scene {
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.cameraManager.expandBounds(firstInfo);
     this.cameraManager.panToChunk(firstInfo, 0);
+    // Update bounds whenever a chunk is added
     this.mazeManager.events.on('chunk-added', info => {
       if (info !== firstInfo) {
         this.cameraManager.expandBounds(info);
-        this.cameraManager.panToChunk(info);
-        this.cameraManager.zoomBump();
       }
     });
 
@@ -164,7 +163,13 @@ class GameScene extends Phaser.Scene {
           gameState.addScore(100);
           this.events.emit('updateScore', gameState.score);
           this.events.emit('updateKeys', this.hero.keys);
-          this.mazeManager.spawnNext(gameState.clearedMazes, curTile.chunk, this.heroSprite);
+          const nextInfo = this.mazeManager.spawnNext(
+            gameState.clearedMazes,
+            curTile.chunk,
+            this.heroSprite
+          );
+          this.cameraManager.panToChunk(nextInfo);
+          this.cameraManager.zoomBump();
         } else {
           if (curTile.chunk.doorSprite) {
             this.tweens.add({
