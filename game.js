@@ -8,6 +8,8 @@ import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
 import { newChunkTransition } from './effects.js';
 
+const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
+
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
@@ -18,10 +20,20 @@ class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene');
     this.isMoving = false;
+    this.midpointPlayed = false;
+    this.heroAnimationTimer = null;
+    this.heroAnimIndex = 0;
   }
 
   preload() {
     Characters.registerTextures(this);
+    this.load.audio('hero_walk', 'assets/sounds/01_hero_walk.wav');
+    this.load.audio('door_open', 'assets/sounds/02_door_open.mp3');
+    this.load.audio('chest_open', 'assets/sounds/03_chest_open.wav');
+    this.load.audio('chunk_generate_1', 'assets/sounds/04_chunk_generate_1.wav');
+    this.load.audio('chunk_generate_2', 'assets/sounds/05_chunk_generate_02.wav');
+    this.load.audio('midpoint', 'assets/sounds/06_midpoint.wav');
+    this.load.audio('game_over', 'assets/sounds/07_game_over.wav');
   }
 
   create() {
@@ -31,16 +43,17 @@ class GameScene extends Phaser.Scene {
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
     const firstInfo = this.mazeManager.spawnInitial();
+    this.sound.play('chunk_generate_1');
 
-    const heroImage = Characters.createHero(this);
-    const heroRatio = heroImage.height / heroImage.width;
-    heroImage.setDisplaySize(
+    this.heroImage = Characters.createHero(this);
+    const heroRatio = this.heroImage.height / this.heroImage.width;
+    this.heroImage.setDisplaySize(
       this.mazeManager.tileSize,
       this.mazeManager.tileSize * heroRatio
     );
-    heroImage.y = -4; // shift sprite up for depth effect
+    this.heroImage.y = -4; // shift sprite up for depth effect
 
-    this.heroSprite = this.add.container(0, 0, [heroImage]);
+    this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.worldLayer.add(this.heroSprite);
@@ -69,6 +82,7 @@ class GameScene extends Phaser.Scene {
     });
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
+      this.sound.play('chunk_generate_2');
     });
 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -143,6 +157,20 @@ class GameScene extends Phaser.Scene {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
+          this.sound.play('hero_walk');
+
+          const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
+          this.heroAnimIndex = 0;
+          this.heroImage.setTexture(frames[0]);
+          this.heroAnimationTimer = this.time.addEvent({
+            delay: duration / frames.length,
+            loop: true,
+            callback: () => {
+              this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+              this.heroImage.setTexture(frames[this.heroAnimIndex]);
+            }
+          });
+
           this.tweens.add({
             targets: this.heroSprite,
             x: targetX,
@@ -150,6 +178,11 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
+              if (this.heroAnimationTimer) {
+                this.heroAnimationTimer.remove();
+                this.heroAnimationTimer = null;
+              }
+              this.heroImage.setTexture('hero_idle');
               this.inputBuffer.repeat(moveDir);
             }
           });
@@ -162,6 +195,7 @@ class GameScene extends Phaser.Scene {
     if (curTile) {
       if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
         curTile.chunk.chunk.chestOpened = true;
+        this.sound.play('chest_open');
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
         this.updateKeyDisplay();
@@ -188,6 +222,7 @@ class GameScene extends Phaser.Scene {
             curTile.tx,
             curTile.ty
           );
+          this.sound.play('door_open');
         }
       }
 
@@ -195,9 +230,17 @@ class GameScene extends Phaser.Scene {
         if (this.hero.useKey()) {
           this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
+          this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
+          if (MIDPOINTS.includes(gameState.clearedMazes)) {
+            this.sound.play('midpoint');
+            const ui = this.scene.get('UIScene');
+            if (ui && ui.showMidpoint) {
+              ui.showMidpoint(gameState.clearedMazes);
+            }
+          }
           this.events.emit('updateChunks', gameState.clearedMazes);
           this.events.emit('updateKeys', this.hero.keys);
           const nextInfo = this.mazeManager.spawnNext(
