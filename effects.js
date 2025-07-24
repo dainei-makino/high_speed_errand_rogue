@@ -56,27 +56,26 @@ export function newChunkTransition(scene, doorDir, doorWorldX, doorWorldY) {
   }
 }
 
+// チャンク消滅時に黒いチップを飛ばす簡易エフェクト
 export function evaporateChunk(scene, x, y, width, height) {
-  if (!scene.textures.exists('particle')) {
-    const g = scene.make.graphics({ x: 0, y: 0, add: false });
-    g.fillStyle(0xffffff, 1);
-    g.fillRect(0, 0, 4, 4);
-    g.generateTexture('particle', 4, 4);
-    g.destroy();
+  const PARTICLES = 30;
+  const SIZE = 4;
+  for (let i = 0; i < PARTICLES; i++) {
+    const px = x + Math.random() * width;
+    const py = y + Math.random() * height;
+    const chip = scene.add.rectangle(px, py, SIZE, SIZE, 0x000000);
+    chip.setDepth(1000);
+    const dx = (Math.random() - 0.5) * 40;
+    const dy = -30 - Math.random() * 30;
+    scene.tweens.add({
+      targets: chip,
+      x: chip.x + dx,
+      y: chip.y + dy,
+      alpha: 0,
+      scale: 0,
+      duration: 600,
+      ease: 'Quad.easeOut',
+      onComplete: () => chip.destroy()
+    });
   }
-  const particles = scene.add.particles('particle');
-  particles.setDepth(1000);
-  const emitter = particles.addEmitter({
-    x: { min: x, max: x + width },
-    y: { min: y, max: y + height },
-    speedX: { min: -20, max: 20 },
-    speedY: { min: -60, max: -30 },
-    alpha: { start: 0.7, end: 0 },
-    scale: { start: 1, end: 0 },
-    lifespan: 600,
-    tint: 0x000000,
-    quantity: 20
-  });
-  emitter.explode(40, width / 2 + x, height / 2 + y);
-  scene.time.delayedCall(600, () => particles.destroy());
 }
