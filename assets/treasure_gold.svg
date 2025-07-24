@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
     <linearGradient id="chestLid" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#fff7b1"/>
-      <stop offset="100%" stop-color="#ffd700"/>
+      <stop offset="0%" stop-color="#ffff66"/>
+      <stop offset="100%" stop-color="#ffcc00"/>
     </linearGradient>
     <linearGradient id="chestBody" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffd700"/>
-      <stop offset="100%" stop-color="#cfa200"/>
+      <stop offset="0%" stop-color="#ffcc00"/>
+      <stop offset="100%" stop-color="#664400"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="14" width="24" height="14" fill="url(#chestBody)" stroke="#b8860b" stroke-width="2"/>
-  <rect x="4" y="8" width="24" height="10" fill="url(#chestLid)" stroke="#b8860b" stroke-width="2"/>
-  <line x1="4" y1="16" x2="28" y2="16" stroke="#b8860b" stroke-width="2"/>
-  <line x1="16" y1="14" x2="16" y2="28" stroke="#cfa200" stroke-width="1"/>
-  <circle cx="16" cy="22" r="2" fill="#b8860b"/>
+  <rect x="4" y="14" width="24" height="14" fill="url(#chestBody)" stroke="#ffdd33" stroke-width="2"/>
+  <rect x="4" y="8" width="24" height="10" fill="url(#chestLid)" stroke="#ffdd33" stroke-width="2"/>
+  <line x1="4" y1="16" x2="28" y2="16" stroke="#ffdd33" stroke-width="2"/>
+  <line x1="16" y1="14" x2="16" y2="28" stroke="#664400" stroke-width="1"/>
+  <circle cx="16" cy="22" r="2" fill="#ffdd33"/>
 </svg>
