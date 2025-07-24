@@ -3,6 +3,7 @@ export default class InputBuffer {
     this.scene = scene;
     this.buffer = [];
     this.holdKeys = {};
+    this.holdOrder = [];
     this.maxSize = 4;
     scene.input.keyboard.on('keydown', this.onKeyDown, this);
     scene.input.keyboard.on('keyup', this.onKeyUp, this);
@@ -32,14 +33,27 @@ export default class InputBuffer {
     if (!dir) return;
     if (!this.holdKeys[dir]) {
       this.holdKeys[dir] = true;
-      this.push(dir);
+      this.holdOrder.push(dir);
+      if (this.holdOrder.length === 1) {
+        this.push(dir);
+      }
     }
   }
 
   onKeyUp(event) {
     const dir = this.keyToDir(event.code);
     if (!dir) return;
-    delete this.holdKeys[dir];
+    if (this.holdKeys[dir]) {
+      delete this.holdKeys[dir];
+      const index = this.holdOrder.indexOf(dir);
+      if (index !== -1) {
+        const wasFirst = index === 0;
+        this.holdOrder.splice(index, 1);
+        if (wasFirst && this.holdOrder.length > 0) {
+          this.push(this.holdOrder[0]);
+        }
+      }
+    }
   }
 
   push(dir) {
@@ -63,7 +77,7 @@ export default class InputBuffer {
   }
 
   repeat(dir) {
-    if (this.holdKeys[dir]) {
+    if (this.holdOrder[0] === dir) {
       this.push(dir);
     }
   }
