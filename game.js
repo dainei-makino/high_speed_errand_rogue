@@ -19,6 +19,8 @@ class GameScene extends Phaser.Scene {
     super('GameScene');
     this.isMoving = false;
     this.midpointPlayed = false;
+    this.heroAnimationTimer = null;
+    this.heroAnimIndex = 0;
   }
 
   preload() {
@@ -41,15 +43,15 @@ class GameScene extends Phaser.Scene {
     const firstInfo = this.mazeManager.spawnInitial();
     this.sound.play('chunk_generate_1');
 
-    const heroImage = Characters.createHero(this);
-    const heroRatio = heroImage.height / heroImage.width;
-    heroImage.setDisplaySize(
+    this.heroImage = Characters.createHero(this);
+    const heroRatio = this.heroImage.height / this.heroImage.width;
+    this.heroImage.setDisplaySize(
       this.mazeManager.tileSize,
       this.mazeManager.tileSize * heroRatio
     );
-    heroImage.y = -4; // shift sprite up for depth effect
+    this.heroImage.y = -4; // shift sprite up for depth effect
 
-    this.heroSprite = this.add.container(0, 0, [heroImage]);
+    this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.worldLayer.add(this.heroSprite);
@@ -154,6 +156,19 @@ class GameScene extends Phaser.Scene {
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
           this.sound.play('hero_walk');
+
+          const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
+          this.heroAnimIndex = 0;
+          this.heroImage.setTexture(frames[0]);
+          this.heroAnimationTimer = this.time.addEvent({
+            delay: duration / frames.length,
+            loop: true,
+            callback: () => {
+              this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+              this.heroImage.setTexture(frames[this.heroAnimIndex]);
+            }
+          });
+
           this.tweens.add({
             targets: this.heroSprite,
             x: targetX,
@@ -161,6 +176,11 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
+              if (this.heroAnimationTimer) {
+                this.heroAnimationTimer.remove();
+                this.heroAnimationTimer = null;
+              }
+              this.heroImage.setTexture('hero_idle');
               this.inputBuffer.repeat(moveDir);
             }
           });

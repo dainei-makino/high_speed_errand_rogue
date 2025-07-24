@@ -7,7 +7,10 @@ const SPRITES = {
   door_silver_open: 'door_silver_open.svg',
   door_open: 'door_open.svg',
   treasure: 'treasure.svg',
-  hero: 'hero.svg',
+  hero_idle: 'hero.svg',
+  hero_walk1: 'hero_walk1.svg',
+  hero_walk2: 'hero_walk2.svg',
+  hero_walk3: 'hero_walk3.svg',
   arrow: 'arrow.svg',
   key: 'key.svg'
 };
@@ -77,7 +80,7 @@ function createKey(scene) {
 }
 
 function createHero(scene) {
-  return scene.add.image(0, 0, 'hero').setOrigin(0.5);
+  return scene.add.image(0, 0, 'hero_idle').setOrigin(0.5);
 }
 
 function createArrow(scene) {
