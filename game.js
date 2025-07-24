@@ -117,9 +117,15 @@ class GameScene extends Phaser.Scene {
           const baseDuration = (size / pixelsPerSecond) * 1000;
 
           const now = this.time.now;
+          const opposite = {
+            left: 'right',
+            right: 'left',
+            up: 'down',
+            down: 'up'
+          };
           const quickChange =
             this.lastMoveDir &&
-            this.lastMoveDir !== dir &&
+            dir === opposite[this.lastMoveDir] &&
             now - this.lastMoveTime < 250;
 
           const startMove = () => {
@@ -152,10 +158,10 @@ class GameScene extends Phaser.Scene {
               targets: this.heroSprite,
               x: this.heroSprite.x + ox,
               y: this.heroSprite.y + oy,
-              duration: 60,
+              duration: 30,
               ease: 'Sine.easeOut',
               onComplete: () => {
-                this.time.delayedCall(60, startMove);
+                this.time.delayedCall(30, startMove);
               }
             });
           } else {
