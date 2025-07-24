@@ -25,7 +25,7 @@ export default class UIScene extends Phaser.Scene {
     this.oxygenGfx = this.add.graphics();
     this.o2Label = this.add.text(0, 0, 'O2 Timer', {
       fontFamily: 'monospace',
-      fontSize: '16px',
+      fontSize: '21px',
       color: '#ffffff'
     }).setOrigin(0.5);
 
@@ -61,7 +61,7 @@ export default class UIScene extends Phaser.Scene {
     const thickness = 32;
     const start = Phaser.Math.DegToRad(-90);
 
-    this.o2Label.setPosition(centerX, centerY - radius - 16);
+    this.o2Label.setPosition(centerX, centerY - radius - 56);
 
     this.oxygenGfx.clear();
     this.oxygenGfx.lineStyle(thickness, 0x333333, 0.5);
