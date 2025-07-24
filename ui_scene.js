@@ -11,7 +11,8 @@ export default class UIScene extends Phaser.Scene {
     const { width, height } = this.scale.gameSize;
     this.cameras.main.setViewport((width - VIRTUAL_WIDTH * 2) / 2, (height - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
 
-    this.scoreText = this.add.text(12, 8, 'CHUNK 000000', {
+    // Display cleared chunk count; left aligned with no zero padding
+    this.chunkText = this.add.text(12, 8, 'CHUNK 0', {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#ffffff'
@@ -39,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   updateChunks(count) {
-    this.scoreText.setText('CHUNK ' + count.toString().padStart(6, '0'));
+    // Right pad with spaces to keep label position stable
+    this.chunkText.setText('CHUNK ' + count.toString());
   }
 }
