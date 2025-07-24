@@ -27,6 +27,19 @@ export default class LoadingScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.loadingText.setDepth(1001);
 
+    // Progress indicator below the label
+    this.progressText = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT + 32, '0%', {
+      fontFamily: 'monospace',
+      fontSize: '20px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+    this.progressText.setDepth(1001);
+
+    // Update progress as assets load
+    this.load.on('progress', value => {
+      this.progressText.setText(Math.floor(value * 100) + '%');
+    });
+
     // Audio assets
     this.load.audio('hero_walk', 'assets/sounds/01_hero_walk.wav');
     this.load.audio('door_open', 'assets/sounds/02_door_open.mp3');
@@ -46,6 +59,7 @@ export default class LoadingScene extends Phaser.Scene {
     // Short delay to ensure GameScene is ready before removing overlay
     this.time.delayedCall(200, () => {
       // Evaporate loading text
+      // Remove loading texts with a small evaporate effect
       evaporateArea(
         this,
         this.loadingText.x - this.loadingText.width / 2,
@@ -55,6 +69,15 @@ export default class LoadingScene extends Phaser.Scene {
         0xffffff
       );
       this.loadingText.destroy();
+      evaporateArea(
+        this,
+        this.progressText.x - this.progressText.width / 2,
+        this.progressText.y - this.progressText.height / 2,
+        this.progressText.width,
+        this.progressText.height,
+        0xffffff
+      );
+      this.progressText.destroy();
 
       // Evaporate mask after text
       evaporateArea(this, 0, 0, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, 0x000000);
