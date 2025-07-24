@@ -344,15 +344,27 @@ export default class MazeManager {
 
   _largestRect(startX, startY, dir, exclude = []) {
     const tile = this.tileSize;
-    const north = dir === 'S' ? 0 : this._scanDir(startX, startY, 0, -1, exclude);
-    const south = dir === 'N' ? 0 : this._scanDir(startX, startY, 0, 1, exclude);
-    const west = dir === 'E' ? 0 : this._scanDir(startX, startY, -1, 0, exclude);
-    const east = dir === 'W' ? 0 : this._scanDir(startX, startY, 1, 0, exclude);
+    const north =
+      dir === 'S'
+        ? tile
+        : this._scanDir(startX, startY, 0, -1, exclude) + tile;
+    const south =
+      dir === 'N'
+        ? tile
+        : this._scanDir(startX, startY, 0, 1, exclude) + tile;
+    const west =
+      dir === 'E'
+        ? tile
+        : this._scanDir(startX, startY, -1, 0, exclude) + tile;
+    const east =
+      dir === 'W'
+        ? tile
+        : this._scanDir(startX, startY, 1, 0, exclude) + tile;
     return {
       x: startX - west,
       y: startY - north,
-      width: west + east + tile,
-      height: north + south + tile
+      width: west + east,
+      height: north + south
     };
   }
 
