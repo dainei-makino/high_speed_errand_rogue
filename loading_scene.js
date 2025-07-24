@@ -39,6 +39,7 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.on('progress', value => {
       this.progressText.setText(Math.floor(value * 100) + '%');
     });
+    };
 
     // Audio assets
     this.load.audio('hero_walk', 'assets/sounds/01_hero_walk.wav');
@@ -51,18 +52,19 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
-    // Launch the main scenes behind the loading overlay
-    this.scene.launch('GameScene');
-    this.scene.launch('UIScene');
-    this.scene.bringToTop();
+    const startGame = () => {
+      // Launch the main scenes behind the loading overlay
+      this.scene.launch('GameScene');
+      this.scene.launch('UIScene');
+      this.scene.bringToTop();
 
-    // Short delay to ensure GameScene is ready before removing overlay
-    this.time.delayedCall(200, () => {
-      // Evaporate loading text
-      // Remove loading texts with a small evaporate effect
-      evaporateArea(
-        this,
-        this.loadingText.x - this.loadingText.width / 2,
+      // Short delay to ensure GameScene is ready before removing overlay
+      this.time.delayedCall(200, () => {
+        // Evaporate loading text
+        // Remove loading texts with a small evaporate effect
+        evaporateArea(
+          this,
+          this.loadingText.x - this.loadingText.width / 2,
         this.loadingText.y - this.loadingText.height / 2,
         this.loadingText.width,
         this.loadingText.height,
@@ -90,6 +92,34 @@ export default class LoadingScene extends Phaser.Scene {
           this.scene.stop();
         }
       });
+    });
+    };
+
+    const audioKeys = [
+      'hero_walk',
+      'door_open',
+      'chest_open',
+      'chunk_generate_1',
+      'chunk_generate_2',
+      'midpoint',
+      'game_over'
+    ];
+
+    let decodedCount = 0;
+    const onDecoded = key => {
+      if (audioKeys.includes(key)) {
+        decodedCount++;
+        if (decodedCount === audioKeys.length) {
+          this.sound.off('decoded', onDecoded);
+          startGame();
+        }
+      }
+    };
+
+    this.sound.on('decoded', onDecoded);
+
+    audioKeys.forEach(key => {
+      this.sound.decodeAudio(key);
     });
   }
 }
