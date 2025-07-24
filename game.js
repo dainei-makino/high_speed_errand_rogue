@@ -135,7 +135,7 @@ class GameScene extends Phaser.Scene {
         );
         if (!blocked) {
           this.isMoving = true;
-          const moveTween = (speedFactor = 1) => {
+          const moveTween = (speedFactor = 1, ease = 'Linear') => {
             const pixelsPerSecond = this.hero.speed * speedFactor;
             const duration = (size / pixelsPerSecond) * 1000;
             this.tweens.add({
@@ -143,6 +143,7 @@ class GameScene extends Phaser.Scene {
               x: targetX,
               y: targetY,
               duration,
+              ease,
               onComplete: () => {
                 this.isMoving = false;
                 this.lastDir = dir;
@@ -168,10 +169,9 @@ class GameScene extends Phaser.Scene {
 
           if (needBrake) {
             const { dx: bdx, dy: bdy } = this._dirToDelta(brakeDir);
-            const overshoot = 6;
-            const overshootTime = 40;
-            const holdTime = 20;
-            const slowFactor = 0.5;
+            const overshoot = 3;
+            const overshootTime = 30;
+            const holdTime = 10;
             const startX = this.heroSprite.x;
             const startY = this.heroSprite.y;
             this.tweens.add({
@@ -180,7 +180,7 @@ class GameScene extends Phaser.Scene {
               y: startY + bdy * overshoot,
               duration: overshootTime,
               onComplete: () => {
-                this.time.delayedCall(holdTime, () => moveTween(slowFactor));
+                this.time.delayedCall(holdTime, () => moveTween(0.5, 'Quad.easeIn'));
               }
             });
           } else {
