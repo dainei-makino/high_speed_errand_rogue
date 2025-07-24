@@ -133,6 +133,7 @@ class GameScene extends Phaser.Scene {
               duration,
               ease: quickChange ? 'Quad.easeIn' : 'Linear',
               onComplete: () => {
+                this.snapHeroToGrid();
                 this.isMoving = false;
                 this.inputBuffer.repeat(dir);
               }
@@ -159,6 +160,7 @@ class GameScene extends Phaser.Scene {
                   if (this.inputBuffer.holdKeys[dir]) {
                     startMove();
                   } else {
+                    this.snapHeroToGrid();
                     this.isMoving = false;
                     this.lastMoveDir = null;
                   }
@@ -246,6 +248,13 @@ class GameScene extends Phaser.Scene {
         this.keyCountText.setText('x' + count);
       }
     }
+  }
+
+  snapHeroToGrid() {
+    const size = this.mazeManager.tileSize;
+    const half = size / 2;
+    this.heroSprite.x = Math.round((this.heroSprite.x - half) / size) * size + half;
+    this.heroSprite.y = Math.round((this.heroSprite.y - half) / size) * size + half;
   }
 }
 
