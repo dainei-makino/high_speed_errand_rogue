@@ -79,3 +79,27 @@ export function evaporateChunk(scene, x, y, width, height) {
     });
   }
 }
+
+// Generic evaporate effect for arbitrary rectangular areas
+export function evaporateArea(scene, x, y, width, height, color = 0xffffff) {
+  const PARTICLES = 30;
+  const SIZE = 4;
+  for (let i = 0; i < PARTICLES; i++) {
+    const px = x + Math.random() * width;
+    const py = y + Math.random() * height;
+    const chip = scene.add.rectangle(px, py, SIZE, SIZE, color);
+    chip.setDepth(1000);
+    const dx = (Math.random() - 0.5) * 40;
+    const dy = -30 - Math.random() * 30;
+    scene.tweens.add({
+      targets: chip,
+      x: chip.x + dx,
+      y: chip.y + dy,
+      alpha: 0,
+      scale: 0,
+      duration: 600,
+      ease: 'Quad.easeOut',
+      onComplete: () => chip.destroy()
+    });
+  }
+}

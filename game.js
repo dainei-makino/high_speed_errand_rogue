@@ -7,6 +7,7 @@ import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
 import { newChunkTransition } from './effects.js';
+import LoadingScene from './loading_scene.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -27,13 +28,6 @@ class GameScene extends Phaser.Scene {
 
   preload() {
     Characters.registerTextures(this);
-    this.load.audio('hero_walk', 'assets/sounds/01_hero_walk.wav');
-    this.load.audio('door_open', 'assets/sounds/02_door_open.mp3');
-    this.load.audio('chest_open', 'assets/sounds/03_chest_open.wav');
-    this.load.audio('chunk_generate_1', 'assets/sounds/04_chunk_generate_1.wav');
-    this.load.audio('chunk_generate_2', 'assets/sounds/05_chunk_generate_02.wav');
-    this.load.audio('midpoint', 'assets/sounds/06_midpoint.wav');
-    this.load.audio('game_over', 'assets/sounds/07_game_over.wav');
   }
 
   create() {
@@ -302,7 +296,7 @@ const config = {
     width: VIRTUAL_WIDTH * 2,
     height: VIRTUAL_HEIGHT * 2
   },
-  scene: [GameScene, UIScene]
+  scene: [LoadingScene, GameScene, UIScene]
 };
 
 Characters.ready.then(() => {
