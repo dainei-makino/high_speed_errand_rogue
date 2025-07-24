@@ -3,6 +3,13 @@ export default class CameraManager {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.cam = scene.cameras.main;
+    this.bounds = { minX: -1000, minY: -1000, maxX: 9000, maxY: 9000 };
+    this.cam.setBounds(
+      this.bounds.minX,
+      this.bounds.minY,
+      this.bounds.maxX - this.bounds.minX,
+      this.bounds.maxY - this.bounds.minY
+    );
     // Keep track of where the camera should be centered
     this.expectedCenter = {
       x: this.cam.midPoint.x,
@@ -62,6 +69,21 @@ export default class CameraManager {
         this.cam.centerOn(x, y);
       }
     }
+  }
+
+  /**
+   * Update camera bounds so all chunks remain within view.
+   * Call whenever a new chunk is added.
+   * @param {object} info - chunk info from MazeManager
+   */
+  expandBounds(info) {
+    const size = this.mazeManager.tileSize * info.chunk.size;
+    const minX = Math.min(this.bounds.minX, info.offsetX);
+    const minY = Math.min(this.bounds.minY, info.offsetY);
+    const maxX = Math.max(this.bounds.maxX, info.offsetX + size);
+    const maxY = Math.max(this.bounds.maxY, info.offsetY + size);
+    this.bounds = { minX, minY, maxX, maxY };
+    this.cam.setBounds(minX, minY, maxX - minX, maxY - minY);
   }
 
   setZoom(zoom, duration = 0) {

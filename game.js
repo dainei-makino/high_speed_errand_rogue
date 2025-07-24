@@ -50,11 +50,12 @@ class GameScene extends Phaser.Scene {
     this.worldLayer.add(this.keyDisplay);
     this.updateKeyDisplay();
 
-    this.cameras.main.setBounds(-1000, -1000, 10000, 10000);
     this.cameraManager = new CameraManager(this, this.mazeManager);
+    this.cameraManager.expandBounds(firstInfo);
     this.cameraManager.panToChunk(firstInfo, 0);
     this.mazeManager.events.on('chunk-added', info => {
       if (info !== firstInfo) {
+        this.cameraManager.expandBounds(info);
         this.cameraManager.panToChunk(info);
         this.cameraManager.zoomBump();
       }
