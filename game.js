@@ -32,8 +32,15 @@ class GameScene extends Phaser.Scene {
     this.mazeManager = new MazeManager(this);
     const firstInfo = this.mazeManager.spawnInitial();
 
-    this.heroSprite = Characters.createHero(this);
-    this.heroSprite.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
+    const heroImage = Characters.createHero(this);
+    const heroRatio = heroImage.height / heroImage.width;
+    heroImage.setDisplaySize(
+      this.mazeManager.tileSize,
+      this.mazeManager.tileSize * heroRatio
+    );
+    heroImage.y = -4; // shift sprite up for depth effect
+
+    this.heroSprite = this.add.container(0, 0, [heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.worldLayer.add(this.heroSprite);
