@@ -170,7 +170,10 @@ export default class MazeManager {
         ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
 
         let attempts = 0;
-        while (this._isOverlap(offsetX, offsetY, chunk.size) && attempts < 3) {
+        while (
+          this._isOverlap(offsetX, offsetY, chunk.size, null, fromObj) &&
+          attempts < 3
+        ) {
           switch (doorDir) {
             case 'N':
               offsetY -= this.tileSize;
@@ -189,8 +192,8 @@ export default class MazeManager {
           attempts += 1;
         }
         if (
-          !this._isOverlap(offsetX, offsetY, chunk.size) &&
-          this._canSpawnChain(offsetX, offsetY, chunk, progress)
+          !this._isOverlap(offsetX, offsetY, chunk.size, null, fromObj) &&
+          this._canSpawnChain(offsetX, offsetY, chunk, progress, fromObj)
         ) {
           success = true;
         }
@@ -295,7 +298,7 @@ export default class MazeManager {
     }
   }
 
-  _isOverlap(x, y, size, extra) {
+  _isOverlap(x, y, size, extra, ignore) {
     const ts = this.tileSize;
     const newLeft = x;
     const newTop = y;
@@ -316,6 +319,11 @@ export default class MazeManager {
     };
 
     for (const obj of this.activeChunks) {
+      if (
+        (ignore && (Array.isArray(ignore) ? ignore.includes(obj) : obj === ignore))
+      ) {
+        continue;
+      }
       if (check(obj)) {
         return true;
       }
@@ -326,14 +334,14 @@ export default class MazeManager {
     return false;
   }
 
-  _canSpawnChain(x, y, chunk, progress) {
+  _canSpawnChain(x, y, chunk, progress, ignore) {
     const steps = 2;
     const testSize = pickMazeConfig(Math.max(1, progress + 1)).size;
     let obj = { offsetX: x, offsetY: y, chunk };
     const dir = chunk.door ? chunk.door.dir : 'E';
     for (let i = 0; i < steps; i++) {
       const next = this._calcOffset(obj, testSize, dir);
-      if (this._isOverlap(next.offsetX, next.offsetY, testSize, obj)) {
+      if (this._isOverlap(next.offsetX, next.offsetY, testSize, obj, ignore)) {
         return false;
       }
       obj = { offsetX: next.offsetX, offsetY: next.offsetY, chunk: { size: testSize } };
@@ -365,7 +373,15 @@ export default class MazeManager {
         testSize,
         dir
       );
-      if (!this._isOverlap(pos.offsetX, pos.offsetY, testSize, { offsetX, offsetY, chunk: { size } })) {
+      if (
+        !this._isOverlap(
+          pos.offsetX,
+          pos.offsetY,
+          testSize,
+          { offsetX, offsetY, chunk: { size } },
+          fromObj
+        )
+      ) {
         doorDir = dir;
         break;
       }
