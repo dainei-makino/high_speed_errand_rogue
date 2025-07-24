@@ -36,6 +36,13 @@ export default class InputBuffer {
       this.holdOrder.push(dir);
       if (this.holdOrder.length === 1) {
         this.push(dir);
+      } else {
+        const first = this.holdOrder[0];
+        const isH = d => d === 'left' || d === 'right';
+        const isV = d => d === 'up' || d === 'down';
+        if ((isH(first) && isV(dir)) || (isV(first) && isH(dir))) {
+          this.push(dir);
+        }
       }
     }
   }
@@ -47,9 +54,8 @@ export default class InputBuffer {
       delete this.holdKeys[dir];
       const index = this.holdOrder.indexOf(dir);
       if (index !== -1) {
-        const wasFirst = index === 0;
         this.holdOrder.splice(index, 1);
-        if (wasFirst && this.holdOrder.length > 0) {
+        if (this.holdOrder.length > 0) {
           this.push(this.holdOrder[0]);
         }
       }
@@ -77,8 +83,17 @@ export default class InputBuffer {
   }
 
   repeat(dir) {
-    if (this.holdOrder[0] === dir) {
-      this.push(dir);
+    const isH = d => d === 'left' || d === 'right';
+    const isV = d => d === 'up' || d === 'down';
+    if (this.holdOrder.includes(dir)) {
+      let alt = null;
+      for (const d of this.holdOrder) {
+        if (d !== dir && ((isH(d) && isV(dir)) || (isV(d) && isH(dir)))) {
+          alt = d;
+          break;
+        }
+      }
+      this.push(alt || dir);
     }
   }
 
