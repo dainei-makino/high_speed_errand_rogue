@@ -1,6 +1,6 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
-import { pickMazeConfig } from './maze_table.js';
+import { sizesForStage } from './maze_table.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -172,35 +172,49 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const { size } = pickMazeConfig(progress + 1);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
-
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
-    const result = this._findPlacement(
-      fromObj,
-      chunk,
-      doorDir,
-      doorWorldX,
-      doorWorldY
-    );
+    const sizes = sizesForStage(progress + 1);
+    let final = null;
+    let allAttempts = 0;
+    let allRects = [];
+    for (const size of sizes) {
+      for (let s = 0; s < 4; s++) {
+        const chunk = createChunk(this._nextSeed(), size, entryDir);
+        const result = this._findPlacement(
+          fromObj,
+          chunk,
+          doorDir,
+          doorWorldX,
+          doorWorldY
+        );
+        allAttempts += result.attempts;
+        allRects = allRects.concat(result.rects);
+        if (result.success) {
+          final = { chunk, placement: result };
+          break;
+        }
+      }
+      if (final) break;
+    }
 
-    if (!result.success) {
+    if (!final) {
       console.error('Failed to place chunk', {
         progress,
         doorDir,
-        attempts: result.attempts,
-        rectCount: result.rects.length
+        attempts: allAttempts,
+        rectCount: allRects.length
       });
-      if (result.rects.length) {
-        console.log('Rect sizes:', result.rects.map(r => `${r.width}x${r.height}`));
+      if (allRects.length) {
+        console.log('Rect sizes:', allRects.map(r => `${r.width}x${r.height}`));
       }
       this.scene.scene.pause();
       return null;
     }
 
-    const { offsetX, offsetY, entrance } = result;
+    const { chunk, placement } = final;
+    const { offsetX, offsetY, entrance } = placement;
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
