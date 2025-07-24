@@ -1,4 +1,4 @@
-const ASSET_PATH = 'assets/';
+const ASSET_PATH = 'assets/images/';
 const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
