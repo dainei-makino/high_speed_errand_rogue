@@ -15,6 +15,16 @@ export default class CameraManager {
       x: this.cam.midPoint.x,
       y: this.cam.midPoint.y
     };
+
+    // Debug markers for camera vs chunk center
+    this.debugCam = scene.add.circle(0, 0, 3, 0xffffff);
+    this.debugChunk = scene.add.circle(0, 0, 6, 0x0000ff, 0)
+      .setStrokeStyle(1, 0x0000ff);
+    this.debugCam.setDepth(1000);
+    this.debugChunk.setDepth(1000);
+    if (scene.worldLayer) {
+      scene.worldLayer.add([this.debugCam, this.debugChunk]);
+    }
   }
 
   /**
@@ -28,6 +38,9 @@ export default class CameraManager {
     this.expectedCenter.y = cy;
     // Force a new pan so it isn't ignored if a previous pan is active
     this.cam.pan(cx, cy, duration, 'Sine.easeInOut', true);
+    if (this.debugChunk) {
+      this.debugChunk.setPosition(cx, cy);
+    }
   }
 
   /**
@@ -75,6 +88,9 @@ export default class CameraManager {
       if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
         this.cam.centerOn(x, y);
       }
+    }
+    if (this.debugCam) {
+      this.debugCam.setPosition(this.cam.midPoint.x, this.cam.midPoint.y);
     }
   }
 
