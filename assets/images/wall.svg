@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
-    <linearGradient id="brickGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#777777"/>
-      <stop offset="100%" stop-color="#444444"/>
+    <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e4e4e4"/>
+      <stop offset="100%" stop-color="#bcbcbc"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" fill="url(#brickGrad)"/>
-  <path d="M0 8H32M0 16H32M0 24H32" stroke="#555555" stroke-width="2"/>
-  <path d="M8 0V16M16 0V16M24 0V16M4 16V32M12 16V32M20 16V32M28 16V32" stroke="#555555" stroke-width="2"/>
-  <rect width="32" height="32" fill="none" stroke="#888888" stroke-width="2"/>
+  <rect width="32" height="32" fill="url(#wallGrad)"/>
+  <path d="M0 10H32M0 20H32" stroke="#aaaaaa" stroke-width="1.5"/>
+  <path d="M10 0V32M22 0V32" stroke="#aaaaaa" stroke-width="1.5"/>
+  <rect width="32" height="32" fill="none" stroke="#d0d0d0" stroke-width="1"/>
 </svg>
