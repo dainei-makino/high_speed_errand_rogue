@@ -153,9 +153,33 @@ export default class MazeManager {
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
     const { size } = pickMazeConfig(progress + 1);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
+    let chunk = createChunk(this._nextSeed(), size, entryDir);
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+
+    let attempts = 0;
+    while (this._isOverlap(offsetX, offsetY, chunk.size) && attempts < 3) {
+      switch (doorDir) {
+        case 'N':
+          offsetY -= this.tileSize;
+          break;
+        case 'S':
+          offsetY += this.tileSize;
+          break;
+        case 'W':
+          offsetX -= this.tileSize;
+          break;
+        case 'E':
+        default:
+          offsetX += this.tileSize;
+          break;
+      }
+      attempts += 1;
+    }
+    if (this._isOverlap(offsetX, offsetY, chunk.size)) {
+      chunk = this._createGapChunk(entryDir);
+      ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
+    }
 
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
@@ -246,6 +270,65 @@ export default class MazeManager {
       default:
         return 'W';
     }
+  }
+
+  _isOverlap(x, y, size) {
+    const ts = this.tileSize;
+    const newLeft = x;
+    const newTop = y;
+    const newRight = x + size * ts;
+    const newBottom = y + size * ts;
+    for (const obj of this.activeChunks) {
+      const exLeft = obj.offsetX;
+      const exTop = obj.offsetY;
+      const exRight = exLeft + obj.chunk.size * ts;
+      const exBottom = exTop + obj.chunk.size * ts;
+      if (
+        newLeft < exRight &&
+        newRight > exLeft &&
+        newTop < exBottom &&
+        newBottom > exTop
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _createGapChunk(entryDir) {
+    const size = 5;
+    const seed = this._nextSeed() + '-gap';
+    const chunk = createChunk(seed, size, entryDir);
+    const t = chunk.tiles;
+    t.fill(TILE.WALL);
+    const c = Math.floor(size / 2);
+    for (let i = 1; i < size - 1; i++) {
+      t[c * size + i] = TILE.FLOOR;
+      t[i * size + c] = TILE.FLOOR;
+    }
+    chunk.chest = { x: c, y: c };
+    t[c * size + c] = TILE.CHEST;
+    const doorDir = this._oppositeDir(entryDir);
+    let door;
+    switch (doorDir) {
+      case 'N':
+        door = { dir: 'N', x: c, y: 0 };
+        break;
+      case 'S':
+        door = { dir: 'S', x: c, y: size - 1 };
+        break;
+      case 'W':
+        door = { dir: 'W', x: 0, y: c };
+        break;
+      case 'E':
+      default:
+        door = { dir: 'E', x: size - 1, y: c };
+        break;
+    }
+    chunk.door = door;
+    t[door.y * size + door.x] = TILE.DOOR;
+    chunk.entrance = this._calcEntrance(door.dir, door.x, door.y, size);
+    return chunk;
   }
 
   _calcOffset(fromObj, newSize, dir) {
