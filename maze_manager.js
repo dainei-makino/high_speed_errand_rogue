@@ -146,6 +146,7 @@ export default class MazeManager {
           duration: this.fadeDuration,
           onComplete: () => {
             if (this.isHeroInside(hero, obj)) {
+              this.scene.sound.play('game_over');
               this.scene.scene.restart();
             }
             obj.container.destroy();
