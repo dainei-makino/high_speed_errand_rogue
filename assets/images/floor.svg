@@ -1,12 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
     <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f0f0f0"/>
-      <stop offset="100%" stop-color="#c8c8c8"/>
+      <stop offset="0%" stop-color="#f7f7f7"/>
+      <stop offset="100%" stop-color="#cfcfcf"/>
     </linearGradient>
+    <radialGradient id="floorHighlight" cx="0.4" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
   <rect width="32" height="32" fill="url(#floorGrad)"/>
-  <path d="M0 8H32M0 16H32M0 24H32" stroke="#bcbcbc" stroke-width="1"/>
-  <path d="M8 0V32M16 0V32M24 0V32" stroke="#bcbcbc" stroke-width="1"/>
-  <path d="M4 0V32M12 0V32M20 0V32M28 0V32" stroke="#e0e0e0" stroke-width="0.5"/>
+  <rect width="32" height="32" fill="url(#floorHighlight)"/>
+  <path d="M0 8H32M0 16H32M0 24H32" stroke="#b0b0b0" stroke-width="1"/>
+  <path d="M8 0V32M16 0V32M24 0V32" stroke="#b0b0b0" stroke-width="1"/>
+  <path d="M4 0V32M12 0V32M20 0V32M28 0V32" stroke="#e6e6e6" stroke-width="0.5"/>
+  <path d="M0 0L32 32M32 0L0 32" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/>
 </svg>
