@@ -36,6 +36,19 @@ class GameScene extends Phaser.Scene {
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
+
+    this.cameraManager = new CameraManager(this, this.mazeManager);
+    this._seenFirstChunk = false;
+    this.mazeManager.events.on('chunk-created', info => {
+      this.cameraManager.expandBounds(info);
+      const dur = this._seenFirstChunk ? 400 : 0;
+      this.cameraManager.panToChunk(info, dur);
+      if (this._seenFirstChunk) {
+        this.cameraManager.zoomBump();
+      }
+      this._seenFirstChunk = true;
+    });
+
     const firstInfo = this.mazeManager.spawnInitial();
     this.sound.play('chunk_generate_1');
 
@@ -65,15 +78,7 @@ class GameScene extends Phaser.Scene {
     this.worldLayer.add(this.keyDisplay);
     this.updateKeyDisplay();
 
-    this.cameraManager = new CameraManager(this, this.mazeManager);
-    this.cameraManager.expandBounds(firstInfo);
-    this.cameraManager.panToChunk(firstInfo, 0);
-    // Update bounds whenever a chunk is added
-    this.mazeManager.events.on('chunk-added', info => {
-      if (info !== firstInfo) {
-        this.cameraManager.expandBounds(info);
-      }
-    });
+    // Handle transitions for door exit
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
       this.sound.play('chunk_generate_2');
@@ -242,8 +247,6 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
-          this.cameraManager.panToChunk(nextInfo);
-          this.cameraManager.zoomBump();
         } else {
           if (curTile.chunk.doorSprite) {
             this.tweens.add({

@@ -15,6 +15,16 @@ export default class CameraManager {
       x: this.cam.midPoint.x,
       y: this.cam.midPoint.y
     };
+
+    // Debug markers for camera vs chunk center
+    this.debugCam = scene.add.circle(0, 0, 3, 0xffffff);
+    this.debugChunk = scene.add.circle(0, 0, 6, 0x0000ff, 0)
+      .setStrokeStyle(1, 0x0000ff);
+    this.debugCam.setDepth(1000);
+    this.debugChunk.setDepth(1000);
+    if (scene.worldLayer) {
+      scene.worldLayer.add([this.debugCam, this.debugChunk]);
+    }
   }
 
   /**
@@ -26,7 +36,17 @@ export default class CameraManager {
     const { x: cx, y: cy } = this.mazeManager.getChunkCenter(info);
     this.expectedCenter.x = cx;
     this.expectedCenter.y = cy;
-    this.cam.pan(cx, cy, duration, 'Sine.easeInOut');
+    // Force a new pan so it isn't ignored if a previous pan is active
+    this.cam.pan(cx, cy, duration, 'Sine.easeInOut', true);
+    this.cam.once('camerapancomplete', () => {
+      // Snap exactly to the target to avoid drift
+      this.cam.centerOn(cx, cy);
+      this.expectedCenter.x = cx;
+      this.expectedCenter.y = cy;
+    });
+    if (this.debugChunk) {
+      this.debugChunk.setPosition(cx, cy);
+    }
   }
 
   /**
@@ -58,7 +78,13 @@ export default class CameraManager {
   panTo(x, y, duration = 500) {
     this.expectedCenter.x = x;
     this.expectedCenter.y = y;
-    this.cam.pan(x, y, duration, 'Sine.easeInOut');
+    // Force the pan so it always completes even if another is running
+    this.cam.pan(x, y, duration, 'Sine.easeInOut', true);
+    this.cam.once('camerapancomplete', () => {
+      this.cam.centerOn(x, y);
+      this.expectedCenter.x = x;
+      this.expectedCenter.y = y;
+    });
   }
 
   /**
@@ -73,6 +99,9 @@ export default class CameraManager {
       if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
         this.cam.centerOn(x, y);
       }
+    }
+    if (this.debugCam) {
+      this.debugCam.setPosition(this.cam.midPoint.x, this.cam.midPoint.y);
     }
   }
 
