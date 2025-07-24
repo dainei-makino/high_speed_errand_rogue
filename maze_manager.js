@@ -375,7 +375,7 @@ export default class MazeManager {
       doorWorldX + (doorDir === 'E' ? tile : doorDir === 'W' ? -tile : 0);
     const startY =
       doorWorldY + (doorDir === 'S' ? tile : doorDir === 'N' ? -tile : 0);
-    const rect = this._largestRect(startX, startY, doorDir);
+    const rect = this._largestRect(startX, startY, doorDir, fromObj);
 
     const min = 1;
     const max = newSize - 2;
@@ -409,13 +409,28 @@ export default class MazeManager {
       if (!this._canPlace(offsetX, offsetY, newSize, fromObj)) continue;
 
       const candidateObj = { chunk, offsetX, offsetY };
-      const nextOffset = this._calcOffset(candidateObj, newSize, chunk.door.dir);
-      if (
-        this._canPlace(nextOffset.offsetX, nextOffset.offsetY, newSize, [
-          fromObj,
-          candidateObj
-        ])
-      ) {
+
+      const nextDoorWorldX = offsetX + chunk.door.x * tile;
+      const nextDoorWorldY = offsetY + chunk.door.y * tile;
+      const nextStartX =
+        nextDoorWorldX +
+        (chunk.door.dir === 'E'
+          ? tile
+          : chunk.door.dir === 'W'
+          ? -tile
+          : 0);
+      const nextStartY =
+        nextDoorWorldY +
+        (chunk.door.dir === 'S'
+          ? tile
+          : chunk.door.dir === 'N'
+          ? -tile
+          : 0);
+      const nextRect = this._largestRect(nextStartX, nextStartY, chunk.door.dir, [
+        fromObj,
+        candidateObj
+      ]);
+      if (nextRect.width >= newSize * tile && nextRect.height >= newSize * tile) {
         return { offsetX, offsetY, entrance };
       }
     }
