@@ -41,36 +41,16 @@
 
 ---
 
-## 4. ざっくりコード
+## 4. ざっくり実装例
 
-```ts
-class CameraManager {
-  constructor(private cam: Phaser.Cameras.Scene2D.Camera){}
+`CameraManager` クラスではカメラ移動やズーム、フラッシュなどの演出をまとめて管理します。
 
-  // 1. チャンクの中心へ移動
-  panToChunk(chunk: MazeChunk, dur=400){
-    const cx = chunk.x + chunk.size*16; // 32pxタイル → 半分
-    const cy = chunk.y + chunk.size*16;
-    // "force" オプションを有効にして常に最新の移動を適用
-    this.cam.pan(cx, cy, dur, 'Sine.easeInOut', true);
-  }
+- **panToChunk(chunk, duration)** … 新しく生成された迷路チャンクの中央へカメラを移動。
+- **zoomBump()** … 一瞬だけ縮小して戻すことで軽く揺らす演出。
+- **flashWhite()** … 画面全体を白くフラッシュさせる。
 
-  // 2. 軽い揺れ (ズームバンプ)
-  zoomBump(){
-    this.cam.zoomTo(0.95,150)
-      .once('camerazoomcomplete', ()=> this.cam.zoomTo(1,200));
-  }
-
-  // 3. 白フラッシュ
-  flashWhite(){ this.cam.flash(120,255,255,255); }
-}
-```
-
-- **GameScene** 内ではインスタンスを作り、イベントで呼ぶだけ。
-
-```ts
-generator.on('chunk-created', ch => cameraMgr.panToChunk(ch));
-```
+GameScene 側では `generator` が発行する `chunk-created` イベントで
+`panToChunk()` を呼び出すだけで、常に迷路の中心を追うことができます。
 
 ---
 
