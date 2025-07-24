@@ -8,6 +8,7 @@ export default class MazeManager {
     this.scene = scene;
     this.tileSize = 16;
     this.activeChunks = [];
+    this.chunkCount = 0;
     this.chunkSpacing = 16;
     // Use a random base for seeds so mazes differ each run
     this.seedBase = Math.random().toString(36).slice(2);
@@ -53,6 +54,7 @@ export default class MazeManager {
     this.scene.tweens.add({ targets: container, alpha: 1, duration: 400 });
 
     const info = {
+      index: this.chunkCount++,
       chunk,
       container,
       offsetX,
@@ -138,8 +140,21 @@ export default class MazeManager {
   }
 
   update(delta, hero) {
-    for (const obj of this.activeChunks) {
+    const heroTile = this.worldToTile(hero.x, hero.y);
+    const heroIdx = heroTile ? heroTile.chunk.index : -1;
+    for (const obj of [...this.activeChunks]) {
       obj.age += delta;
+      if (heroIdx >= obj.index + 2 && !obj.fading) {
+        if (this.isHeroInside(hero, obj)) {
+          this.scene.sound.play('game_over');
+          this.scene.scene.restart();
+        }
+        const size = obj.chunk.size * this.tileSize;
+        evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
+        obj.container.destroy();
+        this.activeChunks = this.activeChunks.filter(c => c !== obj);
+        continue;
+      }
       if (obj.age > this.fadeDelay && !obj.fading) {
         obj.fading = true;
         this.scene.tweens.add({

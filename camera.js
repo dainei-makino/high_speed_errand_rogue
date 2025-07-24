@@ -15,7 +15,6 @@ export default class CameraManager {
       x: this.cam.midPoint.x,
       y: this.cam.midPoint.y
     };
-
   }
 
   /**
@@ -87,6 +86,9 @@ export default class CameraManager {
       if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
         this.cam.centerOn(x, y);
       }
+    }
+    if (this.debugCam) {
+      this.debugCam.setPosition(this.cam.midPoint.x, this.cam.midPoint.y);
     }
   }
 
