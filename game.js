@@ -7,6 +7,7 @@ import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
 import { newChunkTransition } from './effects.js';
+import { playHeroIdle, playHeroRun } from './hero_anim.js';
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
@@ -34,6 +35,8 @@ class GameScene extends Phaser.Scene {
 
     const heroImage = Characters.createHero(this);
     const heroRatio = heroImage.height / heroImage.width;
+    this.heroImage = heroImage;
+    playHeroIdle(this, heroImage);
     heroImage.setDisplaySize(
       this.mazeManager.tileSize,
       this.mazeManager.tileSize * heroRatio
@@ -141,6 +144,7 @@ class GameScene extends Phaser.Scene {
 
         if (!blocked) {
           this.isMoving = true;
+          playHeroRun(this, this.heroImage, moveDir);
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
           this.tweens.add({
@@ -150,6 +154,7 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
+              playHeroIdle(this, this.heroImage);
               this.inputBuffer.repeat(moveDir);
             }
           });
