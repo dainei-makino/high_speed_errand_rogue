@@ -38,6 +38,12 @@ export default class CameraManager {
     this.expectedCenter.y = cy;
     // Force a new pan so it isn't ignored if a previous pan is active
     this.cam.pan(cx, cy, duration, 'Sine.easeInOut', true);
+    this.cam.once('camerapancomplete', () => {
+      // Snap exactly to the target to avoid drift
+      this.cam.centerOn(cx, cy);
+      this.expectedCenter.x = cx;
+      this.expectedCenter.y = cy;
+    });
     if (this.debugChunk) {
       this.debugChunk.setPosition(cx, cy);
     }
@@ -74,6 +80,11 @@ export default class CameraManager {
     this.expectedCenter.y = y;
     // Force the pan so it always completes even if another is running
     this.cam.pan(x, y, duration, 'Sine.easeInOut', true);
+    this.cam.once('camerapancomplete', () => {
+      this.cam.centerOn(x, y);
+      this.expectedCenter.x = x;
+      this.expectedCenter.y = y;
+    });
   }
 
   /**

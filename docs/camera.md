@@ -45,7 +45,7 @@
 
 `CameraManager` クラスではカメラ移動やズーム、フラッシュなどの演出をまとめて管理します。
 
-- **panToChunk(chunk, duration)** … 新しく生成された迷路チャンクの中央へカメラを移動。
+- **panToChunk(chunk, duration)** … 新しく生成された迷路チャンクの中央へカメラを移動。`force` オプションで必ず開始し、`camerapancomplete` で最終位置を微調整します。
 - **zoomBump()** … 一瞬だけ縮小して戻すことで軽く揺らす演出。
 - **flashWhite()** … 画面全体を白くフラッシュさせる。
 
