@@ -117,21 +117,15 @@ class GameScene extends Phaser.Scene {
           const baseDuration = (size / pixelsPerSecond) * 1000;
 
           const now = this.time.now;
-          const opposite = {
-            left: 'right',
-            right: 'left',
-            up: 'down',
-            down: 'up'
-          };
           const quickChange =
             this.lastMoveDir &&
-            dir === opposite[this.lastMoveDir] &&
+            dir !== this.lastMoveDir &&
             now - this.lastMoveTime < 250;
 
           const startMove = () => {
             this.lastMoveDir = dir;
             this.lastMoveTime = this.time.now;
-            const duration = quickChange ? baseDuration * 1.4 : baseDuration;
+            const duration = quickChange ? baseDuration * 1.6 : baseDuration;
             this.tweens.add({
               targets: this.heroSprite,
               x: targetX,
@@ -146,7 +140,7 @@ class GameScene extends Phaser.Scene {
           };
 
           if (quickChange) {
-            const overshoot = 2;
+            const overshoot = 3;
             let ox = 0;
             let oy = 0;
             if (this.lastMoveDir === 'left') ox = -overshoot;
@@ -158,10 +152,17 @@ class GameScene extends Phaser.Scene {
               targets: this.heroSprite,
               x: this.heroSprite.x + ox,
               y: this.heroSprite.y + oy,
-              duration: 15,
+              duration: 30,
               ease: 'Sine.easeOut',
               onComplete: () => {
-                this.time.delayedCall(15, startMove);
+                this.time.delayedCall(30, () => {
+                  if (this.inputBuffer.holdKeys[dir]) {
+                    startMove();
+                  } else {
+                    this.isMoving = false;
+                    this.lastMoveDir = null;
+                  }
+                });
               }
             });
           } else {
