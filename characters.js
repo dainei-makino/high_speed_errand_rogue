@@ -2,10 +2,10 @@ const ASSET_PATH = 'assets/images/';
 const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
-  exit: 'door_closed.svg',
-  door_silver: 'door_silver.svg',
-  door_silver_open: 'door_silver_open.svg',
-  door_open: 'door_open.svg',
+  exit: 'airlock_closed.svg',
+  door_silver: 'airlock_silver.svg',
+  door_silver_open: 'airlock_silver_open.svg',
+  door_open: 'airlock_open.svg',
   treasure: 'treasure.svg',
   hero_idle: 'hero.svg',
   hero_walk1: 'hero_walk1.svg',
@@ -60,15 +60,15 @@ function createExit(scene) {
 }
 
 function createSilverDoor(scene) {
-  return scene.add.image(0, 0, 'door_silver').setOrigin(0);
+  return scene.add.image(0, 0, 'airlock_silver').setOrigin(0);
 }
 
 function createSilverDoorOpen(scene) {
-  return scene.add.image(0, 0, 'door_silver_open').setOrigin(0);
+  return scene.add.image(0, 0, 'airlock_silver_open').setOrigin(0);
 }
 
 function createDoorOpen(scene) {
-  return scene.add.image(0, 0, 'door_open').setOrigin(0);
+  return scene.add.image(0, 0, 'airlock_open').setOrigin(0);
 }
 
 function createTreasure(scene) {
