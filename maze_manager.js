@@ -1,6 +1,6 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
-import { sizesForStage } from './maze_table.js';
+import { sizesForStage, pickMazeConfig } from './maze_table.js';
 
 export default class MazeManager {
   constructor(scene) {
