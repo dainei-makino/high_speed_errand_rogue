@@ -6,7 +6,7 @@ import { TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
-import { newChunkTransition } from './effects.js';
+import { newChunkTransition, evaporateArea } from './effects.js';
 import LoadingScene from './loading_scene.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
@@ -24,6 +24,7 @@ class GameScene extends Phaser.Scene {
     this.midpointPlayed = false;
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
+    this.introLetters = null;
   }
 
   preload() {
@@ -82,7 +83,12 @@ class GameScene extends Phaser.Scene {
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
       this.sound.play('chunk_generate_2');
+      if (data.info && data.info.index === 1) {
+        this.destroyIntroText();
+      }
     });
+
+    this.setupIntro(firstInfo);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D');
@@ -283,6 +289,63 @@ class GameScene extends Phaser.Scene {
         this.keyCountText.setText('x' + count);
       }
     }
+  }
+
+  createFloatingText(str, centerX, y) {
+    const style = { fontFamily: 'monospace', fontSize: '24px', color: '#ffffff' };
+    const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
+    const total = measure.width;
+    measure.destroy();
+    let x = centerX - total / 2;
+    const letters = [];
+    for (const ch of str) {
+      const letter = this.add.text(0, 0, ch, style).setOrigin(0.5);
+      letter.x = x + letter.width / 2;
+      letter.y = y;
+      letter.setDepth(500);
+      this.worldLayer.add(letter);
+      this.tweens.add({
+        targets: letter,
+        y: letter.y + Phaser.Math.Between(-6, 6),
+        duration: 800 + Phaser.Math.Between(0, 400),
+        repeat: -1,
+        yoyo: true,
+        ease: 'Sine.easeInOut',
+        delay: Phaser.Math.Between(0, 300)
+      });
+      letters.push(letter);
+      x += letter.width;
+    }
+    return letters;
+  }
+
+  setupIntro(firstInfo) {
+    const center = this.mazeManager.getChunkCenter(firstInfo);
+    const size = this.mazeManager.tileSize;
+    const offset = 100;
+    const topY = firstInfo.offsetY + size - offset;
+    const bottomY =
+      firstInfo.offsetY + firstInfo.chunk.size * size - size + offset;
+    this.introLetters = [
+      ...this.createFloatingText('HIGH SPEED MAZE RUNNER', center.x, topY),
+      ...this.createFloatingText('MOVE TO WASD KEY', center.x, bottomY)
+    ];
+  }
+
+  destroyIntroText() {
+    if (!this.introLetters) return;
+    for (const l of this.introLetters) {
+      evaporateArea(
+        this,
+        l.x - l.width / 2,
+        l.y - l.height / 2,
+        l.width,
+        l.height,
+        0xffffff
+      );
+      l.destroy();
+    }
+    this.introLetters = null;
   }
 }
 
