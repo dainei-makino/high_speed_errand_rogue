@@ -45,3 +45,4 @@ this.scene.launch('GameScene');
 - タイトルテキストや背景色は `title_scene.js` 内で調整できる。
 - BootScene で読み込むアセットを追加したい場合は `boot_scene.js` の `preload()` に追記する。
 - ゲーム中の UI 表示は `UIScene` が担当しているため、タイトルからゲームへ移行した後に初期化が必要な場合は `UIScene` の `create()` を参照。
+- ウィンドウサイズ変更時は `scale.on('resize')` でビューポートを再計算している。
