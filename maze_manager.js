@@ -153,9 +153,56 @@ export default class MazeManager {
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
     const { size } = pickMazeConfig(progress + 1);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
+    let chunk = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    const orientTries = 4;
+    const sizeAdjustTries = 2;
+    let success = false;
 
-    let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
+    let baseSize = size;
+    for (let adjust = 0; adjust <= sizeAdjustTries && !success; adjust++) {
+      if (adjust > 0) {
+        baseSize = Math.max(5, baseSize - 2);
+      }
+      for (let i = 0; i < orientTries && !success; i++) {
+        chunk = createChunk(this._nextSeed(), baseSize, entryDir);
+        ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
+
+        let attempts = 0;
+        while (this._isOverlap(offsetX, offsetY, chunk.size) && attempts < 3) {
+          switch (doorDir) {
+            case 'N':
+              offsetY -= this.tileSize;
+              break;
+            case 'S':
+              offsetY += this.tileSize;
+              break;
+            case 'W':
+              offsetX -= this.tileSize;
+              break;
+            case 'E':
+            default:
+              offsetX += this.tileSize;
+              break;
+          }
+          attempts += 1;
+        }
+        if (
+          !this._isOverlap(offsetX, offsetY, chunk.size) &&
+          this._canSpawnChain(offsetX, offsetY, chunk, progress)
+        ) {
+          success = true;
+        }
+      }
+    }
+
+    if (!success) {
+      const gap = this._createGapChunk(entryDir, fromObj, doorDir);
+      chunk = gap.chunk;
+      offsetX = gap.offsetX;
+      offsetY = gap.offsetY;
+    }
 
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
@@ -246,6 +293,104 @@ export default class MazeManager {
       default:
         return 'W';
     }
+  }
+
+  _isOverlap(x, y, size, extra) {
+    const ts = this.tileSize;
+    const newLeft = x;
+    const newTop = y;
+    const newRight = x + size * ts;
+    const newBottom = y + size * ts;
+
+    const check = obj => {
+      const exLeft = obj.offsetX;
+      const exTop = obj.offsetY;
+      const exRight = exLeft + obj.chunk.size * ts;
+      const exBottom = exTop + obj.chunk.size * ts;
+      return (
+        newLeft < exRight &&
+        newRight > exLeft &&
+        newTop < exBottom &&
+        newBottom > exTop
+      );
+    };
+
+    for (const obj of this.activeChunks) {
+      if (check(obj)) {
+        return true;
+      }
+    }
+    if (extra && check(extra)) {
+      return true;
+    }
+    return false;
+  }
+
+  _canSpawnChain(x, y, chunk, progress) {
+    const steps = 2;
+    const testSize = pickMazeConfig(Math.max(1, progress + 1)).size;
+    let obj = { offsetX: x, offsetY: y, chunk };
+    const dir = chunk.door ? chunk.door.dir : 'E';
+    for (let i = 0; i < steps; i++) {
+      const next = this._calcOffset(obj, testSize, dir);
+      if (this._isOverlap(next.offsetX, next.offsetY, testSize, obj)) {
+        return false;
+      }
+      obj = { offsetX: next.offsetX, offsetY: next.offsetY, chunk: { size: testSize } };
+    }
+    return true;
+  }
+
+  _createGapChunk(entryDir, fromObj, incomingDir) {
+    const size = 5;
+    const seed = this._nextSeed() + '-gap';
+    const chunk = createChunk(seed, size, entryDir);
+    const t = chunk.tiles;
+    t.fill(TILE.WALL);
+    const c = Math.floor(size / 2);
+    for (let i = 1; i < size - 1; i++) {
+      t[c * size + i] = TILE.FLOOR;
+      t[i * size + c] = TILE.FLOOR;
+    }
+    chunk.chest = { x: c, y: c };
+    t[c * size + c] = TILE.CHEST;
+
+    const { offsetX, offsetY } = this._calcOffset(fromObj, size, incomingDir);
+    const candidates = ['N', 'E', 'S', 'W'].filter(d => d !== entryDir);
+    const testSize = pickMazeConfig(1).size;
+    let doorDir = this._oppositeDir(entryDir);
+    for (const dir of candidates) {
+      const pos = this._calcOffset(
+        { offsetX, offsetY, chunk: { size } },
+        testSize,
+        dir
+      );
+      if (!this._isOverlap(pos.offsetX, pos.offsetY, testSize, { offsetX, offsetY, chunk: { size } })) {
+        doorDir = dir;
+        break;
+      }
+    }
+
+    let door;
+    switch (doorDir) {
+      case 'N':
+        door = { dir: 'N', x: c, y: 0 };
+        break;
+      case 'S':
+        door = { dir: 'S', x: c, y: size - 1 };
+        break;
+      case 'W':
+        door = { dir: 'W', x: 0, y: c };
+        break;
+      case 'E':
+      default:
+        door = { dir: 'E', x: size - 1, y: c };
+        break;
+    }
+    chunk.door = door;
+    t[door.y * size + door.x] = TILE.DOOR;
+    chunk.entrance = this._calcEntrance(door.dir, door.x, door.y, size);
+    return { chunk, offsetX, offsetY };
   }
 
   _calcOffset(fromObj, newSize, dir) {
