@@ -146,7 +146,7 @@ class GameScene extends Phaser.Scene {
           };
 
           if (quickChange) {
-            const overshoot = 3;
+            const overshoot = 2;
             let ox = 0;
             let oy = 0;
             if (this.lastMoveDir === 'left') ox = -overshoot;
@@ -158,10 +158,10 @@ class GameScene extends Phaser.Scene {
               targets: this.heroSprite,
               x: this.heroSprite.x + ox,
               y: this.heroSprite.y + oy,
-              duration: 30,
+              duration: 15,
               ease: 'Sine.easeOut',
               onComplete: () => {
-                this.time.delayedCall(30, startMove);
+                this.time.delayedCall(15, startMove);
               }
             });
           } else {
