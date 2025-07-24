@@ -8,13 +8,12 @@ export default class MazeManager {
     this.scene = scene;
     this.tileSize = 16;
     this.activeChunks = [];
+    this.nextIndex = 0;
     this.chunkSpacing = 16;
     // Use a random base for seeds so mazes differ each run
     this.seedBase = Math.random().toString(36).slice(2);
     this.seedCount = 0;
-    // Doubled the initial TTL so mazes last longer before fading
-    this.fadeDelay = 18000; // ms until fade starts
-    this.fadeDuration = 2000; // fade time
+    this.fadeDuration = 2000; // fade time for disappearing chunks
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -57,7 +56,7 @@ export default class MazeManager {
       container,
       offsetX,
       offsetY,
-      age: 0,
+      index: this.nextIndex++,
       fading: false,
       doorSprite: null,
       chestSprite: null,
@@ -137,9 +136,10 @@ export default class MazeManager {
   }
 
   update(delta, hero) {
+    const heroTile = this.worldToTile(hero.x, hero.y);
+    const heroIndex = heroTile ? heroTile.chunk.index : -1;
     for (const obj of this.activeChunks) {
-      obj.age += delta;
-      if (obj.age > this.fadeDelay && !obj.fading) {
+      if (!obj.fading && heroIndex >= obj.index + 2) {
         obj.fading = true;
         this.scene.tweens.add({
           targets: obj.container,
