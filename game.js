@@ -132,18 +132,18 @@ class GameScene extends Phaser.Scene {
           curTile.chunk.chunk.exited = true;
 
           // celebratory effects when exiting a chunk
-          // soften the visual blast with shorter flash and subtle shake
-          this.cameraManager.cam.flash(150, 160, 160, 160, 0.3);
-          this.cameraManager.cam.shake(120, 0.002);
+          // greatly reduce flash intensity and show particles across the screen
+          this.cameraManager.cam.flash(100, 120, 120, 120, 0.15);
+          this.cameraManager.cam.shake(100, 0.001);
 
-          // a small expanding flash around the hero for a less intense effect
+          // faint expanding flash around the hero
           const flash = this.add.rectangle(
             this.heroSprite.x,
             this.heroSprite.y,
             this.mazeManager.tileSize,
             this.mazeManager.tileSize,
             0xffffff,
-            0.6
+            0.4
           );
           flash.setOrigin(0.5);
           flash.setScale(0.2);
@@ -154,7 +154,7 @@ class GameScene extends Phaser.Scene {
             scaleX: 1,
             scaleY: 1,
             alpha: 0,
-            duration: 180,
+            duration: 150,
             onComplete: () => flash.destroy()
           });
 
@@ -165,21 +165,25 @@ class GameScene extends Phaser.Scene {
             ctx.fillRect(0, 0, 4, 4);
             tex.refresh();
           }
+
+          const cam = this.cameraManager.cam;
           const part = this.add.particles(
-            this.heroSprite.x,
-            this.heroSprite.y,
+            cam.midPoint.x,
+            cam.midPoint.y,
             'spark',
             {
-              speed: { min: -60, max: 60 },
+              x: { min: -cam.width / 2, max: cam.width / 2 },
+              y: { min: -cam.height / 2, max: cam.height / 2 },
+              speed: { min: -80, max: 80 },
               angle: { min: 0, max: 360 },
               scale: { start: 0.8, end: 0 },
-              lifespan: 350,
-              quantity: 10,
+              lifespan: 400,
+              quantity: 20,
               blendMode: 'ADD'
             }
           );
           this.worldLayer.add(part);
-          this.time.delayedCall(400, () => part.destroy());
+          this.time.delayedCall(500, () => part.destroy());
 
           gameState.incrementMazeCount();
           gameState.addScore(100);
