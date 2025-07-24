@@ -66,6 +66,7 @@ export default class MazeManager {
     this.renderChunk(chunk, container, info);
     this.activeChunks.push(info);
     this.events.emit('chunk-added', info);
+    this.events.emit('chunk-created', info);
     return info;
   }
 
