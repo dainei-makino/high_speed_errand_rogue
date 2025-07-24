@@ -66,7 +66,7 @@ export function evaporateChunk(scene, x, y, width, height) {
   }
   const particles = scene.add.particles('particle');
   particles.setDepth(1000);
-  const emitter = particles.createEmitter({
+  const emitter = particles.addEmitter({
     x: { min: x, max: x + width },
     y: { min: y, max: y + height },
     speedX: { min: -20, max: 20 },
