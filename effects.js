@@ -55,3 +55,28 @@ export function newChunkTransition(scene, doorDir, doorWorldX, doorWorldY) {
     });
   }
 }
+
+export function evaporateChunk(scene, x, y, width, height) {
+  if (!scene.textures.exists('particle')) {
+    const g = scene.make.graphics({ x: 0, y: 0, add: false });
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(0, 0, 4, 4);
+    g.generateTexture('particle', 4, 4);
+    g.destroy();
+  }
+  const particles = scene.add.particles('particle');
+  particles.setDepth(1000);
+  const emitter = particles.createEmitter({
+    x: { min: x, max: x + width },
+    y: { min: y, max: y + height },
+    speedX: { min: -20, max: 20 },
+    speedY: { min: -60, max: -30 },
+    alpha: { start: 0.7, end: 0 },
+    scale: { start: 1, end: 0 },
+    lifespan: 600,
+    tint: 0x000000,
+    quantity: 20
+  });
+  emitter.explode(40, width / 2 + x, height / 2 + y);
+  scene.time.delayedCall(600, () => particles.destroy());
+}
