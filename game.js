@@ -25,6 +25,7 @@ class GameScene extends Phaser.Scene {
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
     this.introLetters = null;
+    this.firstMoveSoundPlayed = false;
   }
 
   preload() {
@@ -34,6 +35,7 @@ class GameScene extends Phaser.Scene {
   create() {
     this.hero = new HeroState();
     this.isMoving = false;
+    this.firstMoveSoundPlayed = false;
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -51,7 +53,6 @@ class GameScene extends Phaser.Scene {
     });
 
     const firstInfo = this.mazeManager.spawnInitial();
-    this.sound.play('chunk_generate_1');
 
     this.heroImage = Characters.createHero(this);
     const heroRatio = this.heroImage.height / this.heroImage.width;
@@ -162,6 +163,10 @@ class GameScene extends Phaser.Scene {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
+          if (!this.firstMoveSoundPlayed) {
+            this.sound.play('chunk_generate_1');
+            this.firstMoveSoundPlayed = true;
+          }
           this.sound.play('hero_walk');
 
           const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
