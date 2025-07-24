@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="56">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
   <defs>
     <linearGradient id="chestLid" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffe08a"/>
@@ -9,12 +9,9 @@
       <stop offset="100%" stop-color="#b07c12"/>
     </linearGradient>
   </defs>
-  <!-- Lid -->
+  <rect x="4" y="14" width="24" height="14" fill="url(#chestBody)" stroke="#996600" stroke-width="2"/>
   <rect x="4" y="8" width="24" height="10" fill="url(#chestLid)" stroke="#996600" stroke-width="2"/>
-  <!-- Upper body -->
-  <rect x="4" y="18" width="24" height="14" fill="url(#chestBody)" stroke="#996600" stroke-width="2"/>
-  <!-- Lower extension -->
-  <rect x="4" y="32" width="24" height="14" fill="url(#chestBody)" stroke="#996600" stroke-width="2"/>
-  <line x1="16" y1="18" x2="16" y2="46" stroke="#b07c12" stroke-width="1"/>
-  <circle cx="16" cy="30" r="2" fill="#996600"/>
+  <line x1="4" y1="16" x2="28" y2="16" stroke="#996600" stroke-width="2"/>
+  <line x1="16" y1="14" x2="16" y2="28" stroke="#b07c12" stroke-width="1"/>
+  <circle cx="16" cy="22" r="2" fill="#996600"/>
 </svg>

@@ -107,12 +107,8 @@ export default class MazeManager {
         }
 
         if (sprite) {
-          const isChest = tile === TILE.CHEST || tile === TILE.ITEM_CHEST;
-          const ratio = sprite.height / sprite.width;
-          const height = isChest ? size * ratio : size;
-          sprite.setDisplaySize(size, height);
-          const yPos = y * size - (isChest ? 6 : 0);
-          sprite.setPosition(x * size, yPos);
+          sprite.setDisplaySize(size, size);
+          sprite.setPosition(x * size, y * size);
           container.add(sprite);
         }
       }
