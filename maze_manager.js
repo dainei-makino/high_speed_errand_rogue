@@ -1,6 +1,7 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import { pickMazeConfig } from './maze_table.js';
+import { evaporateChunk } from './effects.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -149,6 +150,8 @@ export default class MazeManager {
               this.scene.sound.play('game_over');
               this.scene.scene.restart();
             }
+            const size = obj.chunk.size * this.tileSize;
+            evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
             obj.container.destroy();
             this.activeChunks = this.activeChunks.filter(c => c !== obj);
           }
