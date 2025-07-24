@@ -104,7 +104,8 @@ export default class MazeManager {
             break;
           case TILE.CHEST:
           case TILE.ITEM_CHEST:
-            sprite = Characters.createTreasure(this.scene);
+            // Display a key icon instead of a treasure chest
+            sprite = Characters.createKey(this.scene);
             info.chestSprite = sprite;
             info.chestPosition = { x, y };
             break;
