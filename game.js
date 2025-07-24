@@ -171,13 +171,16 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
-      if (
-        curTile.cell === TILE.SILVER_DOOR &&
-        !curTile.chunk.chunk.silverOpened &&
-        this.hero.keys > 0
-      ) {
-        curTile.chunk.chunk.silverOpened = true;
-        this.mazeManager.openSilverDoor(curTile.chunk);
+      if (curTile.cell === TILE.SILVER_DOOR && this.hero.keys > 0) {
+        const doors = curTile.chunk.chunk.silverDoors || [];
+        const door = doors.find(d => d.x === curTile.tx && d.y === curTile.ty);
+        if (door && !door.opened) {
+          this.mazeManager.openSilverDoor(
+            curTile.chunk,
+            curTile.tx,
+            curTile.ty
+          );
+        }
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {

@@ -1,6 +1,7 @@
 export const MAZE_TABLE = [
   { stage: 1, sizes: [7] },
-  { stage: 2, sizes: [9, 11, 13] }
+  // From the second chunk onward allow a wider range including 7 again
+  { stage: 2, sizes: [7, 9, 11, 13] }
 ];
 
 export function pickMazeConfig(stage) {
