@@ -177,8 +177,10 @@ export default class MazeManager {
       attempts += 1;
     }
     if (this._isOverlap(offsetX, offsetY, chunk.size)) {
-      chunk = this._createGapChunk(entryDir);
-      ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
+      const gap = this._createGapChunk(entryDir, fromObj, doorDir);
+      chunk = gap.chunk;
+      offsetX = gap.offsetX;
+      offsetY = gap.offsetY;
     }
 
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
@@ -272,30 +274,38 @@ export default class MazeManager {
     }
   }
 
-  _isOverlap(x, y, size) {
+  _isOverlap(x, y, size, extra) {
     const ts = this.tileSize;
     const newLeft = x;
     const newTop = y;
     const newRight = x + size * ts;
     const newBottom = y + size * ts;
-    for (const obj of this.activeChunks) {
+
+    const check = obj => {
       const exLeft = obj.offsetX;
       const exTop = obj.offsetY;
       const exRight = exLeft + obj.chunk.size * ts;
       const exBottom = exTop + obj.chunk.size * ts;
-      if (
+      return (
         newLeft < exRight &&
         newRight > exLeft &&
         newTop < exBottom &&
         newBottom > exTop
-      ) {
+      );
+    };
+
+    for (const obj of this.activeChunks) {
+      if (check(obj)) {
         return true;
       }
+    }
+    if (extra && check(extra)) {
+      return true;
     }
     return false;
   }
 
-  _createGapChunk(entryDir) {
+  _createGapChunk(entryDir, fromObj, incomingDir) {
     const size = 5;
     const seed = this._nextSeed() + '-gap';
     const chunk = createChunk(seed, size, entryDir);
@@ -308,7 +318,23 @@ export default class MazeManager {
     }
     chunk.chest = { x: c, y: c };
     t[c * size + c] = TILE.CHEST;
-    const doorDir = this._oppositeDir(entryDir);
+
+    const { offsetX, offsetY } = this._calcOffset(fromObj, size, incomingDir);
+    const candidates = ['N', 'E', 'S', 'W'].filter(d => d !== entryDir);
+    const testSize = pickMazeConfig(1).size;
+    let doorDir = this._oppositeDir(entryDir);
+    for (const dir of candidates) {
+      const pos = this._calcOffset(
+        { offsetX, offsetY, chunk: { size } },
+        testSize,
+        dir
+      );
+      if (!this._isOverlap(pos.offsetX, pos.offsetY, testSize, { offsetX, offsetY, chunk: { size } })) {
+        doorDir = dir;
+        break;
+      }
+    }
+
     let door;
     switch (doorDir) {
       case 'N':
@@ -328,7 +354,7 @@ export default class MazeManager {
     chunk.door = door;
     t[door.y * size + door.x] = TILE.DOOR;
     chunk.entrance = this._calcEntrance(door.dir, door.x, door.y, size);
-    return chunk;
+    return { chunk, offsetX, offsetY };
   }
 
   _calcOffset(fromObj, newSize, dir) {
