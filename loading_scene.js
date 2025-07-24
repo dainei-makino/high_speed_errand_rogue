@@ -117,8 +117,12 @@ export default class LoadingScene extends Phaser.Scene {
 
     this.sound.on('decoded', onDecoded);
 
+    // Decode each audio asset before starting the game
     audioKeys.forEach(key => {
-      this.sound.decodeAudio(key);
+      const audioData = this.cache.audio.get(key);
+      if (audioData && audioData.data) {
+        this.sound.decodeAudio(key, audioData.data);
+      }
     });
   }
 }
