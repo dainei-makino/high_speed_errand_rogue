@@ -205,8 +205,10 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
-          this.cameraManager.panToChunk(nextInfo);
-          this.cameraManager.zoomBump();
+          if (nextInfo) {
+            this.cameraManager.panToChunk(nextInfo);
+            this.cameraManager.zoomBump();
+          }
         } else {
           if (curTile.chunk.doorSprite) {
             this.tweens.add({

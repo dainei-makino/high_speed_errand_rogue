@@ -1,6 +1,6 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
-import { pickMazeConfig } from './maze_table.js';
+import { sizesForStage } from './maze_table.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -172,38 +172,49 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const { size } = pickMazeConfig(progress + 1);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
-
-    let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
-
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
-    const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
-
-    // Adjust position so entrance never lands on a corner
-    if (doorDir === 'N' || doorDir === 'S') {
-      const minX = 1;
-      const maxX = chunk.size - 2;
-      let adjX = door.x;
-      if (adjX < minX) adjX = minX;
-      if (adjX > maxX) adjX = maxX;
-      if (adjX !== door.x) {
-        entrance.x = adjX;
-        offsetX = doorWorldX - adjX * this.tileSize;
+    const sizes = sizesForStage(progress + 1);
+    let final = null;
+    let allAttempts = 0;
+    let allRects = [];
+    for (const size of sizes) {
+      for (let s = 0; s < 4; s++) {
+        const chunk = createChunk(this._nextSeed(), size, entryDir);
+        const result = this._findPlacement(
+          fromObj,
+          chunk,
+          doorDir,
+          doorWorldX,
+          doorWorldY
+        );
+        allAttempts += result.attempts;
+        allRects = allRects.concat(result.rects);
+        if (result.success) {
+          final = { chunk, placement: result };
+          break;
+        }
       }
-    } else {
-      const minY = 1;
-      const maxY = chunk.size - 2;
-      let adjY = door.y;
-      if (adjY < minY) adjY = minY;
-      if (adjY > maxY) adjY = maxY;
-      if (adjY !== door.y) {
-        entrance.y = adjY;
-        offsetY = doorWorldY - adjY * this.tileSize;
-      }
+      if (final) break;
     }
+
+    if (!final) {
+      console.error('Failed to place chunk', {
+        progress,
+        doorDir,
+        attempts: allAttempts,
+        rectCount: allRects.length
+      });
+      if (allRects.length) {
+        console.log('Rect sizes:', allRects.map(r => `${r.width}x${r.height}`));
+      }
+      this.scene.scene.pause();
+      return null;
+    }
+
+    const { chunk, placement } = final;
+    const { offsetX, offsetY, entrance } = placement;
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
     switch (doorDir) {
@@ -302,6 +313,154 @@ export default class MazeManager {
       default:
         return { x: 0, y: doorY };
     }
+  }
+
+  _canPlace(offsetX, offsetY, size, exclude = []) {
+    if (!Array.isArray(exclude)) exclude = [exclude];
+    exclude = exclude.filter(Boolean);
+    const tile = this.tileSize;
+    const w = size * tile;
+    const h = size * tile;
+    for (const obj of this.activeChunks) {
+      if (exclude.includes(obj)) continue;
+      const ow = obj.chunk.size * tile;
+      const oh = obj.chunk.size * tile;
+      if (
+        offsetX < obj.offsetX + ow - tile &&
+        offsetX + w - tile > obj.offsetX &&
+        offsetY < obj.offsetY + oh - tile &&
+        offsetY + h - tile > obj.offsetY
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  _rectCollides(x, y, w, h, exclude = []) {
+    if (!Array.isArray(exclude)) exclude = [exclude];
+    exclude = exclude.filter(Boolean);
+    for (const obj of this.activeChunks) {
+      if (exclude.includes(obj)) continue;
+      const ow = obj.chunk.size * this.tileSize;
+      const oh = obj.chunk.size * this.tileSize;
+      if (x < obj.offsetX + ow && x + w > obj.offsetX &&
+          y < obj.offsetY + oh && y + h > obj.offsetY) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _scanDir(x, y, dx, dy, exclude) {
+    const tile = this.tileSize;
+    let dist = 0;
+    for (let i = 0; i < 50; i++) {
+      x += dx * tile;
+      y += dy * tile;
+      if (this._rectCollides(x, y, tile, tile, exclude)) break;
+      dist += tile;
+    }
+    return dist;
+  }
+
+  _largestRect(startX, startY, dir, exclude = []) {
+    const tile = this.tileSize;
+    const north =
+      dir === 'S'
+        ? tile
+        : this._scanDir(startX, startY, 0, -1, exclude) + tile;
+    const south =
+      dir === 'N'
+        ? tile
+        : this._scanDir(startX, startY, 0, 1, exclude) + tile;
+    const west =
+      dir === 'E'
+        ? tile
+        : this._scanDir(startX, startY, -1, 0, exclude) + tile;
+    const east =
+      dir === 'W'
+        ? tile
+        : this._scanDir(startX, startY, 1, 0, exclude) + tile;
+    return {
+      x: startX - west,
+      y: startY - north,
+      width: west + east,
+      height: north + south
+    };
+  }
+
+  _findPlacement(fromObj, chunk, doorDir, doorWorldX, doorWorldY) {
+    const newSize = chunk.size;
+    const tile = this.tileSize;
+    const startX =
+      doorWorldX + (doorDir === 'E' ? tile : doorDir === 'W' ? -tile : 0);
+    const startY =
+      doorWorldY + (doorDir === 'S' ? tile : doorDir === 'N' ? -tile : 0);
+    const rect = this._largestRect(startX, startY, doorDir, fromObj);
+
+    const min = 1;
+    const max = newSize - 2;
+    let attempts = 0;
+    const rects = [];
+    for (let i = min; i <= max; i++) {
+      attempts++;
+      let entrance;
+      switch (doorDir) {
+        case 'N':
+          entrance = { x: i, y: newSize - 1 };
+          break;
+        case 'S':
+          entrance = { x: i, y: 0 };
+          break;
+        case 'W':
+          entrance = { x: newSize - 1, y: i };
+          break;
+        case 'E':
+        default:
+          entrance = { x: 0, y: i };
+          break;
+      }
+      const offsetX = doorWorldX - entrance.x * tile;
+      const offsetY = doorWorldY - entrance.y * tile;
+      if (
+        offsetX < rect.x ||
+        offsetY < rect.y ||
+        offsetX + newSize * tile > rect.x + rect.width ||
+        offsetY + newSize * tile > rect.y + rect.height
+      ) {
+        continue;
+      }
+      if (!this._canPlace(offsetX, offsetY, newSize, fromObj)) continue;
+
+      const candidateObj = { chunk, offsetX, offsetY };
+
+      const nextDoorWorldX = offsetX + chunk.door.x * tile;
+      const nextDoorWorldY = offsetY + chunk.door.y * tile;
+      const nextStartX =
+        nextDoorWorldX +
+        (chunk.door.dir === 'E'
+          ? tile
+          : chunk.door.dir === 'W'
+          ? -tile
+          : 0);
+      const nextStartY =
+        nextDoorWorldY +
+        (chunk.door.dir === 'S'
+          ? tile
+          : chunk.door.dir === 'N'
+          ? -tile
+          : 0);
+      const nextRect = this._largestRect(nextStartX, nextStartY, chunk.door.dir, [
+        fromObj,
+        candidateObj
+      ]);
+      rects.push({ width: nextRect.width, height: nextRect.height });
+      if (nextRect.width >= newSize * tile && nextRect.height >= newSize * tile) {
+        return { success: true, offsetX, offsetY, entrance, attempts, rects };
+      }
+    }
+    return { success: false, attempts, rects };
   }
 
   _ensureEntrance(chunk) {

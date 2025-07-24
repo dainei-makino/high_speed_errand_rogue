@@ -10,3 +10,8 @@ export function pickMazeConfig(stage) {
   const size = sizes[Math.floor(Math.random() * sizes.length)];
   return { size };
 }
+
+export function sizesForStage(stage) {
+  const entry = [...MAZE_TABLE].reverse().find(e => stage >= e.stage) || MAZE_TABLE[0];
+  return entry.sizes;
+}
