@@ -11,14 +11,14 @@ export default class UIScene extends Phaser.Scene {
     const { width, height } = this.scale.gameSize;
     this.cameras.main.setViewport((width - VIRTUAL_WIDTH * 2) / 2, (height - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
 
-    this.scoreText = this.add.text(12, 8, 'SCORE 000000', {
+    this.scoreText = this.add.text(12, 8, 'CHUNK 000000', {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#ffffff'
     });
 
     const gameScene = this.scene.get('GameScene');
-    gameScene.events.on('updateScore', this.updateScore, this);
+    gameScene.events.on('updateChunks', this.updateChunks, this);
 
 
     this.fpsText = this.add.text(420, 8, '', {
@@ -38,7 +38,7 @@ export default class UIScene extends Phaser.Scene {
     }
   }
 
-  updateScore(score) {
-    this.scoreText.setText('SCORE ' + score.toString().padStart(6, '0'));
+  updateChunks(count) {
+    this.scoreText.setText('CHUNK ' + count.toString().padStart(6, '0'));
   }
 }
