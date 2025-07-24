@@ -39,7 +39,6 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.on('progress', value => {
       this.progressText.setText(Math.floor(value * 100) + '%');
     });
-    };
 
     // Audio assets
     this.load.audio('hero_walk', 'assets/sounds/01_hero_walk.wav');
