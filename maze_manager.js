@@ -175,34 +175,24 @@ export default class MazeManager {
     const { size } = pickMazeConfig(progress + 1);
     const chunk = createChunk(this._nextSeed(), size, entryDir);
 
-    let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
-
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
     const doorWorldY = fromObj.offsetY + door.y * this.tileSize;
 
-    const entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
+    const placement = this._findPlacement(
+      fromObj,
+      chunk.size,
+      doorDir,
+      doorWorldX,
+      doorWorldY
+    );
 
-    // Adjust position so entrance never lands on a corner
-    if (doorDir === 'N' || doorDir === 'S') {
-      const minX = 1;
-      const maxX = chunk.size - 2;
-      let adjX = door.x;
-      if (adjX < minX) adjX = minX;
-      if (adjX > maxX) adjX = maxX;
-      if (adjX !== door.x) {
-        entrance.x = adjX;
-        offsetX = doorWorldX - adjX * this.tileSize;
-      }
+    let offsetX, offsetY, entrance;
+    if (placement) {
+      ({ offsetX, offsetY, entrance } = placement);
     } else {
-      const minY = 1;
-      const maxY = chunk.size - 2;
-      let adjY = door.y;
-      if (adjY < minY) adjY = minY;
-      if (adjY > maxY) adjY = maxY;
-      if (adjY !== door.y) {
-        entrance.y = adjY;
-        offsetY = doorWorldY - adjY * this.tileSize;
-      }
+      // fallback to simple direct placement
+      ({ offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir));
+      entrance = this._calcEntrance(doorDir, door.x, door.y, chunk.size);
     }
     chunk.tiles[entrance.y * chunk.size + entrance.x] = TILE.FLOOR;
     const inner = { x: entrance.x, y: entrance.y };
@@ -302,6 +292,55 @@ export default class MazeManager {
       default:
         return { x: 0, y: doorY };
     }
+  }
+
+  _canPlace(offsetX, offsetY, size, exclude) {
+    const tile = this.tileSize;
+    const w = size * tile;
+    const h = size * tile;
+    for (const obj of this.activeChunks) {
+      if (obj === exclude) continue;
+      const ow = obj.chunk.size * tile;
+      const oh = obj.chunk.size * tile;
+      if (
+        offsetX < obj.offsetX + ow - tile &&
+        offsetX + w - tile > obj.offsetX &&
+        offsetY < obj.offsetY + oh - tile &&
+        offsetY + h - tile > obj.offsetY
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  _findPlacement(fromObj, newSize, doorDir, doorWorldX, doorWorldY) {
+    const min = 1;
+    const max = newSize - 2;
+    for (let i = min; i <= max; i++) {
+      let entrance;
+      switch (doorDir) {
+        case 'N':
+          entrance = { x: i, y: newSize - 1 };
+          break;
+        case 'S':
+          entrance = { x: i, y: 0 };
+          break;
+        case 'W':
+          entrance = { x: newSize - 1, y: i };
+          break;
+        case 'E':
+        default:
+          entrance = { x: 0, y: i };
+          break;
+      }
+      const offsetX = doorWorldX - entrance.x * this.tileSize;
+      const offsetY = doorWorldY - entrance.y * this.tileSize;
+      if (this._canPlace(offsetX, offsetY, newSize, fromObj)) {
+        return { offsetX, offsetY, entrance };
+      }
+    }
+    return null;
   }
 
   _ensureEntrance(chunk) {
