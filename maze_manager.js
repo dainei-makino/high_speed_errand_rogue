@@ -292,7 +292,10 @@ export default class MazeManager {
         const total = Math.floor(Math.random() * 3) + 1; // 1-3 doors
         this._addMixedDoors(chunk, total);
       } else if (progress >= 9) {
-        if (Math.random() < 0.5) {
+        if (progress === 9) {
+          // Ensure an auto gate always appears on the 10th chunk
+          this._addAutoGate(chunk);
+        } else if (Math.random() < 0.5) {
           this._addSilverDoor(chunk);
         } else {
           this._addAutoGate(chunk);
