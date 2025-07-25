@@ -410,7 +410,20 @@ class GameScene extends Phaser.Scene {
       this.oxygenLine.lineStyle(2, 0xffffff, 1);
       this.oxygenLine.beginPath();
       this.oxygenLine.moveTo(cx, cy);
-      this.oxygenLine.quadraticBezierTo(midX, midY, hx, hy);
+      const segments = 16;
+      for (let i = 1; i <= segments; i++) {
+        const t = i / segments;
+        const inv = 1 - t;
+        const px =
+          inv * inv * cx +
+          2 * inv * t * midX +
+          t * t * hx;
+        const py =
+          inv * inv * cy +
+          2 * inv * t * midY +
+          t * t * hy;
+        this.oxygenLine.lineTo(px, py);
+      }
       this.oxygenLine.strokePath();
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
     }
