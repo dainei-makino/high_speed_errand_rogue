@@ -29,6 +29,8 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
+    this.oxygenLine = null;
+    this.oxygenConsole = null;
   }
 
   preload() {
@@ -74,7 +76,17 @@ class GameScene extends Phaser.Scene {
     this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    this.heroSprite.setDepth(10);
     this.worldLayer.add(this.heroSprite);
+
+    if (firstInfo.oxygenPosition) {
+      const size = this.mazeManager.tileSize;
+      const cx = firstInfo.offsetX + firstInfo.oxygenPosition.x * size + size / 2;
+      const cy = firstInfo.offsetY + firstInfo.oxygenPosition.y * size + size / 2;
+      this.oxygenConsole = { x: cx, y: cy };
+      this.oxygenLine = this.add.graphics();
+      this.worldLayer.add(this.oxygenLine);
+    }
 
     // Persistent key display above the hero
     this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
@@ -96,6 +108,29 @@ class GameScene extends Phaser.Scene {
       if (data.info && data.info.index === 1) {
         this.bgm.play();
         this.destroyIntroText();
+        if (this.oxygenLine) {
+          const hx = this.heroSprite.x;
+          const hy = this.heroSprite.y;
+          const cx = this.oxygenConsole.x;
+          const cy = this.oxygenConsole.y;
+          const steps = 5;
+          for (let i = 0; i < steps; i++) {
+            const px = cx + ((hx - cx) * i) / steps;
+            const py = cy + ((hy - cy) * i) / steps;
+            this.time.delayedCall(i * 40, () => {
+              evaporateArea(this, px - 4, py - 4, 8, 8, 0xffffff);
+            });
+          }
+          this.tweens.add({
+            targets: this.oxygenLine,
+            alpha: 0,
+            duration: 200,
+            onComplete: () => {
+              this.oxygenLine.destroy();
+              this.oxygenLine = null;
+            }
+          });
+        }
       }
     });
 
@@ -345,6 +380,20 @@ class GameScene extends Phaser.Scene {
     this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+
+    if (this.oxygenLine && this.oxygenConsole) {
+      const hx = this.heroSprite.x;
+      const hy = this.heroSprite.y;
+      const cx = this.oxygenConsole.x;
+      const cy = this.oxygenConsole.y;
+      this.oxygenLine.clear();
+      this.oxygenLine.lineStyle(2, 0xffffff, 1);
+      this.oxygenLine.beginPath();
+      this.oxygenLine.moveTo(cx, cy);
+      this.oxygenLine.lineTo(hx, hy);
+      this.oxygenLine.strokePath();
+      this.oxygenLine.setDepth(hy > cy ? 9 : 11);
+    }
 
     // Prevent camera drift by re-centering if needed
     this.cameraManager.maintainCenter();
