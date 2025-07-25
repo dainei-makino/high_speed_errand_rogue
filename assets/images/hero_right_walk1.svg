@@ -10,8 +10,7 @@
   <!-- Suit Torso -->
   <rect x="10" y="18" width="12" height="14" rx="3" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
   <!-- Suit Arms -->
-  <rect x="5" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
-  <rect x="22" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <rect x="16" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
   <!-- Suit Belt -->
   <rect x="10" y="26" width="12" height="3" fill="#c0c0c0"/>
   <!-- Legs -->
