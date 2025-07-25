@@ -85,7 +85,7 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+            sprite = this._createWallSprite(chunk, x, y);
             break;
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
@@ -151,6 +151,92 @@ export default class MazeManager {
         }
       }
     }
+  }
+
+  _wallMask(chunk, x, y) {
+    const size = chunk.size;
+    const tiles = chunk.tiles;
+    const isWall = (tx, ty) => {
+      if (tx < 0 || ty < 0 || tx >= size || ty >= size) return false;
+      return tiles[ty * size + tx] === TILE.WALL;
+    };
+    const n = isWall(x, y - 1);
+    const e = isWall(x + 1, y);
+    const s = isWall(x, y + 1);
+    const w = isWall(x - 1, y);
+    return (n ? 1 : 0) | (e ? 2 : 0) | (s ? 4 : 0) | (w ? 8 : 0);
+  }
+
+  _createWallSprite(chunk, x, y) {
+    const mask = this._wallMask(chunk, x, y);
+    let sprite = null;
+    let angle = 0;
+    switch (mask) {
+      case 15:
+        sprite = Characters.createStationWallCross(this.scene);
+        break;
+      case 7:
+        sprite = Characters.createStationWallT(this.scene);
+        angle = 0;
+        break;
+      case 11:
+        sprite = Characters.createStationWallT(this.scene);
+        angle = 270;
+        break;
+      case 13:
+        sprite = Characters.createStationWallT(this.scene);
+        angle = 180;
+        break;
+      case 14:
+        sprite = Characters.createStationWallT(this.scene);
+        angle = 90;
+        break;
+      case 5:
+        sprite = Characters.createStationWallStraight(this.scene);
+        angle = 0;
+        break;
+      case 10:
+        sprite = Characters.createStationWallStraight(this.scene);
+        angle = 90;
+        break;
+      case 3:
+        sprite = Characters.createStationWallCorner(this.scene);
+        angle = 0;
+        break;
+      case 6:
+        sprite = Characters.createStationWallCorner(this.scene);
+        angle = 90;
+        break;
+      case 12:
+        sprite = Characters.createStationWallCorner(this.scene);
+        angle = 180;
+        break;
+      case 9:
+        sprite = Characters.createStationWallCorner(this.scene);
+        angle = 270;
+        break;
+      case 1:
+        sprite = Characters.createStationWallEnd(this.scene);
+        angle = 0;
+        break;
+      case 2:
+        sprite = Characters.createStationWallEnd(this.scene);
+        angle = 90;
+        break;
+      case 4:
+        sprite = Characters.createStationWallEnd(this.scene);
+        angle = 180;
+        break;
+      case 8:
+        sprite = Characters.createStationWallEnd(this.scene);
+        angle = 270;
+        break;
+      default:
+        sprite = Characters.createStationWallCross(this.scene);
+        break;
+    }
+    sprite.angle = angle;
+    return sprite;
   }
 
   worldToTile(x, y) {

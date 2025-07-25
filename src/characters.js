@@ -2,6 +2,11 @@ const ASSET_PATH = 'assets/images/';
 const SPRITES = {
   floor: 'floor.svg',
   wall: 'wall.svg',
+  station_wall_end: 'station_wall_end.svg',
+  station_wall_straight: 'station_wall_straight.svg',
+  station_wall_corner: 'station_wall_corner.svg',
+  station_wall_t: 'station_wall_t.svg',
+  station_wall_cross: 'station_wall_cross.svg',
   exit: 'airlock_closed.svg',
   door_silver: 'airlock_silver.svg',
   door_silver_open: 'airlock_silver_open.svg',
@@ -72,6 +77,26 @@ function createFloor(scene) {
 
 function createWall(scene) {
   return scene.add.image(0, 0, 'wall').setOrigin(0);
+}
+
+function createStationWallEnd(scene) {
+  return scene.add.image(0, 0, 'station_wall_end').setOrigin(0);
+}
+
+function createStationWallStraight(scene) {
+  return scene.add.image(0, 0, 'station_wall_straight').setOrigin(0);
+}
+
+function createStationWallCorner(scene) {
+  return scene.add.image(0, 0, 'station_wall_corner').setOrigin(0);
+}
+
+function createStationWallT(scene) {
+  return scene.add.image(0, 0, 'station_wall_t').setOrigin(0);
+}
+
+function createStationWallCross(scene) {
+  return scene.add.image(0, 0, 'station_wall_cross').setOrigin(0);
 }
 
 function createExit(scene) {
@@ -147,6 +172,11 @@ export default {
   registerTextures,
   createFloor,
   createWall,
+  createStationWallEnd,
+  createStationWallStraight,
+  createStationWallCorner,
+  createStationWallT,
+  createStationWallCross,
   createExit,
   createSilverDoor,
   createSilverDoorOpen,
