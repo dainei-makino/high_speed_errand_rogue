@@ -203,7 +203,6 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
-              this.stopTrail();
               if (this.heroAnimationTimer) {
                 this.heroAnimationTimer.remove();
                 this.heroAnimationTimer = null;
@@ -213,6 +212,8 @@ class GameScene extends Phaser.Scene {
             }
           });
         }
+      } else {
+        this.stopTrail();
       }
     }
 
