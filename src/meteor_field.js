@@ -81,11 +81,12 @@ export default class MeteorField {
 
   update() {
     const shieldPos = this.shield.getWorldPosition();
-    const r2 = this.shield.radius * this.shield.radius;
+    const rx = this.shield.radiusX;
+    const ry = this.shield.radiusY;
     for (const m of [...this.active]) {
       const dx = m.x - shieldPos.x;
       const dy = m.y - shieldPos.y;
-      if (dx * dx + dy * dy <= r2) {
+      if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
         this.showExplosion(m.x, m.y);
         this.shield.flash();
         this.removeMeteor(m);
