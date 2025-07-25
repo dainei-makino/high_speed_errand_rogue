@@ -120,7 +120,7 @@ function createSpike(scene) {
 
 function createSleepPod(scene) {
   return scene.add.image(0, 0, 'sleep_pod').setOrigin(0);
-
+}
 function createMeteor(scene) {
   return scene.add.image(0, 0, 'meteor').setOrigin(0.5);
 }

@@ -2,5 +2,7 @@
   <path d="M5 0 H27 A5 5 0 0 1 32 5 V32 H0 V5 A5 5 0 0 1 5 0 Z" fill="#0E1B35"/>
   <path d="M0 32 V5 A5 5 0 0 1 5 0 H27" fill="none" stroke="#1A2F55" stroke-width="1"/>
   <path d="M32 5 V32 H0" fill="none" stroke="#23345C" stroke-width="1"/>
+  <path d="M6 6 H26 V26 H6 Z" fill="none" stroke="#23345C" stroke-width="0.5"/>
+  <path d="M16.0 6 V26" stroke="#1A2F55" stroke-width="0.5"/><path d="M6 16.0 H26" stroke="#1A2F55" stroke-width="0.5"/><path d="M6 6 L26 26" stroke="#23345C" stroke-width="0.5"/><path d="M26 6 L6 26" stroke="#23345C" stroke-width="0.5"/>
   <rect x="4" y="4" width="1" height="1" fill="#1C2E52"/> <rect x="12" y="4" width="1" height="1" fill="#1C2E52"/> <rect x="20" y="4" width="1" height="1" fill="#1C2E52"/> <rect x="28" y="4" width="1" height="1" fill="#1C2E52"/> <rect x="4" y="12" width="1" height="1" fill="#1C2E52"/> <rect x="12" y="12" width="1" height="1" fill="#1C2E52"/> <rect x="20" y="12" width="1" height="1" fill="#1C2E52"/> <rect x="28" y="12" width="1" height="1" fill="#1C2E52"/> <rect x="4" y="20" width="1" height="1" fill="#1C2E52"/> <rect x="12" y="20" width="1" height="1" fill="#1C2E52"/> <rect x="20" y="20" width="1" height="1" fill="#1C2E52"/> <rect x="28" y="20" width="1" height="1" fill="#1C2E52"/> <rect x="4" y="28" width="1" height="1" fill="#1C2E52"/> <rect x="12" y="28" width="1" height="1" fill="#1C2E52"/> <rect x="20" y="28" width="1" height="1" fill="#1C2E52"/> <rect x="28" y="28" width="1" height="1" fill="#1C2E52"/>
 </svg>
