@@ -113,10 +113,24 @@ class GameScene extends Phaser.Scene {
           const hy = this.heroSprite.y;
           const cx = this.oxygenConsole.x;
           const cy = this.oxygenConsole.y;
+          const dx = hx - cx;
+          const dy = hy - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const sag = Math.min(this.mazeManager.tileSize, dist / 4);
+          const midX = (hx + cx) / 2;
+          const midY = Math.max(hy, cy) + sag;
           const steps = 5;
           for (let i = 0; i < steps; i++) {
-            const px = cx + ((hx - cx) * i) / steps;
-            const py = cy + ((hy - cy) * i) / steps;
+            const t = i / steps;
+            const inv = 1 - t;
+            const px =
+              inv * inv * cx +
+              2 * inv * t * midX +
+              t * t * hx;
+            const py =
+              inv * inv * cy +
+              2 * inv * t * midY +
+              t * t * hy;
             this.time.delayedCall(i * 40, () => {
               evaporateArea(this, px - 4, py - 4, 8, 8, 0xffffff);
             });
@@ -386,11 +400,17 @@ class GameScene extends Phaser.Scene {
       const hy = this.heroSprite.y;
       const cx = this.oxygenConsole.x;
       const cy = this.oxygenConsole.y;
+      const dx = hx - cx;
+      const dy = hy - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const sag = Math.min(this.mazeManager.tileSize, dist / 4);
+      const midX = (hx + cx) / 2;
+      const midY = Math.max(hy, cy) + sag;
       this.oxygenLine.clear();
       this.oxygenLine.lineStyle(2, 0xffffff, 1);
       this.oxygenLine.beginPath();
       this.oxygenLine.moveTo(cx, cy);
-      this.oxygenLine.lineTo(hx, hy);
+      this.oxygenLine.quadraticBezierTo(midX, midY, hx, hy);
       this.oxygenLine.strokePath();
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
     }
