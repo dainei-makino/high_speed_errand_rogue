@@ -358,8 +358,11 @@ class GameScene extends Phaser.Scene {
 
   setupIntro() {
     const ui = this.scene.get('UIScene');
-    if (ui && ui.showIntroText) {
+    if (!ui) return;
+    if (this.scene.isActive('UIScene')) {
       ui.showIntroText();
+    } else {
+      ui.events.once('create', () => ui.showIntroText());
     }
   }
 

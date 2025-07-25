@@ -124,7 +124,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   showIntroText() {
-    const offset = 100;
+    const offset = 70;
     const topY = offset;
     const bottomY = VIRTUAL_HEIGHT * 2 - offset;
     this.introLetters = [
