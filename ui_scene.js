@@ -1,7 +1,12 @@
 import { evaporateArea } from './effects.js';
+import Characters from './characters.js';
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
+const GAUGE_CENTER_X = VIRTUAL_WIDTH * 2 - 120;
+const GAUGE_CENTER_Y = VIRTUAL_HEIGHT * 2 - 120;
+const GAUGE_RADIUS = 90;
+const GAUGE_THICKNESS = 32;
 
 export default class UIScene extends Phaser.Scene {
   constructor() {
@@ -24,11 +29,13 @@ export default class UIScene extends Phaser.Scene {
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
+    gameScene.events.on('updateKeys', this.updateKeys, this);
 
     this.shutdownHandler = () => {
       this.scale.off('resize', this.resizeHandler);
       gameScene.events.off('updateChunks', this.updateChunks, this);
       gameScene.events.off('updateOxygen', this.updateOxygen, this);
+      gameScene.events.off('updateKeys', this.updateKeys, this);
     };
     this.events.once('shutdown', this.shutdownHandler);
 
@@ -38,6 +45,16 @@ export default class UIScene extends Phaser.Scene {
       fontSize: '19px',
       color: '#ffffff'
     }).setOrigin(0.5);
+
+    const innerRadius = GAUGE_RADIUS - GAUGE_THICKNESS / 2 - 4;
+    this.keyContainer = this.add.container(GAUGE_CENTER_X, GAUGE_CENTER_Y);
+    this.keyCircle = this.add.circle(0, 0, innerRadius, 0xffffff).setOrigin(0.5);
+    this.keyImage = Characters.createKey(this);
+    this.keyImage.setOrigin(0.5);
+    this.keyImage.setDisplaySize(innerRadius * 1.5, innerRadius * 1.5);
+    this.keyContainer.add([this.keyCircle, this.keyImage]);
+    this.keyContainer.setDepth(5);
+    this.keyContainer.setVisible(false);
 
     this.updateOxygen(1);
 
@@ -69,14 +86,23 @@ export default class UIScene extends Phaser.Scene {
     this.chunkText.setText('CHUNK ' + count.toString());
   }
 
+  updateKeys(count) {
+    if (!this.keyContainer) return;
+    this.keyContainer.setVisible(count > 0);
+  }
+
   updateOxygen(ratio) {
-    const centerX = VIRTUAL_WIDTH * 2 - 120;
-    const centerY = VIRTUAL_HEIGHT * 2 - 120;
-    const radius = 90;
-    const thickness = 32;
+    const centerX = GAUGE_CENTER_X;
+    const centerY = GAUGE_CENTER_Y;
+    const radius = GAUGE_RADIUS;
+    const thickness = GAUGE_THICKNESS;
     const start = Phaser.Math.DegToRad(-90);
 
     this.o2Label.setPosition(centerX, centerY - radius - 36);
+
+    if (this.keyContainer) {
+      this.keyContainer.setPosition(centerX, centerY);
+    }
 
     this.oxygenGfx.clear();
     this.oxygenGfx.lineStyle(thickness, 0x333333, 0.5);
