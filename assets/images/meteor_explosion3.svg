@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <radialGradient id="boom3" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff5cc"/>
+      <stop offset="100%" stop-color="#ff0000"/>
+    </radialGradient>
+  </defs>
+  <polygon points="16,0 22,10 32,10 24,18 28,32 16,24 4,32 8,18 0,10 10,10" fill="url(#boom3)" stroke="#b14a00" stroke-width="1"/>
+</svg>
