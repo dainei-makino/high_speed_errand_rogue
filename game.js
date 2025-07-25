@@ -365,7 +365,7 @@ class GameScene extends Phaser.Scene {
     const bottomY =
       firstInfo.offsetY + firstInfo.chunk.size * size - size + offset;
     this.introLetters = [
-      ...this.createFloatingText('HIGH SPEED MAZE RUNNER', center.x, topY),
+      ...this.createFloatingText('BREATHLESS', center.x, topY),
       ...this.createFloatingText('MOVE TO WASD KEY', center.x, bottomY)
     ];
   }
