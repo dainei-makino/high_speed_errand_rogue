@@ -26,7 +26,9 @@ async function loadAll() {
       img.onload = resolve;
       img.onerror = resolve;
     });
-    img.src = 'data:image/svg+xml;base64,' + btoa(svgText);
+    // btoa only supports Latin1; handle UTF-8 characters like O₂
+    const encoded = btoa(unescape(encodeURIComponent(svgText)));
+    img.src = 'data:image/svg+xml;base64,' + encoded;
     await loaded;
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
