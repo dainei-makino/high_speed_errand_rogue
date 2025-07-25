@@ -55,7 +55,7 @@ class GameScene extends Phaser.Scene {
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.starField = new StarField(this);
     this.shield = new Shield(this);
-    this.meteorField = new MeteorField(this, this.shield);
+    this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 40);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
@@ -139,6 +139,7 @@ class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-M', () => {
       gameState.incrementMazeCount();
       this.events.emit('updateChunks', gameState.clearedMazes);
+      this.checkMeteorFieldActivation();
     });
 
     this.input.keyboard.on('keydown-Q', () => {
@@ -148,6 +149,8 @@ class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-E', () => {
       this.cameraManager.setZoom(Math.max(this.cameraManager.cam.zoom - 0.1, 0.5), 100);
     });
+
+    this.checkMeteorFieldActivation();
   }
 
   sortWorldObjects() {
@@ -335,6 +338,7 @@ class GameScene extends Phaser.Scene {
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
+          this.checkMeteorFieldActivation();
           if (MIDPOINTS.includes(gameState.clearedMazes)) {
             this.sound.play('midpoint');
             if (this.bgm) {
@@ -418,6 +422,17 @@ class GameScene extends Phaser.Scene {
         }
       }
     });
+  }
+
+  checkMeteorFieldActivation() {
+    if (
+      this.meteorField &&
+      this.meteorField.spawnTimer &&
+      this.meteorField.spawnTimer.paused &&
+      gameState.clearedMazes >= 40
+    ) {
+      this.meteorField.start();
+    }
   }
 
   handleGameOver() {

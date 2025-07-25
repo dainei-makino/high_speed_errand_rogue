@@ -1,5 +1,5 @@
 export default class MeteorField {
-  constructor(scene, shield) {
+  constructor(scene, shield, active = true) {
     this.scene = scene;
     this.shield = shield;
     this.container = scene.add.container(0, 0);
@@ -13,6 +13,15 @@ export default class MeteorField {
         this.spawnTimer.delay = Phaser.Math.Between(5000, 10000);
       }
     });
+    this.spawnTimer.paused = !active;
+  }
+
+  start() {
+    if (this.spawnTimer) this.spawnTimer.paused = false;
+  }
+
+  stop() {
+    if (this.spawnTimer) this.spawnTimer.paused = true;
   }
 
   getEdgePos(edge, width, height, margin) {
