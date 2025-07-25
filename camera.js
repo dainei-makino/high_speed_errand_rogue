@@ -3,6 +3,8 @@ export default class CameraManager {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.cam = scene.cameras.main;
+    // Start a bit closer to make the maze appear larger
+    this.cam.setZoom(2);
     this.bounds = { minX: -1000, minY: -1000, maxX: 9000, maxY: 9000 };
     this.cam.setBounds(
       this.bounds.minX,
