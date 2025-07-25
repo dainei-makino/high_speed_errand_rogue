@@ -128,7 +128,7 @@ class GameScene extends Phaser.Scene {
   update() {
     const delta = this.game.loop.delta;
 
-    if (!this.isMoving) {
+    if (!this.isMoving && !this.isGameOver) {
       const entry = this.inputBuffer.consume();
       if (entry) {
         const size = this.mazeManager.tileSize;
@@ -342,6 +342,14 @@ class GameScene extends Phaser.Scene {
       this.bgm.stop();
     }
     this.sound.stopAll();
+    this.sound.play('game_over');
+
+    this.tweens.killTweensOf(this.heroSprite);
+    if (this.heroAnimationTimer) {
+      this.heroAnimationTimer.remove();
+      this.heroAnimationTimer = null;
+    }
+    this.isMoving = false;
 
     const size = this.mazeManager.tileSize;
     const evaporate = () => {
@@ -351,7 +359,7 @@ class GameScene extends Phaser.Scene {
         this.heroSprite.y - size,
         size,
         size * 2,
-        0xffffff
+        0x000000
       );
     };
     evaporate();
@@ -361,17 +369,14 @@ class GameScene extends Phaser.Scene {
       callback: evaporate
     });
 
-    this.tweens.add({
-      targets: this.heroSprite,
-      alpha: 0,
-      duration: 2000,
-      onComplete: () => {
-        evapTimer.remove();
-        this.heroSprite.destroy();
-        this.scene.launch('GameOverScene');
-        this.scene.bringToTop('GameOverScene');
-        this.scene.pause();
-      }
+    this.heroSprite.setVisible(false);
+
+    this.time.delayedCall(2000, () => {
+      evapTimer.remove();
+      this.heroSprite.destroy();
+      this.scene.launch('GameOverScene');
+      this.scene.bringToTop('GameOverScene');
+      this.scene.pause();
     });
   }
 
