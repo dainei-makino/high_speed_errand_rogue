@@ -202,7 +202,6 @@ export default class MazeManager {
         this.activeChunks = this.activeChunks.filter(c => c !== obj);
         continue;
       }
-      }
     }
   }
 
