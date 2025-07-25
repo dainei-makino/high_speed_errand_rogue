@@ -56,6 +56,7 @@ export default class LoadingScene extends Phaser.Scene {
       // Launch the main scenes behind the loading overlay
       this.scene.launch('GameScene');
       this.scene.launch('UIScene');
+      // Keep loading overlay on top while launching scenes
       this.scene.bringToTop();
 
       // Short delay to ensure GameScene is ready before removing overlay
@@ -90,6 +91,8 @@ export default class LoadingScene extends Phaser.Scene {
         onComplete: () => {
           this.mask.destroy();
           this.scene.stop();
+          // Ensure HUD is visible above the game once loading ends
+          this.scene.bringToTop('UIScene');
         }
       });
     });
