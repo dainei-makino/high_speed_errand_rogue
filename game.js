@@ -237,6 +237,7 @@ class GameScene extends Phaser.Scene {
 
       if (curTile.cell === TILE.OXYGEN && curTile.chunk.chunk.airTank && !curTile.chunk.chunk.airTank.collected) {
         this.mazeManager.removeAirTank(curTile.chunk);
+        this.sound.play('pick_up');
         this.hero.oxygen = Math.min(this.hero.oxygen + 5, this.hero.maxOxygen);
         this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
       }
