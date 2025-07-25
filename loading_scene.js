@@ -48,6 +48,7 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.audio('chunk_generate_2', 'assets/sounds/05_chunk_generate_02.wav');
     this.load.audio('midpoint', 'assets/sounds/06_midpoint.wav');
     this.load.audio('game_over', 'assets/sounds/07_game_over.wav');
+    this.load.audio('bgm', 'assets/sounds/music_ambience.wav');
   }
 
   create() {
@@ -101,7 +102,8 @@ export default class LoadingScene extends Phaser.Scene {
       'chunk_generate_1',
       'chunk_generate_2',
       'midpoint',
-      'game_over'
+      'game_over',
+      'bgm'
     ];
 
     // Decode each audio asset before starting the game
