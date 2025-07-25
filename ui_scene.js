@@ -22,6 +22,13 @@ export default class UIScene extends Phaser.Scene {
     gameScene.events.on('updateChunks', this.updateChunks, this);
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
 
+    this.shutdownHandler = () => {
+      this.scale.off('resize', this.resizeHandler);
+      gameScene.events.off('updateChunks', this.updateChunks, this);
+      gameScene.events.off('updateOxygen', this.updateOxygen, this);
+    };
+    this.events.once('shutdown', this.shutdownHandler);
+
     this.oxygenGfx = this.add.graphics();
     this.o2Label = this.add.text(0, 0, 'O2 Timer', {
       fontFamily: 'monospace',
@@ -38,9 +45,11 @@ export default class UIScene extends Phaser.Scene {
       color: '#ffffff'
     }).setVisible(false);
 
-    this.scale.on('resize', (gw, gh) => {
+    this.resizeHandler = (gw, gh) => {
+      if (!this.cameras || !this.cameras.main) return;
       this.cameras.main.setViewport((gw - VIRTUAL_WIDTH * 2) / 2, (gh - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
-    });
+    };
+    this.scale.on('resize', this.resizeHandler);
   }
 
   update() {
@@ -50,7 +59,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   updateChunks(count) {
-    // Right pad with spaces to keep label position stable
+    if (!this.chunkText || !this.chunkText.setText) return;
     this.chunkText.setText('CHUNK ' + count.toString());
   }
 
