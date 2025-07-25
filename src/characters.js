@@ -1,7 +1,6 @@
 const ASSET_PATH = 'assets/images/';
 const SPRITES = {
   floor: 'floor.svg',
-  wall: 'wall.svg',
   exit: 'airlock_closed.svg',
   door_silver: 'airlock_silver.svg',
   door_silver_open: 'airlock_silver_open.svg',
@@ -29,7 +28,12 @@ const SPRITES = {
   meteor: 'meteor.svg',
   meteor_explosion1: 'meteor_explosion1.svg',
   meteor_explosion2: 'meteor_explosion2.svg',
-  meteor_explosion3: 'meteor_explosion3.svg'
+  meteor_explosion3: 'meteor_explosion3.svg',
+  station_wall_end: 'station_wall_end.svg',
+  station_wall_straight: 'station_wall_straight.svg',
+  station_wall_corner: 'station_wall_corner.svg',
+  station_wall_t: 'station_wall_t.svg',
+  station_wall_cross: 'station_wall_cross.svg'
 };
 
 const canvases = {};
@@ -71,7 +75,11 @@ function createFloor(scene) {
 }
 
 function createWall(scene) {
-  return scene.add.image(0, 0, 'wall').setOrigin(0);
+  return scene.add.image(0, 0, 'station_wall_straight').setOrigin(0);
+}
+
+function createStationWall(scene, key) {
+  return scene.add.image(0, 0, key).setOrigin(0);
 }
 
 function createExit(scene) {
@@ -157,6 +165,7 @@ export default {
   createAirTank,
   createOxygenConsole,
   createSpike,
+  createStationWall,
   createSleepPod,
   createMeteor,
   createMeteorExplosion,

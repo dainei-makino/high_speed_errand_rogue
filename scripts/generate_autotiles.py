@@ -14,10 +14,10 @@ TILES = {
     'station_wall_cross.svg': (0, 0, 0, 0),
 }
 
-highlight_color = '#1A2F55'
-shadow_color = '#23345C'
-base_color = '#0E1B35'
-rivet_color = '#1C2E52'
+highlight_color = '#2a4776'
+shadow_color = '#385a7c'
+base_color = '#18294B'
+rivet_color = '#2d4870'
 
 os.makedirs('assets/images', exist_ok=True)
 

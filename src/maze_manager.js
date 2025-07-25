@@ -83,9 +83,12 @@ export default class MazeManager {
 
         let sprite = null;
         switch (tile) {
-          case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+          case TILE.WALL: {
+            const { sprite: s, angle } = this._createWallSprite(chunk, x, y);
+            sprite = s;
+            sprite.setAngle(angle);
             break;
+          }
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
             info.oxygenSprite = sprite;
@@ -574,6 +577,52 @@ export default class MazeManager {
       }
     }
     chunk.spikes = spikes;
+  }
+
+  _createWallSprite(chunk, x, y) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const n = y > 0 && t[(y - 1) * size + x] === TILE.WALL;
+    const s = y < size - 1 && t[(y + 1) * size + x] === TILE.WALL;
+    const e = x < size - 1 && t[y * size + (x + 1)] === TILE.WALL;
+    const w = x > 0 && t[y * size + (x - 1)] === TILE.WALL;
+
+    const count = (n ? 1 : 0) + (e ? 1 : 0) + (s ? 1 : 0) + (w ? 1 : 0);
+    let tex = 'station_wall_cross';
+    let angle = 0;
+
+    if (count === 4) {
+      tex = 'station_wall_cross';
+    } else if (count === 3) {
+      tex = 'station_wall_t';
+      if (!n) angle = 180;
+      else if (!e) angle = 90;
+      else if (!s) angle = 0;
+      else if (!w) angle = -90;
+    } else if (count === 2) {
+      if (n && s) {
+        tex = 'station_wall_straight';
+        angle = 0;
+      } else if (e && w) {
+        tex = 'station_wall_straight';
+        angle = 90;
+      } else {
+        tex = 'station_wall_corner';
+        if (n && w) angle = 0;
+        else if (n && e) angle = -90;
+        else if (s && e) angle = 180;
+        else if (s && w) angle = 90;
+      }
+    } else if (count === 1) {
+      tex = 'station_wall_end';
+      if (n) angle = 0;
+      else if (e) angle = -90;
+      else if (s) angle = 180;
+      else if (w) angle = 90;
+    }
+
+    const sprite = Characters.createStationWall(this.scene, tex);
+    return { sprite, angle };
   }
 
   openDoor(info) {
