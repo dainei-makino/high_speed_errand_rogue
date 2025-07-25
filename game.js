@@ -142,7 +142,10 @@ class GameScene extends Phaser.Scene {
           const blocked = tileInfo && (
             tileInfo.cell === TILE.WALL ||
             (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited)
+            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+            (tileInfo.cell === TILE.AUTO_GATE &&
+              tileInfo.chunk.chunk.autoGates &&
+              tileInfo.chunk.chunk.autoGates.find(g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed))
           );
           return { blocked, targetX, targetY };
         };
