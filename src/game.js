@@ -270,6 +270,7 @@ class GameScene extends Phaser.Scene {
           onComplete: () => icon.destroy()
         });
         this.events.emit('updateKeys', this.hero.keys);
+        this.updateKeyDisplay();
       }
 
       if (
@@ -355,6 +356,7 @@ class GameScene extends Phaser.Scene {
           }
           this.events.emit('updateChunks', gameState.clearedMazes);
           this.events.emit('updateKeys', this.hero.keys);
+          this.updateKeyDisplay();
           const nextInfo = this.mazeManager.spawnNext(
             gameState.clearedMazes,
             curTile.chunk,
@@ -380,6 +382,14 @@ class GameScene extends Phaser.Scene {
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
 
+    if (this.keyDisplay) {
+      this.keyDisplay.setPosition(
+        this.heroSprite.x - 10,
+        this.heroSprite.y - this.mazeManager.tileSize
+      );
+      this.keyDisplay.setDepth(this.heroSprite.depth + 1);
+    }
+
     if (this.oxygenLine && this.oxygenConsole) {
       const hx = this.heroSprite.x;
       const hy = this.heroSprite.y;
@@ -402,7 +412,9 @@ class GameScene extends Phaser.Scene {
   }
 
   updateKeyDisplay() {
-    // Deprecated: key display is now handled by UIScene
+    if (!this.keyDisplay || !this.keyIcon || !this.keyCountText) return;
+    this.keyCountText.setText(this.hero.keys.toString());
+    this.keyDisplay.setVisible(this.hero.keys > 0);
   }
 
   startOxygenTimer() {
