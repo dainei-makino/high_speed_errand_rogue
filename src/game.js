@@ -429,13 +429,13 @@ class GameScene extends Phaser.Scene {
     evaporate();
     const evapTimer = this.time.addEvent({
       delay: 100,
-      repeat: 7,
+      repeat: 5,
       callback: evaporate
     });
 
     this.heroSprite.setVisible(false);
 
-    this.time.delayedCall(1200, () => {
+    this.time.delayedCall(1000, () => {
       evapTimer.remove();
       this.heroSprite.destroy();
       this.scene.launch('GameOverScene');
