@@ -9,6 +9,7 @@ const SPRITES = {
   auto_gate_closed: 'auto_gate_closed.svg',
   door_open: 'airlock_open.svg',
   treasure: 'treasure.svg',
+  sleep_pod: 'sleep_pod.svg',
   hero_plain: 'hero_plain.svg',
   hero_idle: 'hero.svg',
   hero_walk1: 'hero_walk1.svg',
@@ -113,6 +114,10 @@ function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
 
+function createSleepPod(scene) {
+  return scene.add.image(0, 0, 'sleep_pod').setOrigin(0);
+}
+
 function createHero(scene) {
   return scene.add.image(0, 0, 'hero_idle').setOrigin(0.5);
 }
@@ -141,6 +146,7 @@ export default {
   createAirTank,
   createOxygenConsole,
   createSpike,
+  createSleepPod,
   createHero,
   createHeroPlain,
   createArrow
