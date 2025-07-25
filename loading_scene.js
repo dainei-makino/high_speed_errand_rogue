@@ -95,29 +95,7 @@ export default class LoadingScene extends Phaser.Scene {
     });
     };
 
-    const audioKeys = [
-      'hero_walk',
-      'door_open',
-      'chest_open',
-      'chunk_generate_1',
-      'chunk_generate_2',
-      'midpoint',
-      'game_over',
-      'bgm'
-    ];
-
-    // Decode each audio asset before starting the game
-    const decodePromises = audioKeys.map(key => {
-      const audioData = this.cache.audio.get(key);
-      if (audioData) {
-        const buffer = audioData.data || audioData;
-        return this.sound.decodeAudio(key, buffer);
-      }
-      return Promise.resolve();
-    });
-
-    Promise.all(decodePromises)
-      .catch(() => {})
-      .finally(startGame);
+    // Assets are already loaded by this point, so just start the game.
+    startGame();
   }
 }

@@ -424,13 +424,14 @@ export default class MazeManager {
 
   removeAirTank(info) {
     if (info && info.airTankSprite) {
+      const sprite = info.airTankSprite;
+      info.airTankSprite = null;
       this.scene.tweens.add({
-        targets: info.airTankSprite,
+        targets: sprite,
         alpha: 0,
         duration: 200,
         onComplete: () => {
-          info.airTankSprite.destroy();
-          info.airTankSprite = null;
+          sprite.destroy();
           if (info.chunk.airTank) {
             const { x, y } = info.chunk.airTank;
             const idx = y * info.chunk.size + x;
