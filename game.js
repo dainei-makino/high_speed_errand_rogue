@@ -101,8 +101,7 @@ class GameScene extends Phaser.Scene {
     this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D');
     this.inputBuffer = new InputBuffer(this);
 
-    this.scene.launch('UIScene');
-    this.scene.bringToTop('UIScene');
+    // UIScene is launched from LoadingScene and stays on top
     this.events.emit('updateChunks', gameState.clearedMazes);
     this.events.emit('updateKeys', this.hero.keys);
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
