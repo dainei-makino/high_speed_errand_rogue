@@ -382,6 +382,14 @@ class GameScene extends Phaser.Scene {
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
 
+    if (this.keyDisplay) {
+      this.keyDisplay.setPosition(
+        this.heroSprite.x - 10,
+        this.heroSprite.y - this.mazeManager.tileSize
+      );
+      this.keyDisplay.setDepth(this.heroSprite.depth + 1);
+    }
+
     if (this.oxygenLine && this.oxygenConsole) {
       const hx = this.heroSprite.x;
       const hy = this.heroSprite.y;
