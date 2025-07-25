@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <linearGradient id="laserWallBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4f708e"/>
+      <stop offset="100%" stop-color="#2f4456"/>
+    </linearGradient>
+    <linearGradient id="laserBeam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff5555"/>
+      <stop offset="100%" stop-color="#ff0000"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" fill="url(#laserWallBase)"/>
+  <rect x="0" y="8" width="32" height="2" fill="url(#laserBeam)"/>
+  <rect x="0" y="16" width="32" height="2" fill="url(#laserBeam)"/>
+  <rect x="0" y="24" width="32" height="2" fill="url(#laserBeam)"/>
+  <rect width="32" height="32" fill="none" stroke="#869ab3" stroke-width="1"/>
+</svg>
