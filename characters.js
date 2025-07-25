@@ -5,6 +5,8 @@ const SPRITES = {
   exit: 'airlock_closed.svg',
   door_silver: 'airlock_silver.svg',
   door_silver_open: 'airlock_silver_open.svg',
+  auto_gate_open: 'auto_gate_open.svg',
+  auto_gate_closed: 'auto_gate_closed.svg',
   door_open: 'airlock_open.svg',
   treasure: 'treasure.svg',
   hero_idle: 'hero.svg',
@@ -78,6 +80,14 @@ function createSilverDoorOpen(scene) {
   return scene.add.image(0, 0, 'door_silver_open').setOrigin(0);
 }
 
+function createAutoGateOpen(scene) {
+  return scene.add.image(0, 0, 'auto_gate_open').setOrigin(0);
+}
+
+function createAutoGateClosed(scene) {
+  return scene.add.image(0, 0, 'auto_gate_closed').setOrigin(0);
+}
+
 function createDoorOpen(scene) {
   return scene.add.image(0, 0, 'door_open').setOrigin(0);
 }
@@ -118,6 +128,8 @@ export default {
   createExit,
   createSilverDoor,
   createSilverDoorOpen,
+  createAutoGateOpen,
+  createAutoGateClosed,
   createDoorOpen,
   createTreasure,
   createKey,

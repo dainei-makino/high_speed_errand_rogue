@@ -68,6 +68,7 @@ export default class MazeManager {
       oxygenSprite: null,
       oxygenPosition: null,
       silverDoors: [],
+      autoGates: []
       spikeSprites: []
     };
     this.renderChunk(chunk, container, info);
@@ -109,6 +110,16 @@ export default class MazeManager {
               if (d) {
                 d.sprite = sprite;
                 info.silverDoors.push(d);
+              }
+            }
+            break;
+          case TILE.AUTO_GATE:
+            sprite = Characters.createAutoGateOpen(this.scene);
+            if (chunk.autoGates) {
+              const g = chunk.autoGates.find(v => v.x === x && v.y === y);
+              if (g) {
+                g.sprite = sprite;
+                info.autoGates.push(g);
               }
             }
             break;
@@ -171,6 +182,22 @@ export default class MazeManager {
     const heroIdx = heroTile ? heroTile.chunk.index : -1;
     for (const obj of [...this.activeChunks]) {
       obj.age += delta;
+      if (obj.autoGates && obj.autoGates.length) {
+        const hx = heroTile && heroTile.chunk === obj ? heroTile.tx : -1;
+        const hy = heroTile && heroTile.chunk === obj ? heroTile.ty : -1;
+        for (const gate of obj.autoGates) {
+          if (gate.closed) continue;
+          if (!gate.passed && gate.x === hx && gate.y === hy) {
+            gate.passed = true;
+          } else if (gate.passed && (gate.x !== hx || gate.y !== hy)) {
+            gate.closed = true;
+            if (gate.sprite) {
+              gate.sprite.setTexture('auto_gate_closed');
+            }
+            this.scene.sound.play('door_open');
+          }
+        }
+      }
       if (heroIdx >= obj.index + 2 && !obj.fading) {
         if (this.isHeroInside(hero, obj)) {
           this.scene.handleGameOver();
@@ -281,7 +308,21 @@ export default class MazeManager {
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
     if (progress >= 1) {
-      this._addSilverDoor(chunk);
+      if (progress >= 19) {
+        const total = Math.floor(Math.random() * 3) + 1; // 1-3 doors
+        this._addMixedDoors(chunk, total);
+      } else if (progress >= 10) {
+        if (progress === 10) {
+          // Ensure an auto gate always appears on the 11th chunk
+          this._addAutoGate(chunk);
+        } else if (Math.random() < 0.5) {
+          this._addSilverDoor(chunk);
+        } else {
+          this._addAutoGate(chunk);
+        }
+      } else {
+        this._addSilverDoor(chunk);
+      }
       this._addAirTank(chunk);
     }
     if (progress >= 2) {
@@ -399,7 +440,7 @@ export default class MazeManager {
     }
   }
 
-  _addSilverDoor(chunk) {
+  _getDoorCandidates(chunk) {
     const candidates = [];
     const size = chunk.size;
     const t = chunk.tiles;
@@ -417,10 +458,20 @@ export default class MazeManager {
         }
       }
     }
+    return candidates;
+  }
+
+  _addSilverDoor(chunk, count) {
+    const size = chunk.size;
+    const candidates = this._getDoorCandidates(chunk);
     const doors = [];
     if (candidates.length) {
       const doorCount =
-        size >= 11 && Math.random() < 0.5 ? 2 : 1;
+        typeof count === 'number'
+          ? Math.min(count, candidates.length)
+          : size >= 11 && Math.random() < 0.5
+            ? 2
+            : 1;
       for (let i = 0; i < doorCount && candidates.length; i++) {
         const idx = Math.floor(Math.random() * candidates.length);
         const spot = candidates.splice(idx, 1)[0];
@@ -429,6 +480,48 @@ export default class MazeManager {
       }
     }
     chunk.silverDoors = doors;
+  }
+
+  _addAutoGate(chunk, count) {
+    const size = chunk.size;
+    const candidates = this._getDoorCandidates(chunk);
+    const gates = [];
+    if (candidates.length) {
+      const gateCount =
+        typeof count === 'number'
+          ? Math.min(count, candidates.length)
+          : size >= 11 && Math.random() < 0.5
+            ? 2
+            : 1;
+      for (let i = 0; i < gateCount && candidates.length; i++) {
+        const idx = Math.floor(Math.random() * candidates.length);
+        const spot = candidates.splice(idx, 1)[0];
+        chunk.tiles[spot.y * size + spot.x] = TILE.AUTO_GATE;
+        gates.push({ x: spot.x, y: spot.y, closed: false, passed: false });
+      }
+    }
+    chunk.autoGates = gates;
+  }
+
+  _addMixedDoors(chunk, totalCount) {
+    const size = chunk.size;
+    const candidates = this._getDoorCandidates(chunk);
+    const doors = [];
+    const gates = [];
+    const count = Math.min(totalCount, candidates.length);
+    for (let i = 0; i < count; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
+      if (Math.random() < 0.5) {
+        chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
+        doors.push({ x: spot.x, y: spot.y, opened: false });
+      } else {
+        chunk.tiles[spot.y * size + spot.x] = TILE.AUTO_GATE;
+        gates.push({ x: spot.x, y: spot.y, closed: false, passed: false });
+      }
+    }
+    chunk.silverDoors = doors;
+    chunk.autoGates = gates;
   }
 
   _addAirTank(chunk) {

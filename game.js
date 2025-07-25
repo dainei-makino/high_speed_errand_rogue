@@ -193,7 +193,10 @@ class GameScene extends Phaser.Scene {
           const blocked = tileInfo && (
             tileInfo.cell === TILE.WALL ||
             (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited)
+            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+            (tileInfo.cell === TILE.AUTO_GATE &&
+              tileInfo.chunk.chunk.autoGates &&
+              tileInfo.chunk.chunk.autoGates.find(g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed))
           );
           return { blocked, targetX, targetY };
         };
@@ -271,7 +274,6 @@ class GameScene extends Phaser.Scene {
         this.sound.play('chest_open');
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
-        this.updateKeyDisplay();
         const icon = Characters.createKey(this);
         icon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
         icon.setPosition(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
@@ -316,6 +318,8 @@ class GameScene extends Phaser.Scene {
           this.lastSpikeTile.y === curTile.ty;
         if (hit && !sameTile) {
           this.cameras.main.flash(100, 0, 0, 0);
+          this.cameraManager.shakeSmall();
+          this.sound.play('spike_damage');
           this.hero.oxygen = Math.max(this.hero.oxygen - 1, 0);
           this.events.emit(
             'updateOxygen',
@@ -349,7 +353,6 @@ class GameScene extends Phaser.Scene {
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
         if (this.hero.useKey()) {
-          this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
@@ -390,8 +393,6 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    this.keyDisplay.x = this.heroSprite.x - 10;
-    this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
 
@@ -433,18 +434,7 @@ class GameScene extends Phaser.Scene {
   }
 
   updateKeyDisplay() {
-    const count = this.hero.keys;
-    if (count <= 0) {
-      this.keyDisplay.setVisible(false);
-    } else {
-      this.keyDisplay.setVisible(true);
-      if (count === 1) {
-        this.keyCountText.setVisible(false);
-      } else {
-        this.keyCountText.setVisible(true);
-        this.keyCountText.setText('x' + count);
-      }
-    }
+    // Deprecated: key display is now handled by UIScene
   }
 
   startOxygenTimer() {
