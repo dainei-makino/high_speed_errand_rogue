@@ -13,9 +13,6 @@ export default class MazeManager {
     // Use a random base for seeds so mazes differ each run
     this.seedBase = Math.random().toString(36).slice(2);
     this.seedCount = 0;
-    // Doubled the initial TTL so mazes last longer before fading
-    this.fadeDelay = 18000; // ms until fade starts
-    this.fadeDuration = 2000; // fade time
     this.events = new Phaser.Events.EventEmitter();
   }
 
@@ -60,8 +57,6 @@ export default class MazeManager {
       container,
       offsetX,
       offsetY,
-      age: 0,
-      fading: false,
       doorSprite: null,
       chestSprite: null,
       airTankSprite: null,
@@ -181,7 +176,6 @@ export default class MazeManager {
     const heroTile = this.worldToTile(hero.x, hero.y);
     const heroIdx = heroTile ? heroTile.chunk.index : -1;
     for (const obj of [...this.activeChunks]) {
-      obj.age += delta;
       if (obj.autoGates && obj.autoGates.length) {
         const hx = heroTile && heroTile.chunk === obj ? heroTile.tx : -1;
         const hy = heroTile && heroTile.chunk === obj ? heroTile.ty : -1;
@@ -198,7 +192,7 @@ export default class MazeManager {
           }
         }
       }
-      if (heroIdx >= obj.index + 2 && !obj.fading) {
+      if (heroIdx >= obj.index + 2) {
         if (this.isHeroInside(hero, obj)) {
           this.scene.handleGameOver();
         }
@@ -207,23 +201,6 @@ export default class MazeManager {
         obj.container.destroy();
         this.activeChunks = this.activeChunks.filter(c => c !== obj);
         continue;
-      }
-      if (obj.index !== 0 && obj.age > this.fadeDelay && !obj.fading) {
-        obj.fading = true;
-        this.scene.tweens.add({
-          targets: obj.container,
-          alpha: 0,
-          duration: this.fadeDuration,
-          onComplete: () => {
-            if (this.isHeroInside(hero, obj)) {
-              this.scene.handleGameOver();
-            }
-            const size = obj.chunk.size * this.tileSize;
-            evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
-            obj.container.destroy();
-            this.activeChunks = this.activeChunks.filter(c => c !== obj);
-          }
-        });
       }
     }
   }
