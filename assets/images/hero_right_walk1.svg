@@ -4,9 +4,11 @@
       <stop offset="0%" stop-color="#aee868"/>
       <stop offset="100%" stop-color="#6aa84f"/>
     </linearGradient>
+    <linearGradient id="tankGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b0e0ff"/>
+      <stop offset="100%" stop-color="#3399ff"/>
+    </linearGradient>
   </defs>
-  <!-- Oxygen Tank -->
-  <rect x="10" y="16" width="6" height="12" rx="2" fill="#6fa8dc" stroke="#2b6f95" stroke-width="1"/>
   <!-- Body -->
   <ellipse cx="16" cy="25" rx="6" ry="7" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
   <!-- Suit Torso -->
@@ -18,6 +20,13 @@
   <!-- Legs -->
   <ellipse cx="11" cy="34" rx="4" ry="2" fill="#8cc84b"/>
   <ellipse cx="21" cy="34" rx="4" ry="2" fill="#8cc84b"/>
+  <!-- Oxygen Tank -->
+  <g id="tank">
+    <rect x="9" y="15" width="10" height="15" rx="3" fill="url(#tankGrad)" stroke="#2b6f95" stroke-width="1.5"/>
+    <rect x="9" y="22" width="10" height="2" fill="#333" opacity="0.4"/>
+    <line x1="14" y1="15" x2="14" y2="12" stroke="#c0c0c0" stroke-width="2"/>
+    <circle cx="14" cy="11" r="2" fill="#99d9ff" stroke="#2b6f95" stroke-width="0.5"/>
+  </g>
   <!-- Head -->
   <ellipse cx="18" cy="12" rx="11" ry="10" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
   <ellipse cx="24" cy="14" rx="4" ry="2" fill="#8cc84b"/>
