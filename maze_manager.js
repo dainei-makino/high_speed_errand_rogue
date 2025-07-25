@@ -153,8 +153,7 @@ export default class MazeManager {
       obj.age += delta;
       if (heroIdx >= obj.index + 2 && !obj.fading) {
         if (this.isHeroInside(hero, obj)) {
-          this.scene.sound.play('game_over');
-          this.scene.scene.restart();
+          this.scene.handleGameOver();
         }
         const size = obj.chunk.size * this.tileSize;
         evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
@@ -170,8 +169,7 @@ export default class MazeManager {
           duration: this.fadeDuration,
           onComplete: () => {
             if (this.isHeroInside(hero, obj)) {
-              this.scene.sound.play('game_over');
-              this.scene.scene.restart();
+              this.scene.handleGameOver();
             }
             const size = obj.chunk.size * this.tileSize;
             evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);

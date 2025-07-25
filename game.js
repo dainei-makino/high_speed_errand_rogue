@@ -9,6 +9,7 @@ import UIScene from './ui_scene.js';
 import { newChunkTransition, evaporateArea } from './effects.js';
 import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
+import GameOverScene from './game_over_scene.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -28,6 +29,7 @@ class GameScene extends Phaser.Scene {
     this.introLetters = null;
     this.oxygenTimer = null;
     this.bgm = null;
+    this.isGameOver = false;
   }
 
   preload() {
@@ -37,6 +39,7 @@ class GameScene extends Phaser.Scene {
   create() {
     this.hero = new HeroState();
     this.isMoving = false;
+    this.isGameOver = false;
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
@@ -322,9 +325,52 @@ class GameScene extends Phaser.Scene {
         this.hero.oxygen -= 1;
         this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
         if (this.hero.oxygen <= 0) {
-          this.sound.play('game_over');
-          this.scene.restart();
+          this.handleGameOver();
         }
+      }
+    });
+  }
+
+  handleGameOver() {
+    if (this.isGameOver) return;
+    this.isGameOver = true;
+    if (this.oxygenTimer) {
+      this.oxygenTimer.remove();
+      this.oxygenTimer = null;
+    }
+    if (this.bgm) {
+      this.bgm.stop();
+    }
+    this.sound.stopAll();
+
+    const size = this.mazeManager.tileSize;
+    const evaporate = () => {
+      evaporateArea(
+        this,
+        this.heroSprite.x - size / 2,
+        this.heroSprite.y - size,
+        size,
+        size * 2,
+        0xffffff
+      );
+    };
+    evaporate();
+    const evapTimer = this.time.addEvent({
+      delay: 100,
+      repeat: 19,
+      callback: evaporate
+    });
+
+    this.tweens.add({
+      targets: this.heroSprite,
+      alpha: 0,
+      duration: 2000,
+      onComplete: () => {
+        evapTimer.remove();
+        this.heroSprite.destroy();
+        this.scene.launch('GameOverScene');
+        this.scene.bringToTop('GameOverScene');
+        this.scene.pause();
       }
     });
   }
@@ -400,7 +446,7 @@ const config = {
     width: VIRTUAL_WIDTH * 2,
     height: VIRTUAL_HEIGHT * 2
   },
-  scene: [LoadingScene, GameScene, UIScene]
+  scene: [LoadingScene, GameScene, UIScene, GameOverScene]
 };
 
 Characters.ready.then(() => {
