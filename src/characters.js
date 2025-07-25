@@ -9,6 +9,7 @@ const SPRITES = {
   auto_gate_closed: 'auto_gate_closed.svg',
   door_open: 'airlock_open.svg',
   treasure: 'treasure.svg',
+  hero_plain: 'hero_plain.svg',
   hero_idle: 'hero.svg',
   hero_walk1: 'hero_walk1.svg',
   hero_walk2: 'hero_walk2.svg',
@@ -116,6 +117,10 @@ function createHero(scene) {
   return scene.add.image(0, 0, 'hero_idle').setOrigin(0.5);
 }
 
+function createHeroPlain(scene) {
+  return scene.add.image(0, 0, 'hero_plain').setOrigin(0.5);
+}
+
 function createArrow(scene) {
   return scene.add.image(0, 0, 'arrow').setOrigin(0.5);
 }
@@ -137,5 +142,6 @@ export default {
   createOxygenConsole,
   createSpike,
   createHero,
+  createHeroPlain,
   createArrow
 };
