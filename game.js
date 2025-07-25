@@ -80,7 +80,11 @@ class GameScene extends Phaser.Scene {
       this.heroSprite.y - this.mazeManager.tileSize + 5
     );
     this.keyIcon = Characters.createKey(this);
-    this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
+    // Display the persistent key icon at half size
+    this.keyIcon.setDisplaySize(
+      this.mazeManager.tileSize / 2,
+      this.mazeManager.tileSize / 2
+    );
     this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
       fontFamily: 'monospace',
       fontSize: '16px',
