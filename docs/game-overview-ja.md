@@ -33,9 +33,9 @@
 - **アニメーション**: animation.mdを参照
 - **カメラ制御**: camera.mdを参照
 - **キー入力**: key_input.mdを参照
-- **迷路生成**: maze_core_core mechanics.mdを参照
-- **迷路寿命**: maze_ extinction.mdを参照
-- **カメラ制御**: ui_hud.mdを参照
+- **迷路生成**: maze_generation_logic.mdを参照
+- **迷路寿命**: maze_extinction.mdを参照
+- **UI/HUD**: ui_hud.mdを参照
 - **グラフィックとアニメーション**: 迷路の床や壁、出口扉、主人公、宝箱などは全て16x16pxを基準とする。後々はアトラス化した画像を読み込んでアニメーションするが、仮置きとしてそれぞれの分かりやすい色をつけたものを描画する。画像を表示することを想定したコードにしておく。
 
 
