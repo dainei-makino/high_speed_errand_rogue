@@ -8,6 +8,7 @@ import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
 import { newChunkTransition, evaporateArea } from './effects.js';
 import LoadingScene from './loading_scene.js';
+import StarField from './star_field.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -44,6 +45,7 @@ class GameScene extends Phaser.Scene {
     this.mazeManager = new MazeManager(this);
 
     this.cameraManager = new CameraManager(this, this.mazeManager);
+    this.starField = new StarField(this);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
