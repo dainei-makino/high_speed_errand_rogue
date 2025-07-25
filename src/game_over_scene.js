@@ -61,6 +61,8 @@ export default class GameOverScene extends Phaser.Scene {
     this.scene.stop('UIScene');
     gameState.reset();
     this.scene.start('GameScene');
+    this.scene.launch('UIScene');
+    this.scene.bringToTop('UIScene');
     this.scene.stop();
   }
 }
