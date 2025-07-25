@@ -16,16 +16,25 @@
       <stop offset="0%" stop-color="#ff6666"/>
       <stop offset="100%" stop-color="#330000"/>
     </radialGradient>
+    <!-- Outlet hole shading -->
+    <radialGradient id="portHole" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="100%" stop-color="#333333"/>
+    </radialGradient>
   </defs>
   <rect width="32" height="32" fill="url(#wallBase)"/>
   <!-- Laser emitter box -->
   <rect x="2" y="4" width="8" height="24" rx="1" fill="url(#emitterBody)" stroke="#777" stroke-width="1"/>
   <!-- Emitter lenses and short beams -->
   <circle cx="6" cy="10" r="2" fill="url(#laserLens)" stroke="#aa0000" stroke-width="0.5"/>
-  <rect x="8" y="9" width="6" height="1" fill="url(#laserBeam)"/>
+  <rect x="8" y="9" width="18" height="1" fill="url(#laserBeam)"/>
   <circle cx="6" cy="16" r="2" fill="url(#laserLens)" stroke="#aa0000" stroke-width="0.5"/>
-  <rect x="8" y="15" width="6" height="1" fill="url(#laserBeam)"/>
+  <rect x="8" y="15" width="18" height="1" fill="url(#laserBeam)"/>
   <circle cx="6" cy="22" r="2" fill="url(#laserLens)" stroke="#aa0000" stroke-width="0.5"/>
-  <rect x="8" y="21" width="6" height="1" fill="url(#laserBeam)"/>
+  <rect x="8" y="21" width="18" height="1" fill="url(#laserBeam)"/>
+  <!-- Outlet ports -->
+  <circle cx="28" cy="10" r="2" fill="url(#portHole)" stroke="#777" stroke-width="0.5"/>
+  <circle cx="28" cy="16" r="2" fill="url(#portHole)" stroke="#777" stroke-width="0.5"/>
+  <circle cx="28" cy="22" r="2" fill="url(#portHole)" stroke="#777" stroke-width="0.5"/>
   <rect width="32" height="32" fill="none" stroke="#869ab3" stroke-width="1"/>
 </svg>
