@@ -11,6 +11,8 @@ import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
 import GameOverScene from './game_over_scene.js';
 import { computeTetherPoints, isHorizontal, isVertical } from './utils.js';
+import Shield from './shield.js';
+import MeteorField from './meteor_field.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -52,6 +54,8 @@ class GameScene extends Phaser.Scene {
 
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.starField = new StarField(this);
+    this.shield = new Shield(this, this.mazeManager);
+    this.meteorField = new MeteorField(this, this.shield);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
@@ -405,6 +409,14 @@ class GameScene extends Phaser.Scene {
       }
       this.oxygenLine.strokePath();
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
+    }
+
+    if (this.shield) {
+      this.shield.update();
+    }
+
+    if (this.meteorField) {
+      this.meteorField.update();
     }
 
     // Prevent camera drift by re-centering if needed

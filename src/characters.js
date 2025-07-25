@@ -23,7 +23,11 @@ const SPRITES = {
   key: 'key.svg',
   air_tank: 'air_tank.svg',
   oxygen_console: 'oxygen_supply_console.svg',
-  spikes: 'floor_spikes.svg'
+  spikes: 'floor_spikes.svg',
+  meteor: 'meteor.svg',
+  meteor_explosion1: 'meteor_explosion1.svg',
+  meteor_explosion2: 'meteor_explosion2.svg',
+  meteor_explosion3: 'meteor_explosion3.svg'
 };
 
 const canvases = {};
@@ -112,6 +116,14 @@ function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
 
+function createMeteor(scene) {
+  return scene.add.image(0, 0, 'meteor').setOrigin(0.5);
+}
+
+function createMeteorExplosion(scene) {
+  return scene.add.image(0, 0, 'meteor_explosion1').setOrigin(0.5);
+}
+
 function createHero(scene) {
   return scene.add.image(0, 0, 'hero_idle').setOrigin(0.5);
 }
@@ -136,6 +148,8 @@ export default {
   createAirTank,
   createOxygenConsole,
   createSpike,
+  createMeteor,
+  createMeteorExplosion,
   createHero,
   createArrow
 };
