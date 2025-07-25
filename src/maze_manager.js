@@ -582,6 +582,7 @@ export default class MazeManager {
       this.scene.tweens.add({
         targets: info.chestSprite,
         alpha: 0,
+        y: '-=8',
         duration: 200,
         onComplete: () => {
           info.chestSprite.destroy();
@@ -598,6 +599,7 @@ export default class MazeManager {
       this.scene.tweens.add({
         targets: sprite,
         alpha: 0,
+        y: '-=8',
         duration: 200,
         onComplete: () => {
           sprite.destroy();
