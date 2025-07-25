@@ -3,7 +3,7 @@ export default class MeteorField {
     this.scene = scene;
     this.shield = shield;
     this.container = scene.add.container(0, 0);
-    this.container.setDepth(-900);
+    this.container.setDepth(1000);
     this.container.setScrollFactor(0);
     this.active = [];
     this.spawnTimer = scene.time.addEvent({
@@ -42,6 +42,7 @@ export default class MeteorField {
     const start = this.getEdgePos(startEdge, width, height, margin);
     const dest = this.getEdgePos(destEdge, width, height, margin);
     const meteor = this.scene.add.image(start.x, start.y, 'meteor').setOrigin(0.5);
+    meteor.setDepth(0);
     this.container.add(meteor);
     this.active.push(meteor);
     const distance = Phaser.Math.Distance.Between(start.x, start.y, dest.x, dest.y);
@@ -67,7 +68,7 @@ export default class MeteorField {
 
   showExplosion(x, y) {
     const img = this.scene.add.image(x, y, 'meteor_explosion1').setOrigin(0.5);
-    img.setDepth(-850);
+    img.setDepth(1);
     img.setScrollFactor(0);
     this.container.add(img);
     this.scene.time.delayedCall(100, () => img.setTexture('meteor_explosion2'));

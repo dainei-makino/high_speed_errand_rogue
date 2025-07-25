@@ -3,9 +3,10 @@ export default class Shield {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.radius = 10;
-    this.arc = scene.add.circle(0, 0, this.radius, 0x3388ff, 0);
-    this.arc.setDepth(8);
-    this.arc.setScrollFactor(0);
+    this.sprite = scene.add.image(0, 0, this._createTexture(this.radius)).setOrigin(0.5);
+    this.sprite.setDepth(8);
+    this.sprite.setScrollFactor(0);
+    this.sprite.setAlpha(0);
   }
 
   getCurrentChunk() {
@@ -17,26 +18,53 @@ export default class Shield {
     const info = this.getCurrentChunk();
     if (!info) return;
     const size = info.chunk.size * this.mazeManager.tileSize;
-    const r = (size * 1.3) / 2;
+    const r = (size * 1.5) / 2;
     if (r !== this.radius) {
       this.radius = r;
-      this.arc.setRadius(this.radius);
+      const key = this._createTexture(this.radius);
+      this.sprite.setTexture(key);
+      this.sprite.setDisplaySize(this.radius * 2, this.radius * 2);
     }
     const { x, y } = this.mazeManager.getChunkCenter(info);
     const cam = this.scene.cameras.main;
-    this.arc.setPosition(x - cam.scrollX, y - cam.scrollY);
+    this.sprite.setPosition(x - cam.scrollX, y - cam.scrollY);
   }
 
   getScreenPosition() {
-    return { x: this.arc.x, y: this.arc.y };
+    return { x: this.sprite.x, y: this.sprite.y };
   }
 
   flash() {
-    this.arc.setFillStyle(0x3388ff, 0.5);
+    this.sprite.setAlpha(1);
     this.scene.tweens.add({
-      targets: this.arc,
-      fillAlpha: 0,
+      targets: this.sprite,
+      alpha: 0,
       duration: 300
     });
+  }
+
+  _createTexture(radius) {
+    const size = Math.ceil(radius * 2) + 2;
+    const key = `shield-${Math.floor(radius)}`;
+    if (this.scene.textures.exists(key)) {
+      this.scene.textures.remove(key);
+    }
+    const tex = this.scene.textures.createCanvas(key, size, size);
+    const ctx = tex.context;
+    ctx.clearRect(0, 0, size, size);
+    const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, radius);
+    grad.addColorStop(0, 'rgba(51,136,255,0)');
+    grad.addColorStop(1, 'rgba(51,136,255,0.6)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(102,170,255,0.8)';
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, radius - 0.5, 0, Math.PI * 2);
+    ctx.stroke();
+    tex.refresh();
+    return key;
   }
 }
