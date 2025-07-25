@@ -72,12 +72,12 @@ class GameScene extends Phaser.Scene {
       this.mazeManager.tileSize,
       this.mazeManager.tileSize * heroRatio
     );
-    this.heroImage.y = -4; // shift sprite up for depth effect
+    // Shift sprite slightly downward so the hero sits lower in its tile
+    this.heroImage.y = 0; // centered vertically
 
     this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
-    this.heroSprite.setDepth(10);
     this.worldLayer.add(this.heroSprite);
 
     if (firstInfo.oxygenPosition) {
@@ -155,6 +155,18 @@ class GameScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown-E', () => {
       this.cameraManager.setZoom(Math.max(this.cameraManager.cam.zoom - 0.1, 0.5), 100);
+    });
+  }
+
+  sortWorldObjects() {
+    if (!this.worldLayer) return;
+    this.worldLayer.list.sort((a, b) => {
+      const da = a.depth || 0;
+      const db = b.depth || 0;
+      if (da !== db) {
+        return da - db;
+      }
+      return (a.y || 0) - (b.y || 0);
     });
   }
 
@@ -399,6 +411,7 @@ class GameScene extends Phaser.Scene {
 
     // Prevent camera drift by re-centering if needed
     this.cameraManager.maintainCenter();
+    this.sortWorldObjects();
   }
 
   updateKeyDisplay() {
