@@ -1,20 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
   <defs>
-    <radialGradient id="coreGlow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0%" stop-color="#ffeb99"/>
-      <stop offset="50%" stop-color="#ff9900"/>
-      <stop offset="100%" stop-color="#ff0000"/>
-    </radialGradient>
-    <linearGradient id="casing" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#dddddd"/>
-      <stop offset="100%" stop-color="#888888"/>
+    <linearGradient id="ironWall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a8a8a"/>
+      <stop offset="100%" stop-color="#4a4a4a"/>
     </linearGradient>
+    <linearGradient id="innerPanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e6e6e6"/>
+      <stop offset="100%" stop-color="#949494"/>
+    </linearGradient>
+    <radialGradient id="coreGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff7cc"/>
+      <stop offset="60%" stop-color="#ff9900"/>
+      <stop offset="100%" stop-color="#ff3300"/>
+    </radialGradient>
   </defs>
-  <!-- Outer casing -->
-  <rect x="4" y="4" width="88" height="88" rx="8" fill="url(#casing)" stroke="#444444" stroke-width="4"/>
-  <!-- Inner core -->
-  <circle cx="48" cy="48" r="28" fill="url(#coreGlow)" stroke="#cc3300" stroke-width="4"/>
+  <!-- Iron wall frame -->
+  <rect width="96" height="96" rx="10" fill="url(#ironWall)" stroke="#2c2c2c" stroke-width="4"/>
+  <!-- Inner panel -->
+  <rect x="8" y="8" width="80" height="80" rx="6" fill="url(#innerPanel)" stroke="#5a5a5a" stroke-width="3"/>
+  <!-- Bolts -->
+  <g fill="#3a3a3a">
+    <circle cx="16" cy="16" r="2"/>
+    <circle cx="80" cy="16" r="2"/>
+    <circle cx="16" cy="80" r="2"/>
+    <circle cx="80" cy="80" r="2"/>
+  </g>
+  <!-- Reactor core -->
+  <circle cx="48" cy="48" r="26" fill="url(#coreGlow)" stroke="#cc4400" stroke-width="4"/>
   <!-- Energy rings -->
-  <circle cx="48" cy="48" r="40" fill="none" stroke="#ffe066" stroke-width="2" stroke-dasharray="4 6"/>
-  <circle cx="48" cy="48" r="20" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 4"/>
+  <circle cx="48" cy="48" r="36" fill="none" stroke="#ffe066" stroke-width="2" stroke-dasharray="4 6"/>
+  <circle cx="48" cy="48" r="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 4"/>
 </svg>
