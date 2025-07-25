@@ -21,7 +21,8 @@ const SPRITES = {
   hero_right_walk3: 'hero_right_walk3.svg',
   arrow: 'arrow.svg',
   key: 'key.svg',
-  air_tank: 'air_tank.svg'
+  air_tank: 'air_tank.svg',
+  spikes: 'floor_spikes.svg'
 };
 
 const canvases = {};
@@ -102,6 +103,10 @@ function createAirTank(scene) {
   return scene.add.image(0, 0, 'air_tank').setOrigin(0);
 }
 
+function createSpike(scene) {
+  return scene.add.image(0, 0, 'spikes').setOrigin(0);
+}
+
 function createHero(scene) {
   return scene.add.image(0, 0, 'hero_idle').setOrigin(0.5);
 }
@@ -124,6 +129,7 @@ export default {
   createTreasure,
   createKey,
   createAirTank,
+  createSpike,
   createHero,
   createArrow
 };

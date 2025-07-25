@@ -28,6 +28,7 @@ class GameScene extends Phaser.Scene {
     this.oxygenTimer = null;
     this.bgm = null;
     this.isGameOver = false;
+    this.lastSpikeTile = null;
   }
 
   preload() {
@@ -38,6 +39,7 @@ class GameScene extends Phaser.Scene {
     this.hero = new HeroState();
     this.isMoving = false;
     this.isGameOver = false;
+    this.lastSpikeTile = null;
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
@@ -74,18 +76,6 @@ class GameScene extends Phaser.Scene {
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.worldLayer.add(this.heroSprite);
 
-    // Persistent key display above the hero
-    this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
-    this.keyIcon = Characters.createKey(this);
-    this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
-    this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
-      fontFamily: 'monospace',
-      fontSize: '16px',
-      color: '#ffffff'
-    }).setOrigin(0, 0.5);
-    this.keyDisplay.add([this.keyIcon, this.keyCountText]);
-    this.worldLayer.add(this.keyDisplay);
-    this.updateKeyDisplay();
 
     // Handle transitions for door exit
     this.mazeManager.events.on('spawn-next', data => {
@@ -223,7 +213,6 @@ class GameScene extends Phaser.Scene {
         this.sound.play('chest_open');
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
-        this.updateKeyDisplay();
         const icon = Characters.createKey(this);
         icon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
         icon.setPosition(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
@@ -238,10 +227,52 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
-      if (curTile.cell === TILE.OXYGEN && curTile.chunk.chunk.airTank && !curTile.chunk.chunk.airTank.collected) {
+      if (
+        curTile.cell === TILE.OXYGEN &&
+        curTile.chunk.chunk.airTank &&
+        !curTile.chunk.chunk.airTank.collected
+      ) {
+        curTile.chunk.chunk.airTank.collected = true;
         this.mazeManager.removeAirTank(curTile.chunk);
-        this.hero.oxygen = Math.min(this.hero.oxygen + 5, this.hero.maxOxygen);
-        this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
+        this.sound.play('pick_up');
+        this.hero.oxygen = Math.min(
+          this.hero.oxygen + 5,
+          this.hero.maxOxygen
+        );
+        this.events.emit(
+          'updateOxygen',
+          this.hero.oxygen / this.hero.maxOxygen
+        );
+      }
+
+      if (curTile.chunk.chunk.spikes) {
+        const hit = curTile.chunk.chunk.spikes.find(
+          s => s.x === curTile.tx && s.y === curTile.ty
+        );
+        const sameTile =
+          hit &&
+          this.lastSpikeTile &&
+          this.lastSpikeTile.chunkIndex === curTile.chunk.index &&
+          this.lastSpikeTile.x === curTile.tx &&
+          this.lastSpikeTile.y === curTile.ty;
+        if (hit && !sameTile) {
+          this.cameras.main.flash(100, 0, 0, 0);
+          this.hero.oxygen = Math.max(this.hero.oxygen - 1, 0);
+          this.events.emit(
+            'updateOxygen',
+            this.hero.oxygen / this.hero.maxOxygen
+          );
+          if (this.hero.oxygen <= 0) {
+            this.handleGameOver();
+          }
+          this.lastSpikeTile = {
+            chunkIndex: curTile.chunk.index,
+            x: curTile.tx,
+            y: curTile.ty
+          };
+        } else if (!hit) {
+          this.lastSpikeTile = null;
+        }
       }
 
       if (curTile.cell === TILE.SILVER_DOOR && this.hero.keys > 0) {
@@ -259,7 +290,6 @@ class GameScene extends Phaser.Scene {
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
         if (this.hero.useKey()) {
-          this.updateKeyDisplay();
           this.mazeManager.openDoor(curTile.chunk);
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
@@ -300,8 +330,6 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    this.keyDisplay.x = this.heroSprite.x - 10;
-    this.keyDisplay.y = this.heroSprite.y - this.mazeManager.tileSize;
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
 
@@ -310,18 +338,7 @@ class GameScene extends Phaser.Scene {
   }
 
   updateKeyDisplay() {
-    const count = this.hero.keys;
-    if (count <= 0) {
-      this.keyDisplay.setVisible(false);
-    } else {
-      this.keyDisplay.setVisible(true);
-      if (count === 1) {
-        this.keyCountText.setVisible(false);
-      } else {
-        this.keyCountText.setVisible(true);
-        this.keyCountText.setText('x' + count);
-      }
-    }
+    // Deprecated: key display is now handled by UIScene
   }
 
   startOxygenTimer() {

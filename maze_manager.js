@@ -66,6 +66,7 @@ export default class MazeManager {
       airTankSprite: null,
       silverDoors: [],
       autoGates: []
+      spikeSprites: []
     };
     this.renderChunk(chunk, container, info);
     this.activeChunks.push(info);
@@ -132,6 +133,17 @@ export default class MazeManager {
           sprite.setDisplaySize(size, size);
           sprite.setPosition(x * size, y * size);
           container.add(sprite);
+        }
+
+        if (chunk.spikes) {
+          const s = chunk.spikes.find(v => v.x === x && v.y === y);
+          if (s) {
+            const spikeSprite = Characters.createSpike(this.scene);
+            spikeSprite.setDisplaySize(size, size);
+            spikeSprite.setPosition(x * size, y * size);
+            container.add(spikeSprite);
+            info.spikeSprites.push({ x, y, sprite: spikeSprite });
+          }
         }
       }
     }
@@ -304,6 +316,9 @@ export default class MazeManager {
         this._addSilverDoor(chunk);
       }
       this._addAirTank(chunk);
+    }
+    if (progress >= 2) {
+      this._addSpikes(chunk);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -514,6 +529,31 @@ export default class MazeManager {
     );
     t[y * size + x] = TILE.OXYGEN;
     chunk.airTank = { x, y, collected: false };
+  }
+
+  _addSpikes(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const spikeCount = Math.floor(Math.random() * 3); // 0-2
+    const spikes = [];
+    for (let i = 0; i < spikeCount; i++) {
+      let x, y;
+      let tries = 0;
+      do {
+        x = Math.floor(Math.random() * (size - 2)) + 1;
+        y = Math.floor(Math.random() * (size - 2)) + 1;
+        tries++;
+      } while (
+        (t[y * size + x] !== TILE.FLOOR ||
+          this._isNearEntranceOrExit(chunk, x, y) ||
+          spikes.some(s => s.x === x && s.y === y)) &&
+        tries < 20
+      );
+      if (tries < 20) {
+        spikes.push({ x, y });
+      }
+    }
+    chunk.spikes = spikes;
   }
 
   openDoor(info) {
