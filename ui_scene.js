@@ -20,6 +20,16 @@ export default class UIScene extends Phaser.Scene {
 
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
+    gameScene.events.on('updateOxygen', this.updateOxygen, this);
+
+    this.oxygenGfx = this.add.graphics();
+    this.o2Label = this.add.text(0, 0, 'O2 Timer', {
+      fontFamily: 'monospace',
+      fontSize: '19px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    this.updateOxygen(1);
 
 
     this.fpsText = this.add.text(420, 8, '', {
@@ -42,6 +52,45 @@ export default class UIScene extends Phaser.Scene {
   updateChunks(count) {
     // Right pad with spaces to keep label position stable
     this.chunkText.setText('CHUNK ' + count.toString());
+  }
+
+  updateOxygen(ratio) {
+    const centerX = VIRTUAL_WIDTH * 2 - 120;
+    const centerY = VIRTUAL_HEIGHT * 2 - 120;
+    const radius = 90;
+    const thickness = 32;
+    const start = Phaser.Math.DegToRad(-90);
+
+    this.o2Label.setPosition(centerX, centerY - radius - 36);
+
+    this.oxygenGfx.clear();
+    this.oxygenGfx.lineStyle(thickness, 0x333333, 0.5);
+    this.oxygenGfx.beginPath();
+    this.oxygenGfx.arc(centerX, centerY, radius, 0, Phaser.Math.PI2, false);
+    this.oxygenGfx.strokePath();
+
+    const mainRatio = Math.min(ratio, 1);
+    const extraRatio = Math.max(Math.min(ratio - 1, 1), 0);
+
+    let ringColor = 0xffff00;
+    if (mainRatio <= 0.25) {
+      ringColor = 0xff0000;
+    } else if (mainRatio <= 0.5) {
+      ringColor = 0xffa500;
+    }
+
+    this.oxygenGfx.lineStyle(thickness, ringColor, 1);
+    this.oxygenGfx.beginPath();
+    this.oxygenGfx.arc(centerX, centerY, radius, start, start + Phaser.Math.DegToRad(360 * mainRatio), false);
+    this.oxygenGfx.strokePath();
+
+    if (extraRatio > 0) {
+      const innerRadius = radius - thickness - 4;
+      this.oxygenGfx.lineStyle(thickness, 0x00ff00, 1);
+      this.oxygenGfx.beginPath();
+      this.oxygenGfx.arc(centerX, centerY, innerRadius, start, start + Phaser.Math.DegToRad(360 * extraRatio), false);
+      this.oxygenGfx.strokePath();
+    }
   }
 
   showMidpoint(num) {

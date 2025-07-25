@@ -8,6 +8,8 @@ export default class HeroState {
     this.inventory = [];
     this.powerUps = [];
     this.keys = 0;
+    this.maxOxygen = 20;
+    this.oxygen = 20;
   }
 
   moveTo(x, y) {
