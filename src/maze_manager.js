@@ -49,6 +49,7 @@ export default class MazeManager {
       offsetX,
       offsetY,
       doorSprite: null,
+      entranceDoorSprite: null,
       chestSprite: null,
       airTankSprite: null,
       oxygenSprite: null,
@@ -324,6 +325,12 @@ export default class MazeManager {
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
+    info.entranceDoorSprite = fromObj.doorSprite;
+    if (fromObj.doorSprite) {
+      fromObj.sprites = fromObj.sprites.filter(s => s !== fromObj.doorSprite);
+      info.sprites.push(fromObj.doorSprite);
+      fromObj.doorSprite = null;
+    }
 
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
     heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
@@ -579,6 +586,9 @@ export default class MazeManager {
   openDoor(info) {
     if (info && info.doorSprite) {
       info.doorSprite.setTexture('door_open');
+    }
+    if (info && info.entranceDoorSprite) {
+      info.entranceDoorSprite.setTexture('exit');
     }
   }
 
