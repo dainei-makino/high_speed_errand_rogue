@@ -28,6 +28,7 @@ class GameScene extends Phaser.Scene {
     this.oxygenTimer = null;
     this.bgm = null;
     this.isGameOver = false;
+    this.lastSpikeTile = null;
   }
 
   preload() {
@@ -38,6 +39,7 @@ class GameScene extends Phaser.Scene {
     this.hero = new HeroState();
     this.isMoving = false;
     this.isGameOver = false;
+    this.lastSpikeTile = null;
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
@@ -251,6 +253,36 @@ class GameScene extends Phaser.Scene {
           'updateOxygen',
           this.hero.oxygen / this.hero.maxOxygen
         );
+      }
+
+      if (curTile.chunk.chunk.spikes) {
+        const hit = curTile.chunk.chunk.spikes.find(
+          s => s.x === curTile.tx && s.y === curTile.ty
+        );
+        const sameTile =
+          hit &&
+          this.lastSpikeTile &&
+          this.lastSpikeTile.chunkIndex === curTile.chunk.index &&
+          this.lastSpikeTile.x === curTile.tx &&
+          this.lastSpikeTile.y === curTile.ty;
+        if (hit && !sameTile) {
+          this.cameras.main.flash(100, 0, 0, 0);
+          this.hero.oxygen = Math.max(this.hero.oxygen - 1, 0);
+          this.events.emit(
+            'updateOxygen',
+            this.hero.oxygen / this.hero.maxOxygen
+          );
+          if (this.hero.oxygen <= 0) {
+            this.handleGameOver();
+          }
+          this.lastSpikeTile = {
+            chunkIndex: curTile.chunk.index,
+            x: curTile.tx,
+            y: curTile.ty
+          };
+        } else if (!hit) {
+          this.lastSpikeTile = null;
+        }
       }
 
       if (curTile.cell === TILE.SILVER_DOOR && this.hero.keys > 0) {
