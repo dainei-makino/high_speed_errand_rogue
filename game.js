@@ -29,6 +29,8 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
+    this.oxygenLine = null;
+    this.oxygenConsole = null;
   }
 
   preload() {
@@ -74,8 +76,30 @@ class GameScene extends Phaser.Scene {
     this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
     this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    this.heroSprite.setDepth(10);
     this.worldLayer.add(this.heroSprite);
 
+    if (firstInfo.oxygenPosition) {
+      const size = this.mazeManager.tileSize;
+      const cx = firstInfo.offsetX + firstInfo.oxygenPosition.x * size + size / 2;
+      const cy = firstInfo.offsetY + firstInfo.oxygenPosition.y * size + size / 2;
+      this.oxygenConsole = { x: cx, y: cy };
+      this.oxygenLine = this.add.graphics();
+      this.worldLayer.add(this.oxygenLine);
+    }
+
+    // Persistent key display above the hero
+    this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
+    this.keyIcon = Characters.createKey(this);
+    this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
+    this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#ffffff'
+    }).setOrigin(0, 0.5);
+    this.keyDisplay.add([this.keyIcon, this.keyCountText]);
+    this.worldLayer.add(this.keyDisplay);
+    this.updateKeyDisplay();
 
     // Handle transitions for door exit
     this.mazeManager.events.on('spawn-next', data => {
@@ -84,6 +108,43 @@ class GameScene extends Phaser.Scene {
       if (data.info && data.info.index === 1) {
         this.bgm.play();
         this.destroyIntroText();
+        if (this.oxygenLine) {
+          const hx = this.heroSprite.x;
+          const hy = this.heroSprite.y;
+          const cx = this.oxygenConsole.x;
+          const cy = this.oxygenConsole.y;
+          const dx = hx - cx;
+          const dy = hy - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const sag = Math.min(this.mazeManager.tileSize, dist / 4);
+          const midX = (hx + cx) / 2;
+          const midY = Math.max(hy, cy) + sag;
+          const steps = 5;
+          for (let i = 0; i < steps; i++) {
+            const t = i / steps;
+            const inv = 1 - t;
+            const px =
+              inv * inv * cx +
+              2 * inv * t * midX +
+              t * t * hx;
+            const py =
+              inv * inv * cy +
+              2 * inv * t * midY +
+              t * t * hy;
+            this.time.delayedCall(i * 40, () => {
+              evaporateArea(this, px - 4, py - 4, 8, 8, 0xffffff);
+            });
+          }
+          this.tweens.add({
+            targets: this.oxygenLine,
+            alpha: 0,
+            duration: 200,
+            onComplete: () => {
+              this.oxygenLine.destroy();
+              this.oxygenLine = null;
+            }
+          });
+        }
       }
     });
 
@@ -334,6 +395,39 @@ class GameScene extends Phaser.Scene {
 
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+
+    if (this.oxygenLine && this.oxygenConsole) {
+      const hx = this.heroSprite.x;
+      const hy = this.heroSprite.y;
+      const cx = this.oxygenConsole.x;
+      const cy = this.oxygenConsole.y;
+      const dx = hx - cx;
+      const dy = hy - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const sag = Math.min(this.mazeManager.tileSize, dist / 4);
+      const midX = (hx + cx) / 2;
+      const midY = Math.max(hy, cy) + sag;
+      this.oxygenLine.clear();
+      this.oxygenLine.lineStyle(2, 0xffffff, 1);
+      this.oxygenLine.beginPath();
+      this.oxygenLine.moveTo(cx, cy);
+      const segments = 16;
+      for (let i = 1; i <= segments; i++) {
+        const t = i / segments;
+        const inv = 1 - t;
+        const px =
+          inv * inv * cx +
+          2 * inv * t * midX +
+          t * t * hx;
+        const py =
+          inv * inv * cy +
+          2 * inv * t * midY +
+          t * t * hy;
+        this.oxygenLine.lineTo(px, py);
+      }
+      this.oxygenLine.strokePath();
+      this.oxygenLine.setDepth(hy > cy ? 9 : 11);
+    }
 
     // Prevent camera drift by re-centering if needed
     this.cameraManager.maintainCenter();

@@ -22,6 +22,7 @@ const SPRITES = {
   arrow: 'arrow.svg',
   key: 'key.svg',
   air_tank: 'air_tank.svg',
+  oxygen_console: 'oxygen_supply_console.svg',
   spikes: 'floor_spikes.svg'
 };
 
@@ -103,6 +104,10 @@ function createAirTank(scene) {
   return scene.add.image(0, 0, 'air_tank').setOrigin(0);
 }
 
+function createOxygenConsole(scene) {
+  return scene.add.image(0, 0, 'oxygen_console').setOrigin(0);
+}
+
 function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
@@ -129,6 +134,7 @@ export default {
   createTreasure,
   createKey,
   createAirTank,
+  createOxygenConsole,
   createSpike,
   createHero,
   createArrow
