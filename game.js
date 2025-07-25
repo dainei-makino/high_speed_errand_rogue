@@ -96,6 +96,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.scene.launch('UIScene');
+    this.scene.bringToTop('UIScene');
     this.setupIntro();
 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -328,33 +329,6 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  createFloatingText(str, centerX, y) {
-    const style = { fontFamily: 'monospace', fontSize: '24px', color: '#ffffff' };
-    const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
-    const total = measure.width;
-    measure.destroy();
-    let x = centerX - total / 2;
-    const letters = [];
-    for (const ch of str) {
-      const letter = this.add.text(0, 0, ch, style).setOrigin(0.5);
-      letter.x = x + letter.width / 2;
-      letter.y = y;
-      letter.setDepth(500);
-      this.worldLayer.add(letter);
-      this.tweens.add({
-        targets: letter,
-        y: letter.y + Phaser.Math.Between(-6, 6),
-        duration: 800 + Phaser.Math.Between(0, 400),
-        repeat: -1,
-        yoyo: true,
-        ease: 'Sine.easeInOut',
-        delay: Phaser.Math.Between(0, 300)
-      });
-      letters.push(letter);
-      x += letter.width;
-    }
-    return letters;
-  }
 
   setupIntro() {
     const ui = this.scene.get('UIScene');

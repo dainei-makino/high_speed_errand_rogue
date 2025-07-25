@@ -97,7 +97,13 @@ export default class UIScene extends Phaser.Scene {
   }
 
   createFloatingText(str, centerX, y) {
-    const style = { fontFamily: 'monospace', fontSize: '24px', color: '#ffffff' };
+    const style = {
+      fontFamily: 'monospace',
+      fontSize: '24px',
+      color: '#ffff00',
+      stroke: '#000000',
+      strokeThickness: 3
+    };
     const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
     const total = measure.width;
     measure.destroy();
@@ -107,7 +113,8 @@ export default class UIScene extends Phaser.Scene {
       const letter = this.add.text(0, 0, ch, style).setOrigin(0.5);
       letter.x = x + letter.width / 2;
       letter.y = y;
-      letter.setDepth(500);
+      letter.setDepth(1000);
+      letter.setShadow(2, 2, '#000000', 2, true, true);
       this.tweens.add({
         targets: letter,
         y: letter.y + Phaser.Math.Between(-6, 6),
@@ -124,7 +131,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   showIntroText() {
-    const offset = 70;
+    const offset = 60;
     const topY = offset;
     const bottomY = VIRTUAL_HEIGHT * 2 - offset;
     this.introLetters = [
