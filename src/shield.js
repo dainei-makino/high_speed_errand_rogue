@@ -53,7 +53,7 @@ export default class Shield {
     ctx.scale(1, scaleY);
     const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
     grad.addColorStop(0, 'rgba(51,136,255,0)');
-    grad.addColorStop(1, 'rgba(51,136,255,0.6)');
+    grad.addColorStop(1, 'rgba(51,136,255,1)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(0, 0, rx, 0, Math.PI * 2);
