@@ -1,3 +1,5 @@
+import { isHorizontal, isVertical } from './utils.js';
+
 export default class InputBuffer {
   constructor(scene) {
     this.scene = scene;
@@ -38,9 +40,7 @@ export default class InputBuffer {
         this.push(dir);
       } else {
         const first = this.holdOrder[0];
-        const isH = d => d === 'left' || d === 'right';
-        const isV = d => d === 'up' || d === 'down';
-        if ((isH(first) && isV(dir)) || (isV(first) && isH(dir))) {
+        if ((isHorizontal(first) && isVertical(dir)) || (isVertical(first) && isHorizontal(dir))) {
           this.push(dir);
         }
       }
@@ -83,12 +83,10 @@ export default class InputBuffer {
   }
 
   repeat(dir) {
-    const isH = d => d === 'left' || d === 'right';
-    const isV = d => d === 'up' || d === 'down';
     if (this.holdOrder.includes(dir)) {
       let alt = null;
       for (const d of this.holdOrder) {
-        if (d !== dir && ((isH(d) && isV(dir)) || (isV(d) && isH(dir)))) {
+        if (d !== dir && ((isHorizontal(d) && isVertical(dir)) || (isVertical(d) && isHorizontal(dir)))) {
           alt = d;
           break;
         }

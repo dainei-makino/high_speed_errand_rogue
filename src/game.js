@@ -10,6 +10,7 @@ import { newChunkTransition, evaporateArea } from './effects.js';
 import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
 import GameOverScene from './game_over_scene.js';
+import { computeTetherPoints, isHorizontal, isVertical } from './utils.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -113,28 +114,13 @@ class GameScene extends Phaser.Scene {
           const hy = this.heroSprite.y;
           const cx = this.oxygenConsole.x;
           const cy = this.oxygenConsole.y;
-          const dx = hx - cx;
-          const dy = hy - cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const sag = Math.min(this.mazeManager.tileSize, dist / 4);
-          const midX = (hx + cx) / 2;
-          const midY = Math.max(hy, cy) + sag;
-          const steps = 5;
-          for (let i = 0; i < steps; i++) {
-            const t = i / steps;
-            const inv = 1 - t;
-            const px =
-              inv * inv * cx +
-              2 * inv * t * midX +
-              t * t * hx;
-            const py =
-              inv * inv * cy +
-              2 * inv * t * midY +
-              t * t * hy;
+          const points = computeTetherPoints(cx, cy, hx, hy, this.mazeManager.tileSize, 5);
+          points.forEach((p, i) => {
+            if (i === 0) return;
             this.time.delayedCall(i * 40, () => {
-              evaporateArea(this, px - 4, py - 4, 8, 8, 0xffffff);
+              evaporateArea(this, p.x - 4, p.y - 4, 8, 8, 0xffffff);
             });
-          }
+          });
           this.tweens.add({
             targets: this.oxygenLine,
             alpha: 0,
@@ -205,11 +191,9 @@ class GameScene extends Phaser.Scene {
         let moveDir = dir;
 
         if (blocked && this.inputBuffer.holdOrder.length > 1) {
-          const isH = d => d === 'left' || d === 'right';
-          const isV = d => d === 'up' || d === 'down';
           for (const d2 of this.inputBuffer.holdOrder) {
             if (d2 === dir) continue;
-            if ((isH(d2) && isH(dir)) || (isV(d2) && isV(dir))) continue;
+            if ((isHorizontal(d2) && isHorizontal(dir)) || (isVertical(d2) && isVertical(dir))) continue;
             const alt = calc(d2);
             if (!alt.blocked) {
               ({ blocked, targetX, targetY } = alt);
@@ -401,29 +385,13 @@ class GameScene extends Phaser.Scene {
       const hy = this.heroSprite.y;
       const cx = this.oxygenConsole.x;
       const cy = this.oxygenConsole.y;
-      const dx = hx - cx;
-      const dy = hy - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const sag = Math.min(this.mazeManager.tileSize, dist / 4);
-      const midX = (hx + cx) / 2;
-      const midY = Math.max(hy, cy) + sag;
+      const points = computeTetherPoints(cx, cy, hx, hy, this.mazeManager.tileSize);
       this.oxygenLine.clear();
       this.oxygenLine.lineStyle(2, 0xffffff, 1);
       this.oxygenLine.beginPath();
       this.oxygenLine.moveTo(cx, cy);
-      const segments = 16;
-      for (let i = 1; i <= segments; i++) {
-        const t = i / segments;
-        const inv = 1 - t;
-        const px =
-          inv * inv * cx +
-          2 * inv * t * midX +
-          t * t * hx;
-        const py =
-          inv * inv * cy +
-          2 * inv * t * midY +
-          t * t * hy;
-        this.oxygenLine.lineTo(px, py);
+      for (let i = 1; i < points.length; i++) {
+        this.oxygenLine.lineTo(points[i].x, points[i].y);
       }
       this.oxygenLine.strokePath();
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
