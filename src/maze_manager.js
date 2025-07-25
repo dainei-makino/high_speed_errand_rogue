@@ -6,10 +6,13 @@ import { evaporateChunk } from './effects.js';
 export default class MazeManager {
   constructor(scene) {
     this.scene = scene;
-    this.tileSize = 16;
+    // Tile graphics were previously drawn assuming 16x16 pixel tiles.
+    // Switch to 32x32px tiles for all placements and scaling.
+    this.tileSize = 32;
     this.activeChunks = [];
     this.chunkCount = 0;
-    this.chunkSpacing = 16;
+    // Keep chunk spacing consistent with the new tile size
+    this.chunkSpacing = 32;
     // Use a random base for seeds so mazes differ each run
     this.seedBase = Math.random().toString(36).slice(2);
     this.seedCount = 0;
