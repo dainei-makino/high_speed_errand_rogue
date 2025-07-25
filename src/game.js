@@ -72,7 +72,8 @@ class GameScene extends Phaser.Scene {
       this.mazeManager.tileSize,
       this.mazeManager.tileSize * heroRatio
     );
-    this.heroImage.y = -4; // shift sprite up for depth effect
+    // Shift sprite down slightly so the hero appears lower in the tile
+    this.heroImage.y = 2; // moved 6px downward
 
     this.heroSprite = this.add.container(0, 0, [this.heroImage]);
     this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
