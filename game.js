@@ -235,11 +235,22 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
-      if (curTile.cell === TILE.OXYGEN && curTile.chunk.chunk.airTank && !curTile.chunk.chunk.airTank.collected) {
+      if (
+        curTile.cell === TILE.OXYGEN &&
+        curTile.chunk.chunk.airTank &&
+        !curTile.chunk.chunk.airTank.collected
+      ) {
+        curTile.chunk.chunk.airTank.collected = true;
         this.mazeManager.removeAirTank(curTile.chunk);
         this.sound.play('pick_up');
-        this.hero.oxygen = Math.min(this.hero.oxygen + 5, this.hero.maxOxygen);
-        this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
+        this.hero.oxygen = Math.min(
+          this.hero.oxygen + 5,
+          this.hero.maxOxygen
+        );
+        this.events.emit(
+          'updateOxygen',
+          this.hero.oxygen / this.hero.maxOxygen
+        );
       }
 
       if (curTile.cell === TILE.SILVER_DOOR && this.hero.keys > 0) {
