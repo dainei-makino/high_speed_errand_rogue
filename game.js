@@ -40,7 +40,7 @@ class GameScene extends Phaser.Scene {
     this.mazeManager = new MazeManager(this);
 
     this.cameraManager = new CameraManager(this, this.mazeManager);
-    this.starField = new StarField(this, this.cameraManager.bounds);
+    this.starField = new StarField(this);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);

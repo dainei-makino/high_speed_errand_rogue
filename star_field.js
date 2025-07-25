@@ -1,12 +1,15 @@
 export default class StarField {
-  constructor(scene, bounds, count = 300) {
+  constructor(scene, count = 200) {
     this.scene = scene;
+    const cam = scene.cameras.main;
+    const width = cam.width;
+    const height = cam.height;
     this.container = scene.add.container(0, 0);
     this.container.setDepth(-1000);
-    const b = bounds || { minX: -1000, minY: -1000, maxX: 9000, maxY: 9000 };
+    this.container.setScrollFactor(0);
     for (let i = 0; i < count; i++) {
-      const x = Phaser.Math.Between(b.minX, b.maxX);
-      const y = Phaser.Math.Between(b.minY, b.maxY);
+      const x = Phaser.Math.Between(0, width);
+      const y = Phaser.Math.Between(0, height);
       const star = scene.add.rectangle(x, y, 2, 2, 0xffffff);
       this.container.add(star);
       scene.tweens.add({
