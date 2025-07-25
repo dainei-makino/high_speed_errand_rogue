@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40">
+  <defs>
+    <linearGradient id="frogBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#aee868"/>
+      <stop offset="100%" stop-color="#6aa84f"/>
+    </linearGradient>
+    <linearGradient id="tankGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b0e0ff"/>
+      <stop offset="100%" stop-color="#3399ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="16" cy="25" rx="6" ry="7" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
+  <!-- Suit Torso -->
+  <rect x="10" y="18" width="12" height="14" rx="3" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Arms -->
+  <rect x="5" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <rect x="22" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Belt -->
+  <rect x="10" y="26" width="12" height="3" fill="#c0c0c0"/>
+  <!-- Legs -->
+  <ellipse cx="11" cy="36" rx="4" ry="2" fill="#8cc84b"/>
+  <ellipse cx="21" cy="32" rx="4" ry="2" fill="#8cc84b"/>
+  <!-- Oxygen Tank -->
+  <g id="tank">
+    <rect x="11" y="15" width="10" height="15" rx="3" fill="url(#tankGrad)" stroke="#2b6f95" stroke-width="1.5"/>
+    <rect x="11" y="22" width="10" height="2" fill="#333" opacity="0.4"/>
+    <line x1="16" y1="15" x2="16" y2="12" stroke="#c0c0c0" stroke-width="2"/>
+    <circle cx="16" cy="11" r="2" fill="#99d9ff" stroke="#2b6f95" stroke-width="0.5"/>
+  </g>
+  <!-- Head -->
+  <ellipse cx="16" cy="12" rx="11" ry="10" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
+  <ellipse cx="8" cy="15" rx="4" ry="2" fill="#8cc84b"/>
+  <ellipse cx="24" cy="13" rx="4" ry="2" fill="#8cc84b"/>
+  <path d="M10 12 L22 12" stroke="#4e7c3a" stroke-width="2"/>
+              <!-- Helmet -->
+  <circle cx="16" cy="12" r="12" fill="#e0f7ff" fill-opacity="0.5" stroke="#99ccff" stroke-width="2"/>
+</svg>
