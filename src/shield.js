@@ -1,37 +1,26 @@
 export default class Shield {
-  constructor(scene, mazeManager) {
+  constructor(scene) {
     this.scene = scene;
-    this.mazeManager = mazeManager;
-    this.radius = 10;
+    this.radius = 150;
     this.sprite = scene.add.image(0, 0, this._createTexture(this.radius)).setOrigin(0.5);
     this.sprite.setDepth(8);
     this.sprite.setScrollFactor(0);
     this.sprite.setAlpha(0);
+    this.updatePosition();
   }
 
-  getCurrentChunk() {
-    if (!this.mazeManager.activeChunks.length) return null;
-    return this.mazeManager.activeChunks[this.mazeManager.activeChunks.length - 1];
+  updatePosition() {
+    const cam = this.scene.cameras.main;
+    this.sprite.setPosition(cam.centerX, cam.centerY);
   }
 
   update() {
-    const info = this.getCurrentChunk();
-    if (!info) return;
-    const size = info.chunk.size * this.mazeManager.tileSize;
-    const r = (size * 1.5) / 2;
-    if (r !== this.radius) {
-      this.radius = r;
-      const key = this._createTexture(this.radius);
-      this.sprite.setTexture(key);
-      this.sprite.setDisplaySize(this.radius * 2, this.radius * 2);
-    }
-    const { x, y } = this.mazeManager.getChunkCenter(info);
-    const cam = this.scene.cameras.main;
-    this.sprite.setPosition(x - cam.scrollX, y - cam.scrollY);
+    this.updatePosition();
   }
 
-  getScreenPosition() {
-    return { x: this.sprite.x, y: this.sprite.y };
+  getWorldPosition() {
+    const cam = this.scene.cameras.main;
+    return { x: cam.scrollX + cam.centerX, y: cam.scrollY + cam.centerY };
   }
 
   flash() {

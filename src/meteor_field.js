@@ -4,7 +4,6 @@ export default class MeteorField {
     this.shield = shield;
     this.container = scene.add.container(0, 0);
     this.container.setDepth(1000);
-    this.container.setScrollFactor(0);
     this.active = [];
     this.spawnTimer = scene.time.addEvent({
       delay: Phaser.Math.Between(5000, 10000),
@@ -32,15 +31,20 @@ export default class MeteorField {
 
   spawnMeteor() {
     const cam = this.scene.cameras.main;
-    const width = cam.width;
-    const height = cam.height;
+    const view = cam.worldView;
+    const width = view.width;
+    const height = view.height;
     const margin = 32;
     const edges = ['left', 'right', 'top', 'bottom'];
     const startEdge = Phaser.Utils.Array.GetRandom(edges);
     const opposite = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
     const destEdge = opposite[startEdge];
     const start = this.getEdgePos(startEdge, width, height, margin);
+    start.x += view.x;
+    start.y += view.y;
     const dest = this.getEdgePos(destEdge, width, height, margin);
+    dest.x += view.x;
+    dest.y += view.y;
     const meteor = this.scene.add.image(start.x, start.y, 'meteor').setOrigin(0.5);
     meteor.setDepth(0);
     this.container.add(meteor);
@@ -69,7 +73,6 @@ export default class MeteorField {
   showExplosion(x, y) {
     const img = this.scene.add.image(x, y, 'meteor_explosion1').setOrigin(0.5);
     img.setDepth(1);
-    img.setScrollFactor(0);
     this.container.add(img);
     this.scene.time.delayedCall(100, () => img.setTexture('meteor_explosion2'));
     this.scene.time.delayedCall(200, () => img.setTexture('meteor_explosion3'));
@@ -77,7 +80,7 @@ export default class MeteorField {
   }
 
   update() {
-    const shieldPos = this.shield.getScreenPosition();
+    const shieldPos = this.shield.getWorldPosition();
     const r2 = this.shield.radius * this.shield.radius;
     for (const m of [...this.active]) {
       const dx = m.x - shieldPos.x;
