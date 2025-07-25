@@ -63,6 +63,14 @@ export default class CameraManager {
   }
 
   /**
+   * 小さく横揺れする演出
+   */
+  shakeSmall() {
+    const intensity = { x: 2 / this.cam.width, y: 0 };
+    this.cam.shake(80, intensity);
+  }
+
+  /**
    * 任意位置へ直接パンするユーティリティ
    */
   panTo(x, y, duration = 500) {
@@ -82,7 +90,10 @@ export default class CameraManager {
    * to avoid cumulative drift.
    */
   maintainCenter() {
-    if (!this.cam.panEffect || !this.cam.panEffect.isRunning) {
+    if (
+      (!this.cam.panEffect || !this.cam.panEffect.isRunning) &&
+      (!this.cam.shakeEffect || !this.cam.shakeEffect.isRunning)
+    ) {
       const { x, y } = this.expectedCenter;
       const dx = x - this.cam.midPoint.x;
       const dy = y - this.cam.midPoint.y;
