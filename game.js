@@ -1,4 +1,4 @@
-import GameState from './game-state.js';
+import gameState from './game-state.js';
 import HeroState from './hero_state.js';
 import CameraManager from './camera.js';
 import MazeManager from './maze_manager.js';
@@ -17,7 +17,6 @@ const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
 // Global state for tracking overall game progress
-const gameState = new GameState();
 
 class GameScene extends Phaser.Scene {
   constructor() {

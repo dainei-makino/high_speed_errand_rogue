@@ -1,4 +1,4 @@
-export default class GameState {
+export class GameState {
   constructor() {
     // Number of maze chunks the player has cleared
     this.clearedMazes = 0;
@@ -14,3 +14,6 @@ export default class GameState {
     this.clearedMazes = 0;
   }
 }
+
+const gameState = new GameState();
+export default gameState;
