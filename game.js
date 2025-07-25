@@ -28,6 +28,7 @@ class GameScene extends Phaser.Scene {
     this.oxygenTimer = null;
     this.bgm = null;
     this.isGameOver = false;
+    this.trailTimer = null;
   }
 
   preload() {
@@ -168,6 +169,7 @@ class GameScene extends Phaser.Scene {
 
         if (!blocked) {
           this.isMoving = true;
+          this.startTrail();
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
           this.sound.play('hero_walk');
@@ -200,6 +202,7 @@ class GameScene extends Phaser.Scene {
             duration,
             onComplete: () => {
               this.isMoving = false;
+              this.stopTrail();
               if (this.heroAnimationTimer) {
                 this.heroAnimationTimer.remove();
                 this.heroAnimationTimer = null;
@@ -322,6 +325,42 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  startTrail() {
+    if (this.trailTimer) return;
+    this.trailTimer = this.time.addEvent({
+      delay: 50,
+      loop: true,
+      callback: () => this.spawnAfterimage()
+    });
+  }
+
+  stopTrail() {
+    if (this.trailTimer) {
+      this.trailTimer.remove();
+      this.trailTimer = null;
+    }
+  }
+
+  spawnAfterimage() {
+    const img = this.add.image(
+      this.heroSprite.x,
+      this.heroSprite.y + this.heroImage.y,
+      this.heroImage.texture.key
+    );
+    img.setOrigin(0.5);
+    img.setDisplaySize(this.heroImage.displayWidth, this.heroImage.displayHeight);
+    img.setFlipX(this.heroImage.flipX);
+    img.setAlpha(0.5);
+    const idx = this.worldLayer.getIndex(this.heroSprite);
+    this.worldLayer.addAt(img, idx);
+    this.tweens.add({
+      targets: img,
+      alpha: 0,
+      duration: 200,
+      onComplete: () => img.destroy()
+    });
+  }
+
   startOxygenTimer() {
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
     this.oxygenTimer = this.time.addEvent({
@@ -355,6 +394,7 @@ class GameScene extends Phaser.Scene {
       this.heroAnimationTimer.remove();
       this.heroAnimationTimer = null;
     }
+    this.stopTrail();
     this.isMoving = false;
 
     const size = this.mazeManager.tileSize;
