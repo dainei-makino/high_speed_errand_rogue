@@ -38,7 +38,8 @@ export const TILE = {
   ITEM_CHEST: 4,
   SPECIAL: 5,
   SILVER_DOOR: 6,
-  OXYGEN: 7
+  OXYGEN: 7,
+  AUTO_GATE: 8
 };
 
 const DIRS = [
