@@ -68,7 +68,7 @@ export default class MazeManager {
       oxygenSprite: null,
       oxygenPosition: null,
       silverDoors: [],
-      autoGates: []
+      autoGates: [],
       spikeSprites: []
     };
     this.renderChunk(chunk, container, info);
