@@ -176,14 +176,23 @@ class GameScene extends Phaser.Scene {
           const targetX = this.heroSprite.x + dx * size;
           const targetY = this.heroSprite.y + dy * size;
           const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
-          const blocked = tileInfo && (
-            tileInfo.cell === TILE.WALL ||
-            (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-            (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
-            (tileInfo.cell === TILE.AUTO_GATE &&
-              tileInfo.chunk.chunk.autoGates &&
-              tileInfo.chunk.chunk.autoGates.find(g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed))
-          );
+          const entranceClosed =
+            tileInfo &&
+            tileInfo.chunk.entranceDoorSprite &&
+            tileInfo.chunk.entranceDoorSprite.texture.key === 'exit' &&
+            tileInfo.tx === tileInfo.chunk.chunk.entrance.x &&
+            tileInfo.ty === tileInfo.chunk.chunk.entrance.y;
+          const blocked =
+            tileInfo &&
+            (tileInfo.cell === TILE.WALL ||
+              (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
+              (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+              (tileInfo.cell === TILE.AUTO_GATE &&
+                tileInfo.chunk.chunk.autoGates &&
+                tileInfo.chunk.chunk.autoGates.find(
+                  g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed
+                )) ||
+              entranceClosed);
           return { blocked, targetX, targetY };
         };
 
