@@ -81,6 +81,8 @@ export default class MazeManager {
         const floor = Characters.createFloor(this.scene);
         floor.setDisplaySize(size, size);
         floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+        // Floors should always render behind other objects
+        floor.setDepth(-1);
         this.scene.worldLayer.add(floor);
         info.sprites.push(floor);
 
