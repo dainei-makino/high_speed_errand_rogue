@@ -330,6 +330,20 @@ export default class MazeManager {
     }
   }
 
+  _isNearEntranceOrExit(chunk, x, y) {
+    if (chunk.entrance) {
+      const dx = Math.abs(chunk.entrance.x - x);
+      const dy = Math.abs(chunk.entrance.y - y);
+      if (dx <= 1 && dy <= 1) return true;
+    }
+    if (chunk.door) {
+      const dx = Math.abs(chunk.door.x - x);
+      const dy = Math.abs(chunk.door.y - y);
+      if (dx <= 1 && dy <= 1) return true;
+    }
+    return false;
+  }
+
   _ensureEntrance(chunk) {
     if (chunk.entrance) return;
     const floors = [];
@@ -342,6 +356,24 @@ export default class MazeManager {
       }
     }
     chunk.entrance = floors[Math.floor(Math.random() * floors.length)] || { x: 1, y: 1 };
+
+    if (chunk.chest) {
+      const idx = chunk.chest.y * size + chunk.chest.x;
+      if (this._isNearEntranceOrExit(chunk, chunk.chest.x, chunk.chest.y)) {
+        let nx, ny;
+        do {
+          nx = Math.floor(Math.random() * (size - 2)) + 1;
+          ny = Math.floor(Math.random() * (size - 2)) + 1;
+        } while (
+          chunk.tiles[ny * size + nx] !== TILE.FLOOR ||
+          this._isNearEntranceOrExit(chunk, nx, ny)
+        );
+        chunk.tiles[idx] = TILE.FLOOR;
+        chunk.tiles[ny * size + nx] = TILE.CHEST;
+        chunk.chest.x = nx;
+        chunk.chest.y = ny;
+      }
+    }
   }
 
   _addSilverDoor(chunk) {
@@ -383,7 +415,10 @@ export default class MazeManager {
     do {
       x = Math.floor(Math.random() * (size - 2)) + 1;
       y = Math.floor(Math.random() * (size - 2)) + 1;
-    } while (t[y * size + x] !== TILE.FLOOR);
+    } while (
+      t[y * size + x] !== TILE.FLOOR ||
+      this._isNearEntranceOrExit(chunk, x, y)
+    );
     t[y * size + x] = TILE.OXYGEN;
     chunk.airTank = { x, y, collected: false };
   }
