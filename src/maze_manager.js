@@ -46,18 +46,9 @@ export default class MazeManager {
   }
 
   addChunk(chunk, offsetX, offsetY) {
-    const container = this.scene.add.container(offsetX, offsetY);
-    if (this.scene.worldLayer) {
-      // Add new chunk containers behind the hero so the character remains visible
-      this.scene.worldLayer.addAt(container, 0);
-    }
-    container.alpha = 0;
-    this.scene.tweens.add({ targets: container, alpha: 1, duration: 400 });
-
     const info = {
       index: this.chunkCount++,
       chunk,
-      container,
       offsetX,
       offsetY,
       age: 0,
@@ -69,24 +60,29 @@ export default class MazeManager {
       oxygenPosition: null,
       silverDoors: [],
       autoGates: [],
-      spikeSprites: []
+      spikeSprites: [],
+      sprites: []
     };
-    this.renderChunk(chunk, container, info);
+    this.renderChunk(chunk, info);
+    // Fade sprites in similar to the old container
+    info.sprites.forEach(s => (s.alpha = 0));
+    this.scene.tweens.add({ targets: info.sprites, alpha: 1, duration: 400 });
     this.activeChunks.push(info);
     this.events.emit('chunk-added', info);
     this.events.emit('chunk-created', info);
     return info;
   }
 
-  renderChunk(chunk, container, info) {
+  renderChunk(chunk, info) {
     const size = this.tileSize;
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
         const tile = chunk.tiles[y * chunk.size + x];
         const floor = Characters.createFloor(this.scene);
         floor.setDisplaySize(size, size);
-        floor.setPosition(x * size, y * size);
-        container.add(floor);
+        floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+        this.scene.worldLayer.add(floor);
+        info.sprites.push(floor);
 
         let sprite = null;
         switch (tile) {
@@ -139,8 +135,9 @@ export default class MazeManager {
 
         if (sprite) {
           sprite.setDisplaySize(size, size);
-          sprite.setPosition(x * size, y * size);
-          container.add(sprite);
+          sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+          this.scene.worldLayer.add(sprite);
+          info.sprites.push(sprite);
         }
 
         if (chunk.spikes) {
@@ -148,8 +145,9 @@ export default class MazeManager {
           if (s) {
             const spikeSprite = Characters.createSpike(this.scene);
             spikeSprite.setDisplaySize(size, size);
-            spikeSprite.setPosition(x * size, y * size);
-            container.add(spikeSprite);
+            spikeSprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+            this.scene.worldLayer.add(spikeSprite);
+            info.sprites.push(spikeSprite);
             info.spikeSprites.push({ x, y, sprite: spikeSprite });
           }
         }
@@ -204,14 +202,14 @@ export default class MazeManager {
         }
         const size = obj.chunk.size * this.tileSize;
         evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
-        obj.container.destroy();
+        obj.sprites.forEach(s => s.destroy());
         this.activeChunks = this.activeChunks.filter(c => c !== obj);
         continue;
       }
       if (obj.index !== 0 && obj.age > this.fadeDelay && !obj.fading) {
         obj.fading = true;
         this.scene.tweens.add({
-          targets: obj.container,
+          targets: obj.sprites,
           alpha: 0,
           duration: this.fadeDuration,
           onComplete: () => {
@@ -220,7 +218,7 @@ export default class MazeManager {
             }
             const size = obj.chunk.size * this.tileSize;
             evaporateChunk(this.scene, obj.offsetX, obj.offsetY, size, size);
-            obj.container.destroy();
+            obj.sprites.forEach(s => s.destroy());
             this.activeChunks = this.activeChunks.filter(c => c !== obj);
           }
         });
