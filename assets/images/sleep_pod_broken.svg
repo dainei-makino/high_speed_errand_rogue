@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46">
+  <defs>
+    <linearGradient id="podGray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d0d0d0"/>
+      <stop offset="100%" stop-color="#888888"/>
+    </linearGradient>
+    <linearGradient id="glassBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f7ff"/>
+      <stop offset="100%" stop-color="#a0d8ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Pod back shell -->
+  <rect x="4" y="2" width="24" height="42" rx="10" fill="url(#podGray)" stroke="#606060" stroke-width="2"/>
+  <!-- Front glass window -->
+  <rect x="7" y="6" width="18" height="34" rx="8" fill="url(#glassBlue)" stroke="#77aadd" stroke-width="1.5" fill-opacity="0.7"/>
+  <!-- Large missing glass section covering most of the window -->
+  <path d="M7 8 L14 6 L21 8 L24 14 L19 22 L22 30 L17 36 L11 32 L7 38 Z" fill="url(#podGray)" stroke="#606060" stroke-width="1"/>
+  <!-- Cracked glass details -->
+  <path d="M22 16 L18 24 L22 32" stroke="#99ccff" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <path d="M16 12 L20 18 L17 24" stroke="#99ccff" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <path d="M19 28 L14 30 L20 36" stroke="#99ccff" stroke-width="1" fill="none" stroke-linecap="round"/>
+</svg>
