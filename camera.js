@@ -3,6 +3,9 @@ export default class CameraManager {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.cam = scene.cameras.main;
+    // Start a bit closer to make the maze appear larger
+    this.defaultZoom = 2;
+    this.cam.setZoom(this.defaultZoom);
     this.bounds = { minX: -1000, minY: -1000, maxX: 9000, maxY: 9000 };
     this.cam.setBounds(
       this.bounds.minX,
@@ -40,16 +43,16 @@ export default class CameraManager {
    * 軽い揺れ演出 (ズームバンプ)
    */
   zoomBump() {
-    this.cam.zoomTo(0.95, 150)
-      .once('camerazoomcomplete', () => this.cam.zoomTo(1, 200));
+    this.cam.zoomTo(this.defaultZoom * 0.95, 150)
+      .once('camerazoomcomplete', () => this.cam.zoomTo(this.defaultZoom, 200));
   }
 
   /**
    * 一瞬だけズームインする演出
    */
   zoomHeroFocus() {
-    this.cam.zoomTo(1.2, 100)
-      .once('camerazoomcomplete', () => this.cam.zoomTo(1, 150));
+    this.cam.zoomTo(this.defaultZoom * 1.2, 100)
+      .once('camerazoomcomplete', () => this.cam.zoomTo(this.defaultZoom, 150));
   }
 
   /**
@@ -108,6 +111,7 @@ export default class CameraManager {
   }
 
   setZoom(zoom, duration = 0) {
+    this.defaultZoom = zoom;
     if (duration > 0) {
       this.scene.tweens.add({
         targets: this.cam,
