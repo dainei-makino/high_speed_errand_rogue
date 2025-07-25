@@ -288,8 +288,18 @@ export default class MazeManager {
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
     if (progress >= 1) {
-      this._addSilverDoor(chunk);
-      this._addAutoGate(chunk);
+      if (progress >= 19) {
+        const total = Math.floor(Math.random() * 3) + 1; // 1-3 doors
+        this._addMixedDoors(chunk, total);
+      } else if (progress >= 9) {
+        if (Math.random() < 0.5) {
+          this._addSilverDoor(chunk);
+        } else {
+          this._addAutoGate(chunk);
+        }
+      } else {
+        this._addSilverDoor(chunk);
+      }
       this._addAirTank(chunk);
     }
 
@@ -404,7 +414,7 @@ export default class MazeManager {
     }
   }
 
-  _addSilverDoor(chunk) {
+  _getDoorCandidates(chunk) {
     const candidates = [];
     const size = chunk.size;
     const t = chunk.tiles;
@@ -422,10 +432,20 @@ export default class MazeManager {
         }
       }
     }
+    return candidates;
+  }
+
+  _addSilverDoor(chunk, count) {
+    const size = chunk.size;
+    const candidates = this._getDoorCandidates(chunk);
     const doors = [];
     if (candidates.length) {
       const doorCount =
-        size >= 11 && Math.random() < 0.5 ? 2 : 1;
+        typeof count === 'number'
+          ? Math.min(count, candidates.length)
+          : size >= 11 && Math.random() < 0.5
+            ? 2
+            : 1;
       for (let i = 0; i < doorCount && candidates.length; i++) {
         const idx = Math.floor(Math.random() * candidates.length);
         const spot = candidates.splice(idx, 1)[0];
@@ -436,27 +456,17 @@ export default class MazeManager {
     chunk.silverDoors = doors;
   }
 
-  _addAutoGate(chunk) {
-    const candidates = [];
+  _addAutoGate(chunk, count) {
     const size = chunk.size;
-    const t = chunk.tiles;
-    for (let y = 1; y < size - 1; y++) {
-      for (let x = 1; x < size - 1; x++) {
-        if (t[y * size + x] !== TILE.WALL) continue;
-        const n = t[(y - 1) * size + x];
-        const s = t[(y + 1) * size + x];
-        const e = t[y * size + (x + 1)];
-        const w = t[y * size + (x - 1)];
-        const horiz = e !== TILE.WALL && w !== TILE.WALL && n === TILE.WALL && s === TILE.WALL;
-        const vert = n !== TILE.WALL && s !== TILE.WALL && e === TILE.WALL && w === TILE.WALL;
-        if (horiz || vert) {
-          candidates.push({ x, y });
-        }
-      }
-    }
+    const candidates = this._getDoorCandidates(chunk);
     const gates = [];
     if (candidates.length) {
-      const gateCount = size >= 11 && Math.random() < 0.5 ? 2 : 1;
+      const gateCount =
+        typeof count === 'number'
+          ? Math.min(count, candidates.length)
+          : size >= 11 && Math.random() < 0.5
+            ? 2
+            : 1;
       for (let i = 0; i < gateCount && candidates.length; i++) {
         const idx = Math.floor(Math.random() * candidates.length);
         const spot = candidates.splice(idx, 1)[0];
@@ -464,6 +474,27 @@ export default class MazeManager {
         gates.push({ x: spot.x, y: spot.y, closed: false, passed: false });
       }
     }
+    chunk.autoGates = gates;
+  }
+
+  _addMixedDoors(chunk, totalCount) {
+    const size = chunk.size;
+    const candidates = this._getDoorCandidates(chunk);
+    const doors = [];
+    const gates = [];
+    const count = Math.min(totalCount, candidates.length);
+    for (let i = 0; i < count; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
+      if (Math.random() < 0.5) {
+        chunk.tiles[spot.y * size + spot.x] = TILE.SILVER_DOOR;
+        doors.push({ x: spot.x, y: spot.y, opened: false });
+      } else {
+        chunk.tiles[spot.y * size + spot.x] = TILE.AUTO_GATE;
+        gates.push({ x: spot.x, y: spot.y, closed: false, passed: false });
+      }
+    }
+    chunk.silverDoors = doors;
     chunk.autoGates = gates;
   }
 
