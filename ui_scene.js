@@ -144,7 +144,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   createFloatingText(str, centerX, y) {
-    const style = { fontFamily: 'monospace', fontSize: '24px', color: '#ffffff' };
+    const style = { fontFamily: 'monospace', fontSize: '36px', color: '#ffffff' };
     const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
     const total = measure.width;
     measure.destroy();
