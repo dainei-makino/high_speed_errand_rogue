@@ -63,6 +63,7 @@ export default class MazeManager {
       fading: false,
       doorSprite: null,
       chestSprite: null,
+      airTankSprite: null,
       silverDoors: []
     };
     this.renderChunk(chunk, container, info);
@@ -108,6 +109,11 @@ export default class MazeManager {
             sprite = Characters.createKey(this.scene);
             info.chestSprite = sprite;
             info.chestPosition = { x, y };
+            break;
+          case TILE.OXYGEN:
+            sprite = Characters.createAirTank(this.scene);
+            info.airTankSprite = sprite;
+            info.airTankPosition = { x, y };
             break;
         }
 
@@ -258,6 +264,7 @@ export default class MazeManager {
     this._ensureEntrance(chunk);
     if (progress >= 1) {
       this._addSilverDoor(chunk);
+      this._addAirTank(chunk);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -371,6 +378,18 @@ export default class MazeManager {
     chunk.silverDoors = doors;
   }
 
+  _addAirTank(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * (size - 2)) + 1;
+      y = Math.floor(Math.random() * (size - 2)) + 1;
+    } while (t[y * size + x] !== TILE.FLOOR);
+    t[y * size + x] = TILE.OXYGEN;
+    chunk.airTank = { x, y, collected: false };
+  }
+
   openDoor(info) {
     if (info && info.doorSprite) {
       info.doorSprite.setTexture('door_open');
@@ -398,6 +417,27 @@ export default class MazeManager {
         onComplete: () => {
           info.chestSprite.destroy();
           info.chestSprite = null;
+        }
+      });
+    }
+  }
+
+  removeAirTank(info) {
+    if (info && info.airTankSprite) {
+      const sprite = info.airTankSprite;
+      info.airTankSprite = null;
+      this.scene.tweens.add({
+        targets: sprite,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => {
+          sprite.destroy();
+          if (info.chunk.airTank) {
+            const { x, y } = info.chunk.airTank;
+            const idx = y * info.chunk.size + x;
+            info.chunk.tiles[idx] = TILE.FLOOR;
+            info.chunk.airTank.collected = true;
+          }
         }
       });
     }
