@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <linearGradient id="spikeMetal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#909090"/>
+    </linearGradient>
+  </defs>
+  <rect y="30" width="32" height="2" fill="#666666"/>
+  <path d="M0 30 L4 18 L8 30 Z" fill="url(#spikeMetal)" stroke="#444444" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M8 30 L12 18 L16 30 Z" fill="url(#spikeMetal)" stroke="#444444" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 30 L20 18 L24 30 Z" fill="url(#spikeMetal)" stroke="#444444" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 30 L28 18 L32 30 Z" fill="url(#spikeMetal)" stroke="#444444" stroke-width="2" stroke-linejoin="round"/>
+</svg>
