@@ -11,6 +11,12 @@ const SPRITES = {
   hero_walk1: 'hero_walk1.svg',
   hero_walk2: 'hero_walk2.svg',
   hero_walk3: 'hero_walk3.svg',
+  hero_back_walk1: 'hero_back_walk1.svg',
+  hero_back_walk2: 'hero_back_walk2.svg',
+  hero_back_walk3: 'hero_back_walk3.svg',
+  hero_right_walk1: 'hero_right_walk1.svg',
+  hero_right_walk2: 'hero_right_walk2.svg',
+  hero_right_walk3: 'hero_right_walk3.svg',
   arrow: 'arrow.svg',
   key: 'key.svg',
   air_tank: 'air_tank.svg'

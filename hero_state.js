@@ -10,6 +10,7 @@ export default class HeroState {
     this.keys = 0;
     this.maxOxygen = 20;
     this.oxygen = 20;
+    this.direction = 'down';
   }
 
   moveTo(x, y) {

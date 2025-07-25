@@ -173,7 +173,16 @@ class GameScene extends Phaser.Scene {
           const duration = (size / pixelsPerSecond) * 1000;
           this.sound.play('hero_walk');
 
-          const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
+          let orientation = moveDir;
+          if (moveDir === 'left') orientation = 'right';
+          this.hero.direction = orientation;
+          const frameMap = {
+            down: ['hero_walk1', 'hero_walk2', 'hero_walk3'],
+            up: ['hero_back_walk1', 'hero_back_walk2', 'hero_back_walk3'],
+            right: ['hero_right_walk1', 'hero_right_walk2', 'hero_right_walk3']
+          };
+          const frames = frameMap[orientation];
+          this.heroImage.setFlipX(moveDir === 'left');
           this.heroAnimIndex = 0;
           this.heroImage.setTexture(frames[0]);
           this.heroAnimationTimer = this.time.addEvent({
@@ -196,7 +205,7 @@ class GameScene extends Phaser.Scene {
                 this.heroAnimationTimer.remove();
                 this.heroAnimationTimer = null;
               }
-              this.heroImage.setTexture('hero_idle');
+              this.heroImage.setTexture(frames[0]);
               this.inputBuffer.repeat(moveDir);
             }
           });

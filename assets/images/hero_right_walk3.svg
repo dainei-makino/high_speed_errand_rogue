@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40">
+  <defs>
+    <linearGradient id="frogBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#aee868"/>
+      <stop offset="100%" stop-color="#6aa84f"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <ellipse cx="16" cy="25" rx="6" ry="7" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
+  <!-- Suit Torso -->
+  <rect x="10" y="18" width="12" height="14" rx="3" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Arms -->
+  <rect x="5" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <rect x="22" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Belt -->
+  <rect x="10" y="26" width="12" height="3" fill="#c0c0c0"/>
+  <!-- Legs -->
+  <ellipse cx="11" cy="36" rx="4" ry="2" fill="#8cc84b"/>
+  <ellipse cx="21" cy="32" rx="4" ry="2" fill="#8cc84b"/>
+  <!-- Head -->
+  <ellipse cx="18" cy="12" rx="11" ry="10" fill="url(#frogBody)" stroke="#4e7c3a" stroke-width="2"/>
+  <ellipse cx="24" cy="13" rx="4" ry="2" fill="#8cc84b"/>
+  <circle cx="22" cy="6" r="4" fill="#ffffff"/>
+  <circle cx="22" cy="6" r="2" fill="#000000"/>
+  <path d="M14 12 Q18 16 22 12" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M10 11 C12 9, 24 9, 26 11" stroke="#e07070" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Helmet -->
+  <circle cx="18" cy="12" r="12" fill="#e0f7ff" fill-opacity="0.5" stroke="#99ccff" stroke-width="2"/>
+</svg>
