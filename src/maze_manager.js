@@ -34,6 +34,37 @@ export default class MazeManager {
     return `${this.seedBase}-${this.seedCount++}`;
   }
 
+  _wallAutotileType(chunk, x, y) {
+    const size = chunk.size;
+    const tiles = chunk.tiles;
+    const isWall = (cx, cy) =>
+      cx >= 0 && cy >= 0 && cx < size && cy < size && tiles[cy * size + cx] === TILE.WALL;
+    const n = isWall(x, y - 1);
+    const e = isWall(x + 1, y);
+    const s = isWall(x, y + 1);
+    const w = isWall(x - 1, y);
+    const bits = (n ? 1 : 0) | (e ? 2 : 0) | (s ? 4 : 0) | (w ? 8 : 0);
+    const map = {
+      0: 'isolated',
+      1: 'end_top',
+      2: 'end_right',
+      4: 'end_bottom',
+      8: 'end_left',
+      3: 'corner_tr',
+      6: 'corner_br',
+      9: 'corner_tl',
+      12: 'corner_bl',
+      5: 'vertical',
+      10: 'horizontal',
+      7: 't_right',
+      11: 't_up',
+      13: 't_left',
+      14: 't_down',
+      15: 'cross'
+    };
+    return map[bits] || 'isolated';
+  }
+
   spawnInitial() {
     const { size } = pickMazeConfig(1);
     const chunk = createChunk(this._nextSeed(), size, 'W');
@@ -85,9 +116,11 @@ export default class MazeManager {
 
         let sprite = null;
         switch (tile) {
-          case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+          case TILE.WALL: {
+            const type = this._wallAutotileType(chunk, x, y);
+            sprite = Characters.createWall(this.scene, type);
             break;
+          }
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
             info.oxygenSprite = sprite;

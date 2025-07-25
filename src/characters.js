@@ -1,7 +1,7 @@
 const ASSET_PATH = 'assets/images/';
 const SPRITES = {
   floor: 'floor.svg',
-  wall: 'wall.svg',
+  wall_autotiles: 'wall_autotiles.svg',
   exit: 'airlock_closed.svg',
   door_silver: 'airlock_silver.svg',
   door_silver_open: 'airlock_silver_open.svg',
@@ -26,6 +26,25 @@ const SPRITES = {
   spikes: 'floor_spikes.svg'
 };
 
+const WALL_TILES = {
+  cross: [0, 0],
+  t_up: [1, 0],
+  t_down: [2, 0],
+  t_left: [3, 0],
+  t_right: [0, 1],
+  horizontal: [1, 1],
+  vertical: [2, 1],
+  corner_tl: [3, 1],
+  corner_tr: [0, 2],
+  corner_bl: [1, 2],
+  corner_br: [2, 2],
+  end_top: [3, 2],
+  end_right: [0, 3],
+  end_bottom: [1, 3],
+  end_left: [2, 3],
+  isolated: [3, 3]
+};
+
 const canvases = {};
 
 async function loadAll() {
@@ -48,6 +67,19 @@ async function loadAll() {
     canvases[key] = canvas;
   });
   await Promise.all(entries);
+  if (canvases.wall_autotiles) {
+    const base = canvases.wall_autotiles;
+    for (const [name, pos] of Object.entries(WALL_TILES)) {
+      const [tx, ty] = pos;
+      const tile = document.createElement('canvas');
+      tile.width = 32;
+      tile.height = 32;
+      const ctx = tile.getContext('2d');
+      ctx.drawImage(base, tx * 32, ty * 32, 32, 32, 0, 0, 32, 32);
+      canvases['wall_' + name] = tile;
+    }
+    delete canvases.wall_autotiles;
+  }
 }
 
 const ready = loadAll();
@@ -64,8 +96,9 @@ function createFloor(scene) {
   return scene.add.image(0, 0, 'floor').setOrigin(0);
 }
 
-function createWall(scene) {
-  return scene.add.image(0, 0, 'wall').setOrigin(0);
+function createWall(scene, type = 'isolated') {
+  const key = 'wall_' + type;
+  return scene.add.image(0, 0, key).setOrigin(0);
 }
 
 function createExit(scene) {
