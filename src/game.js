@@ -13,6 +13,7 @@ import GameOverScene from './game_over_scene.js';
 import { computeTetherPoints, isHorizontal, isVertical } from './utils.js';
 import Shield from './shield.js';
 import MeteorField from './meteor_field.js';
+import PixelRetroPipeline from './pixel_retro_pipeline.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -34,10 +35,16 @@ class GameScene extends Phaser.Scene {
     this.lastSpikeTile = null;
     this.oxygenLine = null;
     this.oxygenConsole = null;
+    this.retroPipeline = null;
   }
 
   preload() {
     Characters.registerTextures(this);
+    if (!this.renderer.pipelines.get('PixelRetro')) {
+      this.retroPipeline = this.renderer.pipelines.add('PixelRetro', new PixelRetroPipeline(this.game));
+    } else {
+      this.retroPipeline = this.renderer.pipelines.get('PixelRetro');
+    }
   }
 
   create() {
@@ -53,6 +60,10 @@ class GameScene extends Phaser.Scene {
     this.mazeManager = new MazeManager(this);
 
     this.cameraManager = new CameraManager(this, this.mazeManager);
+    if (this.retroPipeline) {
+      this.cameras.main.setRenderToTexture(this.retroPipeline);
+      this.retroPipeline.pixelSize = 4.0;
+    }
     this.starField = new StarField(this);
     this.shield = new Shield(this);
     this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 40);
