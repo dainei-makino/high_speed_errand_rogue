@@ -1,4 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+  <defs>
+    <mask id="mask_corner_tl" maskUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="white"/>
+      <circle cx="0" cy="0" r="8" fill="black"/>
+    </mask>
+    <mask id="mask_corner_tr" maskUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="white"/>
+      <circle cx="32" cy="0" r="8" fill="black"/>
+    </mask>
+    <mask id="mask_corner_bl" maskUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="white"/>
+      <circle cx="0" cy="32" r="8" fill="black"/>
+    </mask>
+    <mask id="mask_corner_br" maskUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="white"/>
+      <circle cx="32" cy="32" r="8" fill="black"/>
+    </mask>
+  </defs>
   <g id="cross" transform="translate(0, 0)">
     <rect width="32" height="32" fill="#0E1B35"/>
     <rect x="0" y="0" width="32" height="1" fill="#1A2F55"/>
@@ -183,7 +201,7 @@
     <rect x="15" y="0" width="2" height="32" fill="#1A2F55"/>
         <rect x="15" y="15" width="2" height="2" fill="#1A2F55"/>
   </g>
-  <g id="corner_tl" transform="translate(96, 32)">
+  <g id="corner_tl" transform="translate(96, 32)" mask="url(#mask_corner_tl)">
     <rect width="32" height="32" fill="#0E1B35"/>
     <rect x="0" y="0" width="32" height="1" fill="#1A2F55"/>
     <rect x="0" y="0" width="1" height="32" fill="#1A2F55"/>
@@ -205,9 +223,8 @@
     <rect x="12" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="20" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="28" y="28" width="1" height="1" fill="#1C2E52"/>
-    <path d="M16 0 V11 A5 5 0 0 1 11 16 H0" stroke="#1A2F55" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g id="corner_tr" transform="translate(0, 64)">
+  <g id="corner_tr" transform="translate(0, 64)" mask="url(#mask_corner_tr)">
     <rect width="32" height="32" fill="#0E1B35"/>
     <rect x="0" y="0" width="32" height="1" fill="#1A2F55"/>
     <rect x="0" y="0" width="1" height="32" fill="#1A2F55"/>
@@ -229,9 +246,8 @@
     <rect x="12" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="20" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="28" y="28" width="1" height="1" fill="#1C2E52"/>
-    <path d="M16 0 V11 A5 5 0 0 0 21 16 H32" stroke="#1A2F55" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g id="corner_bl" transform="translate(32, 64)">
+  <g id="corner_bl" transform="translate(32, 64)" mask="url(#mask_corner_bl)">
     <rect width="32" height="32" fill="#0E1B35"/>
     <rect x="0" y="0" width="32" height="1" fill="#1A2F55"/>
     <rect x="0" y="0" width="1" height="32" fill="#1A2F55"/>
@@ -253,9 +269,8 @@
     <rect x="12" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="20" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="28" y="28" width="1" height="1" fill="#1C2E52"/>
-    <path d="M16 32 V21 A5 5 0 0 0 11 16 H0" stroke="#1A2F55" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g id="corner_br" transform="translate(64, 64)">
+  <g id="corner_br" transform="translate(64, 64)" mask="url(#mask_corner_br)">
     <rect width="32" height="32" fill="#0E1B35"/>
     <rect x="0" y="0" width="32" height="1" fill="#1A2F55"/>
     <rect x="0" y="0" width="1" height="32" fill="#1A2F55"/>
@@ -277,7 +292,6 @@
     <rect x="12" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="20" y="28" width="1" height="1" fill="#1C2E52"/>
     <rect x="28" y="28" width="1" height="1" fill="#1C2E52"/>
-    <path d="M16 32 V21 A5 5 0 0 1 21 16 H32" stroke="#1A2F55" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
   <g id="end_top" transform="translate(96, 64)">
     <rect width="32" height="32" fill="#0E1B35"/>
