@@ -49,6 +49,7 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.audio('midpoint', 'assets/sounds/06_midpoint.wav');
     this.load.audio('game_over', 'assets/sounds/07_game_over.wav');
     this.load.audio('pick_up', 'assets/sounds/08_pick_up.wav');
+    this.load.audio('spike_damage', 'assets/sounds/09_spike_damage.wav');
     this.load.audio('bgm', 'assets/sounds/music_ambience.wav');
   }
 

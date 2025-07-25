@@ -267,6 +267,7 @@ class GameScene extends Phaser.Scene {
           this.lastSpikeTile.y === curTile.ty;
         if (hit && !sameTile) {
           this.cameras.main.flash(100, 0, 0, 0);
+          this.sound.play('spike_damage');
           this.hero.oxygen = Math.max(this.hero.oxygen - 1, 0);
           this.events.emit(
             'updateOxygen',
