@@ -1,15 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
-  <defs>
-    <linearGradient id="floorBase" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f6f6fa"/>
-      <stop offset="100%" stop-color="#d3d4d8"/>
-    </linearGradient>
-    <radialGradient id="floorShine" cx="0.3" cy="0.2" r="0.7">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="32" height="32" fill="url(#floorBase)"/>
-  <ellipse cx="10" cy="6" rx="20" ry="8" fill="url(#floorShine)" transform="rotate(-10 10 6)"/>
-  <path d="M0 22 Q16 30 32 22" stroke="#ffffff" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+  <rect width="32" height="32" fill="#d3d4d8"/>
 </svg>
