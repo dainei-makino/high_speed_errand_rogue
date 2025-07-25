@@ -89,18 +89,6 @@ class GameScene extends Phaser.Scene {
       this.worldLayer.add(this.oxygenLine);
     }
 
-    // Persistent key display above the hero
-    this.keyDisplay = this.add.container(this.heroSprite.x - 10, this.heroSprite.y - this.mazeManager.tileSize);
-    this.keyIcon = Characters.createKey(this);
-    this.keyIcon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
-    this.keyCountText = this.add.text(this.mazeManager.tileSize / 2, 0, '', {
-      fontFamily: 'monospace',
-      fontSize: '16px',
-      color: '#ffffff'
-    }).setOrigin(0, 0.5);
-    this.keyDisplay.add([this.keyIcon, this.keyCountText]);
-    this.worldLayer.add(this.keyDisplay);
-    this.updateKeyDisplay();
 
     // Handle transitions for door exit
     this.mazeManager.events.on('spawn-next', data => {
@@ -258,19 +246,7 @@ class GameScene extends Phaser.Scene {
         this.sound.play('chest_open');
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
-        const icon = Characters.createKey(this);
-        icon.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize);
-        icon.setPosition(this.heroSprite.x, this.heroSprite.y - this.mazeManager.tileSize);
-        this.worldLayer.add(icon);
-        this.tweens.add({
-          targets: icon,
-          y: icon.y - this.mazeManager.tileSize,
-          alpha: 0,
-          duration: 1000,
-          onComplete: () => icon.destroy()
-        });
         this.events.emit('updateKeys', this.hero.keys);
-        this.updateKeyDisplay();
       }
 
       if (
@@ -356,7 +332,6 @@ class GameScene extends Phaser.Scene {
           }
           this.events.emit('updateChunks', gameState.clearedMazes);
           this.events.emit('updateKeys', this.hero.keys);
-          this.updateKeyDisplay();
           const nextInfo = this.mazeManager.spawnNext(
             gameState.clearedMazes,
             curTile.chunk,
@@ -382,13 +357,6 @@ class GameScene extends Phaser.Scene {
 
     this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
 
-    if (this.keyDisplay) {
-      this.keyDisplay.setPosition(
-        this.heroSprite.x - 10,
-        this.heroSprite.y - this.mazeManager.tileSize
-      );
-      this.keyDisplay.setDepth(this.heroSprite.depth + 1);
-    }
 
     if (this.oxygenLine && this.oxygenConsole) {
       const hx = this.heroSprite.x;
@@ -411,11 +379,6 @@ class GameScene extends Phaser.Scene {
     this.cameraManager.maintainCenter();
   }
 
-  updateKeyDisplay() {
-    if (!this.keyDisplay || !this.keyIcon || !this.keyCountText) return;
-    this.keyCountText.setText(this.hero.keys.toString());
-    this.keyDisplay.setVisible(this.hero.keys > 0);
-  }
 
   startOxygenTimer() {
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
