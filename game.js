@@ -29,6 +29,7 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.trailTimer = null;
+    this.trailDelayTimer = null;
   }
 
   preload() {
@@ -326,15 +327,22 @@ class GameScene extends Phaser.Scene {
   }
 
   startTrail() {
-    if (this.trailTimer) return;
-    this.trailTimer = this.time.addEvent({
-      delay: 50,
-      loop: true,
-      callback: () => this.spawnAfterimage()
+    if (this.trailTimer || this.trailDelayTimer) return;
+    this.trailDelayTimer = this.time.delayedCall(300, () => {
+      this.trailDelayTimer = null;
+      this.trailTimer = this.time.addEvent({
+        delay: 50,
+        loop: true,
+        callback: () => this.spawnAfterimage()
+      });
     });
   }
 
   stopTrail() {
+    if (this.trailDelayTimer) {
+      this.trailDelayTimer.remove();
+      this.trailDelayTimer = null;
+    }
     if (this.trailTimer) {
       this.trailTimer.remove();
       this.trailTimer = null;
