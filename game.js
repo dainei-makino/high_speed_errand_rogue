@@ -246,6 +246,10 @@ class GameScene extends Phaser.Scene {
           gameState.incrementMazeCount();
           if (MIDPOINTS.includes(gameState.clearedMazes)) {
             this.sound.play('midpoint');
+            if (this.bgm) {
+              this.bgm.stop();
+              this.bgm.play();
+            }
             const ui = this.scene.get('UIScene');
             if (ui && ui.showMidpoint) {
               ui.showMidpoint(gameState.clearedMazes);
