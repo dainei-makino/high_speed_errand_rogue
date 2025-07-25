@@ -29,6 +29,9 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
+    this.moveTime = 0;
+    this.timeSinceStop = 0;
+    this.afterImageTimer = null;
   }
 
   preload() {
@@ -113,6 +116,20 @@ class GameScene extends Phaser.Scene {
 
   update() {
     const delta = this.game.loop.delta;
+
+    if (this.isMoving) {
+      this.timeSinceStop = 0;
+      this.moveTime += delta;
+      if (this.moveTime >= 300) {
+        this.startAfterImage();
+      }
+    } else {
+      this.timeSinceStop += delta;
+      if (this.timeSinceStop > 50) {
+        this.moveTime = 0;
+        this.stopAfterImage();
+      }
+    }
 
     if (!this.isMoving && !this.isGameOver) {
       const entry = this.inputBuffer.consume();
@@ -341,6 +358,42 @@ class GameScene extends Phaser.Scene {
     // Deprecated: key display is now handled by UIScene
   }
 
+  startAfterImage() {
+    if (this.afterImageTimer) return;
+    this.afterImageTimer = this.time.addEvent({
+      delay: 50,
+      loop: true,
+      callback: () => {
+        const img = this.add.image(
+          this.heroSprite.x,
+          this.heroSprite.y + this.heroImage.y,
+          this.heroImage.texture.key
+        );
+        img.setOrigin(0.5);
+        img.setDisplaySize(
+          this.heroImage.displayWidth,
+          this.heroImage.displayHeight
+        );
+        img.setFlipX(this.heroImage.flipX);
+        img.setAlpha(0.5);
+        this.worldLayer.add(img);
+        this.tweens.add({
+          targets: img,
+          alpha: 0,
+          duration: 300,
+          onComplete: () => img.destroy()
+        });
+      }
+    });
+  }
+
+  stopAfterImage() {
+    if (this.afterImageTimer) {
+      this.afterImageTimer.remove();
+      this.afterImageTimer = null;
+    }
+  }
+
   startOxygenTimer() {
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
     this.oxygenTimer = this.time.addEvent({
@@ -375,6 +428,7 @@ class GameScene extends Phaser.Scene {
       this.heroAnimationTimer = null;
     }
     this.isMoving = false;
+    this.stopAfterImage();
 
     const size = this.mazeManager.tileSize;
     const evaporate = () => {
