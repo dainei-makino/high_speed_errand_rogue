@@ -1,7 +1,8 @@
 export default class Shield {
   constructor(scene) {
     this.scene = scene;
-    this.radius = 150;
+    // Fixed diameter of 180px regardless of zoom or chunk size
+    this.radius = 90;
     this.sprite = scene.add.image(0, 0, this._createTexture(this.radius)).setOrigin(0.5);
     this.sprite.setDepth(8);
     this.sprite.setScrollFactor(0);
