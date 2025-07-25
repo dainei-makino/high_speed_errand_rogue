@@ -6,7 +6,7 @@ import { TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
-import { newChunkTransition, evaporateArea } from './effects.js';
+import { newChunkTransition } from './effects.js';
 import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
 
@@ -25,7 +25,6 @@ class GameScene extends Phaser.Scene {
     this.midpointPlayed = false;
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
-    this.introLetters = null;
     this.oxygenTimer = null;
     this.bgm = null;
   }
@@ -96,13 +95,13 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    this.setupIntro(firstInfo);
+    this.scene.launch('UIScene');
+    this.setupIntro();
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasdKeys = this.input.keyboard.addKeys('W,A,S,D');
     this.inputBuffer = new InputBuffer(this);
 
-    this.scene.launch('UIScene');
     this.events.emit('updateChunks', gameState.clearedMazes);
     this.events.emit('updateKeys', this.hero.keys);
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
@@ -357,33 +356,18 @@ class GameScene extends Phaser.Scene {
     return letters;
   }
 
-  setupIntro(firstInfo) {
-    const center = this.mazeManager.getChunkCenter(firstInfo);
-    const size = this.mazeManager.tileSize;
-    const offset = 100;
-    const topY = firstInfo.offsetY + size - offset;
-    const bottomY =
-      firstInfo.offsetY + firstInfo.chunk.size * size - size + offset;
-    this.introLetters = [
-      ...this.createFloatingText('BREATHLESS', center.x, topY),
-      ...this.createFloatingText('MOVE TO WASD KEY', center.x, bottomY)
-    ];
+  setupIntro() {
+    const ui = this.scene.get('UIScene');
+    if (ui && ui.showIntroText) {
+      ui.showIntroText();
+    }
   }
 
   destroyIntroText() {
-    if (!this.introLetters) return;
-    for (const l of this.introLetters) {
-      evaporateArea(
-        this,
-        l.x - l.width / 2,
-        l.y - l.height / 2,
-        l.width,
-        l.height,
-        0xffffff
-      );
-      l.destroy();
+    const ui = this.scene.get('UIScene');
+    if (ui && ui.destroyIntroText) {
+      ui.destroyIntroText();
     }
-    this.introLetters = null;
   }
 }
 
