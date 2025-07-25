@@ -225,6 +225,12 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
+      if (curTile.cell === TILE.OXYGEN && curTile.chunk.chunk.airTank && !curTile.chunk.chunk.airTank.collected) {
+        this.mazeManager.removeAirTank(curTile.chunk);
+        this.hero.oxygen = Math.min(this.hero.oxygen + 5, this.hero.maxOxygen);
+        this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
+      }
+
       if (curTile.cell === TILE.SILVER_DOOR && this.hero.keys > 0) {
         const doors = curTile.chunk.chunk.silverDoors || [];
         const door = doors.find(d => d.x === curTile.tx && d.y === curTile.ty);
