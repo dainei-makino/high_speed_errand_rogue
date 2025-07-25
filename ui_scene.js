@@ -1,9 +1,12 @@
+import { evaporateArea } from './effects.js';
+
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
 export default class UIScene extends Phaser.Scene {
   constructor() {
     super({ key: 'UIScene', active: false });
+    this.introLetters = null;
   }
 
   create() {
@@ -138,5 +141,50 @@ export default class UIScene extends Phaser.Scene {
       ease: 'Quad.easeOut',
       onComplete: () => text.destroy()
     });
+  }
+
+  createFloatingText(str, centerX, y) {
+    const style = { fontFamily: 'monospace', fontSize: '24px', color: '#ffffff' };
+    const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
+    const total = measure.width;
+    measure.destroy();
+    let x = centerX - total / 2;
+    const letters = [];
+    for (const ch of str) {
+      const letter = this.add.text(0, 0, ch, style).setOrigin(0.5);
+      letter.x = x + letter.width / 2;
+      letter.y = y;
+      letter.setDepth(1000);
+      this.tweens.add({
+        targets: letter,
+        y: letter.y + Phaser.Math.Between(-6, 6),
+        duration: 800 + Phaser.Math.Between(0, 400),
+        repeat: -1,
+        yoyo: true,
+        ease: 'Sine.easeInOut',
+        delay: Phaser.Math.Between(0, 300)
+      });
+      letters.push(letter);
+      x += letter.width;
+    }
+    return letters;
+  }
+
+  showIntroText() {
+    const topY = 80;
+    const bottomY = VIRTUAL_HEIGHT * 2 - 80;
+    this.introLetters = [
+      ...this.createFloatingText('BREATHLESS', VIRTUAL_WIDTH, topY),
+      ...this.createFloatingText('MOVE TO WASD KEY', VIRTUAL_WIDTH, bottomY)
+    ];
+  }
+
+  destroyIntroText() {
+    if (!this.introLetters) return;
+    for (const l of this.introLetters) {
+      evaporateArea(this, l.x - l.width / 2, l.y - l.height / 2, l.width, l.height, 0xffffff);
+      l.destroy();
+    }
+    this.introLetters = null;
   }
 }
