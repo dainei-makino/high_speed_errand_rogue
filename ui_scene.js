@@ -53,6 +53,9 @@ export default class UIScene extends Phaser.Scene {
       this.cameras.main.setViewport((gw - VIRTUAL_WIDTH * 2) / 2, (gh - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
     };
     this.scale.on('resize', this.resizeHandler);
+
+    // Show the intro text once UI elements are ready
+    this.showIntroText();
   }
 
   update() {
@@ -171,6 +174,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   showIntroText() {
+    if (this.introLetters) return;
     const topY = 80;
     const bottomY = VIRTUAL_HEIGHT * 2 - 80;
     this.introLetters = [

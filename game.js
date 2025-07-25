@@ -102,12 +102,7 @@ class GameScene extends Phaser.Scene {
     this.inputBuffer = new InputBuffer(this);
 
     this.scene.launch('UIScene');
-    const ui = this.scene.get('UIScene');
-    if (ui && ui.events) {
-      ui.events.once('create', () => this.setupIntro());
-    } else {
-      this.setupIntro();
-    }
+    this.scene.bringToTop('UIScene');
     this.events.emit('updateChunks', gameState.clearedMazes);
     this.events.emit('updateKeys', this.hero.keys);
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
@@ -389,13 +384,6 @@ class GameScene extends Phaser.Scene {
       this.scene.bringToTop('GameOverScene');
       this.scene.pause();
     });
-  }
-
-  setupIntro() {
-    const ui = this.scene.get('UIScene');
-    if (ui && ui.showIntroText) {
-      ui.showIntroText();
-    }
   }
 
   destroyIntroText() {
