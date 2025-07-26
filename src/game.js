@@ -35,6 +35,7 @@ class GameScene extends Phaser.Scene {
     this.lastShockTile = null;
     this.oxygenLine = null;
     this.oxygenConsole = null;
+    this.stopTile = null;
   }
 
   preload() {
@@ -169,6 +170,21 @@ class GameScene extends Phaser.Scene {
 
   update() {
     const delta = this.game.loop.delta;
+
+    const tileHere = this.mazeManager.worldToTile(
+      this.heroSprite.x,
+      this.heroSprite.y
+    );
+    if (
+      this.stopTile &&
+      tileHere &&
+      tileHere.chunk.index === this.stopTile.chunkIndex &&
+      tileHere.tx === this.stopTile.tx &&
+      tileHere.ty === this.stopTile.ty
+    ) {
+      this.inputBuffer.clear();
+      this.stopTile = null;
+    }
 
     if (!this.isMoving && !this.isGameOver) {
       const entry = this.inputBuffer.consume();
@@ -408,6 +424,29 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
+          // Stop the hero one tile inside the new chunk on first entry
+          let sx = nextInfo.chunk.entrance.x;
+          let sy = nextInfo.chunk.entrance.y;
+          switch (nextInfo.chunk.entry) {
+            case 'N':
+              sy += 1;
+              break;
+            case 'S':
+              sy -= 1;
+              break;
+            case 'W':
+              sx += 1;
+              break;
+            case 'E':
+            default:
+              sx -= 1;
+              break;
+          }
+          this.stopTile = {
+            chunkIndex: nextInfo.index,
+            tx: sx,
+            ty: sy
+          };
           if (gameState.clearedMazes === 1 && !this.oxygenTimer) {
             this.startOxygenTimer();
           }

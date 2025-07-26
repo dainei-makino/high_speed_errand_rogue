@@ -3,6 +3,16 @@ import Characters from './characters.js';
 import { pickMazeConfig } from './maze_table.js';
 import { evaporateChunk } from './effects.js';
 
+const DECAL_KEYS = [
+  'floor_crack1',
+  'floor_crack2',
+  'floor_dirt1',
+  'floor_dirt2',
+  'floor_scratch1',
+  'floor_scratch2'
+];
+const DECAL_CHANCE = 0.1;
+
 export default class MazeManager {
   constructor(scene) {
     this.scene = scene;
@@ -74,6 +84,9 @@ export default class MazeManager {
 
   renderChunk(chunk, info) {
     const size = this.tileSize;
+    const decalMap = Array.from({ length: chunk.size }, () =>
+      Array(chunk.size).fill(false)
+    );
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
         const tile = chunk.tiles[y * chunk.size + x];
@@ -90,6 +103,10 @@ export default class MazeManager {
           floor.setDepth(-1);
           this.scene.worldLayer.add(floor);
           info.sprites.push(floor);
+
+          if (tile === TILE.FLOOR) {
+            this._maybeAddFloorDecal(info, decalMap, x, y);
+          }
         }
 
         let sprite = null;
@@ -164,16 +181,16 @@ export default class MazeManager {
               } else {
                 sprite = Characters.createWall(this.scene);
               }
+            } else {
+              sprite = Characters.createWall(this.scene);
+            }
+
             if (
               chunk.brokenPod &&
               chunk.brokenPod.x === x &&
               chunk.brokenPod.y === y
             ) {
               sprite = Characters.createSleepPodBroken(this.scene);
-            }
-              
-            } else {
-              sprite = Characters.createWall(this.scene);
             }
             break;
           }
@@ -826,7 +843,45 @@ export default class MazeManager {
     return gfx;
   }
 
+  _maybeAddFloorDecal(info, decalMap, x, y) {
+    if (Math.random() >= DECAL_CHANCE) return;
+    if (decalMap[y][x]) return;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx;
+        const ny = y + dy;
+        if (ny >= 0 && ny < decalMap.length && nx >= 0 && nx < decalMap.length) {
+          if (decalMap[ny][nx]) return;
+        }
+      }
+    }
 
+    const key = DECAL_KEYS[Math.floor(Math.random() * DECAL_KEYS.length)];
+    const decal = Characters.createFloorDecal(this.scene, key);
+    decal.setDisplaySize(this.tileSize, this.tileSize);
+    const baseX = info.offsetX + x * this.tileSize;
+    const baseY = info.offsetY + y * this.tileSize;
+
+    const OFFSET_RANGE = 16;
+    const chunkSizePx = info.chunk.size * this.tileSize;
+    let posX = baseX + Phaser.Math.Between(-OFFSET_RANGE, OFFSET_RANGE);
+    let posY = baseY + Phaser.Math.Between(-OFFSET_RANGE, OFFSET_RANGE);
+
+    const minX = info.offsetX;
+    const maxX = info.offsetX + chunkSizePx - this.tileSize;
+    const minY = info.offsetY;
+    const maxY = info.offsetY + chunkSizePx - this.tileSize;
+    posX = Math.min(Math.max(posX, minX), maxX);
+    posY = Math.min(Math.max(posY, minY), maxY);
+
+    decal.setPosition(posX + this.tileSize / 2, posY + this.tileSize / 2);
+    decal.setAngle(Math.floor(Math.random() * 360));
+    decal.setDepth(-0.5);
+    this.scene.worldLayer.add(decal);
+    info.sprites.push(decal);
+    decalMap[y][x] = true;
+  }
 
   openDoor(info) {
     if (info && info.doorSprite) {

@@ -34,7 +34,13 @@ const SPRITES = {
   meteor_explosion2: 'meteor_explosion2.svg',
   meteor_explosion3: 'meteor_explosion3.svg',
   wall_corner: 'wall_corner.svg',
-  wall_end: 'wall_end.svg'
+  wall_end: 'wall_end.svg',
+  floor_crack1: 'floor_crack1.svg',
+  floor_crack2: 'floor_crack2.svg',
+  floor_dirt1: 'floor_dirt1.svg',
+  floor_dirt2: 'floor_dirt2.svg',
+  floor_scratch1: 'floor_scratch1.svg',
+  floor_scratch2: 'floor_scratch2.svg'
 };
 
 const canvases = {};
@@ -111,6 +117,10 @@ function createAutoGateClosed(scene) {
 
 function createDoorOpen(scene) {
   return scene.add.image(0, 0, 'door_open').setOrigin(0);
+}
+
+function createFloorDecal(scene, key) {
+  return scene.add.image(0, 0, key).setOrigin(0.5);
 }
 
 function createTreasure(scene) {
@@ -195,5 +205,6 @@ export default {
   createMeteorExplosion,
   createHero,
   createHeroPlain,
-  createArrow
+  createArrow,
+  createFloorDecal
 };
