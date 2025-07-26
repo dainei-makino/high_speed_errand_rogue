@@ -61,7 +61,7 @@ class GameScene extends Phaser.Scene {
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.starField = new StarField(this);
     this.shield = new Shield(this);
-    this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 33);
+    this.meteorField = new MeteorField(this, this.shield, false);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
@@ -548,12 +548,25 @@ class GameScene extends Phaser.Scene {
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
     }
 
+    const inBossRoom = this._isInBossRoom();
+
     if (this.shield) {
-      this.shield.update();
+      this.shield.sprite.setVisible(inBossRoom);
+      if (inBossRoom) {
+        this.shield.update();
+      }
     }
 
     if (this.meteorField) {
-      this.meteorField.update();
+      if (inBossRoom) {
+        if (this.meteorField.spawnTimer && this.meteorField.spawnTimer.paused) {
+          this.meteorField.start();
+        }
+        this.meteorField.update();
+      } else {
+        this.meteorField.stop();
+        this.meteorField.clear();
+      }
     }
 
     // Prevent camera drift by re-centering if needed
@@ -561,6 +574,13 @@ class GameScene extends Phaser.Scene {
     this.sortWorldObjects();
   }
 
+  _isInBossRoom() {
+    const curTile = this.mazeManager.worldToTile(
+      this.heroSprite.x,
+      this.heroSprite.y
+    );
+    return curTile && curTile.chunk && curTile.chunk.isBossRoom;
+  }
 
   startOxygenTimer() {
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
@@ -578,13 +598,14 @@ class GameScene extends Phaser.Scene {
   }
 
   checkMeteorFieldActivation() {
-    if (
-      this.meteorField &&
-      this.meteorField.spawnTimer &&
-      this.meteorField.spawnTimer.paused &&
-      gameState.clearedMazes >= 33
-    ) {
-      this.meteorField.start();
+    if (this.meteorField && this.meteorField.spawnTimer) {
+      const inBossRoom = this._isInBossRoom();
+      if (inBossRoom && this.meteorField.spawnTimer.paused) {
+        this.meteorField.start();
+      } else if (!inBossRoom && !this.meteorField.spawnTimer.paused) {
+        this.meteorField.stop();
+        this.meteorField.clear();
+      }
     }
   }
 
