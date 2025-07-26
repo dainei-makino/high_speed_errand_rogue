@@ -7,7 +7,7 @@ import { TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import InputBuffer from './input_buffer.js';
 import UIScene from './ui_scene.js';
-import { newChunkTransition, evaporateArea } from './effects.js';
+import { newChunkTransition, evaporateArea, spawnAfterimage } from './effects.js';
 import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
 import GameOverScene from './game_over_scene.js';
@@ -48,6 +48,7 @@ class GameScene extends Phaser.Scene {
     this.rivalMoving = false;
     this.rivalAnimTimer = null;
     this.rivalAnimIndex = 0;
+    this.rivalTrailTimer = null;
     this.rivalSwitchTimer = null;
     this.stopTile = null;
   }
@@ -126,13 +127,21 @@ class GameScene extends Phaser.Scene {
       this.sound.play('chunk_generate_2');
 
       if (data.info && data.info.restPoint) {
-        const size = this.mazeManager.tileSize;
-        const cx = data.info.offsetX + data.info.oxygenPosition.x * size + size / 2;
-        const cy = data.info.offsetY + data.info.oxygenPosition.y * size + size / 2;
-        this.oxygenConsole = { x: cx, y: cy };
-        if (!this.oxygenLine) {
-          this.oxygenLine = this.add.graphics();
-          this.worldLayer.add(this.oxygenLine);
+        if (data.info.oxygenPosition) {
+          const size = this.mazeManager.tileSize;
+          const cx = data.info.offsetX + data.info.oxygenPosition.x * size + size / 2;
+          const cy = data.info.offsetY + data.info.oxygenPosition.y * size + size / 2;
+          this.oxygenConsole = { x: cx, y: cy };
+          if (!this.oxygenLine) {
+            this.oxygenLine = this.add.graphics();
+            this.worldLayer.add(this.oxygenLine);
+          }
+        } else {
+          this.oxygenConsole = null;
+          if (this.oxygenLine) {
+            this.oxygenLine.destroy();
+            this.oxygenLine = null;
+          }
         }
         if (this.bgm && this.bgm.isPlaying) {
           this.bgm.stop();
@@ -661,6 +670,23 @@ class GameScene extends Phaser.Scene {
 
         this.rivalMoving = true;
         const duration = (size / this.rival.speed) * 1000;
+        const spawnTrail = () => {
+          spawnAfterimage(
+            this,
+            this.rivalImage.texture.key,
+            this.rivalSprite.x,
+            this.rivalSprite.y,
+            this.rivalImage.flipX,
+            this.rivalImage.displayWidth,
+            this.rivalImage.displayHeight
+          );
+        };
+        spawnTrail();
+        this.rivalTrailTimer = this.time.addEvent({
+          delay: 50,
+          loop: true,
+          callback: spawnTrail
+        });
         let orientation = dir;
         if (dir === 'left') orientation = 'right';
         const frameMap = {
@@ -691,6 +717,11 @@ class GameScene extends Phaser.Scene {
               this.rivalAnimTimer.remove();
               this.rivalAnimTimer = null;
             }
+            if (this.rivalTrailTimer) {
+              this.rivalTrailTimer.remove();
+              this.rivalTrailTimer = null;
+            }
+            spawnTrail();
             this.rivalImage.setTexture(frames[0]);
           }
         });
@@ -775,7 +806,7 @@ class GameScene extends Phaser.Scene {
       delay: 1000,
       loop: true,
       callback: () => {
-        this.rival.oxygen -= 1;
+        this.rival.oxygen -= 1.5;
         this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
         if (this.rival.oxygen <= 0) {
           this.handleRivalDeath();
@@ -906,6 +937,10 @@ class GameScene extends Phaser.Scene {
       this.rivalAnimTimer.remove();
       this.rivalAnimTimer = null;
     }
+    if (this.rivalTrailTimer) {
+      this.rivalTrailTimer.remove();
+      this.rivalTrailTimer = null;
+    }
     this.tweens.killTweensOf(this.rivalSprite);
     const size = this.mazeManager.tileSize;
     const evaporate = () => {
@@ -981,6 +1016,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalAnimTimer) {
       this.rivalAnimTimer.remove();
       this.rivalAnimTimer = null;
+    }
+    if (this.rivalTrailTimer) {
+      this.rivalTrailTimer.remove();
+      this.rivalTrailTimer = null;
     }
     this.isMoving = false;
 
