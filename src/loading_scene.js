@@ -52,6 +52,8 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.audio('spike_damage', 'assets/sounds/09_spike_damage.wav');
     this.load.audio('item_spawn', 'assets/sounds/10_item_spawn.wav');
     this.load.audio('bgm', 'assets/sounds/music_ambience.wav');
+    this.load.audio('boss_bgm_1', 'assets/sounds/music_boss_1.wav');
+    this.load.audio('boss_bgm_2', 'assets/sounds/music_boss_2.wav');
   }
 
   create() {
