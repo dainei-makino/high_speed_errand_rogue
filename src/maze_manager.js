@@ -139,18 +139,31 @@ export default class MazeManager {
               sprite = Characters.createSleepPodBroken(this.scene);
               break;
             }
-            // Count surrounding wall-like tiles (including doors) in all 8 directions
-            const isWallLike = t =>
-              t === TILE.WALL ||
-              t === TILE.DOOR ||
-              t === TILE.SILVER_DOOR ||
-              t === TILE.AUTO_GATE;
+            // Count surrounding wall-like tiles (including doors) in all 8 directions.
+            // Walls that have been replaced by other objects (e.g. machines) should not
+            // be considered when determining the current wall's sprite.
+            const hasReplacement = (cx, cy) => {
+              if (chunk.brokenPod && chunk.brokenPod.x === cx && chunk.brokenPod.y === cy) return true;
+              if (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === cx && p.y === cy)) return true;
+              if (chunk.electricMachines && chunk.electricMachines.some(m => m.x === cx && m.y === cy)) return true;
+              return false;
+            };
+            const isWallLike = (cx, cy) => {
+              if (hasReplacement(cx, cy)) return false;
+              const t = chunk.tiles[cy * chunk.size + cx];
+              return (
+                t === TILE.WALL ||
+                t === TILE.DOOR ||
+                t === TILE.SILVER_DOOR ||
+                t === TILE.AUTO_GATE
+              );
+            };
             const check = (cx, cy) =>
               cx >= 0 &&
               cy >= 0 &&
               cx < chunk.size &&
               cy < chunk.size &&
-              isWallLike(chunk.tiles[cy * chunk.size + cx]);
+              isWallLike(cx, cy);
 
             const west = check(x - 1, y);
             const east = check(x + 1, y);
