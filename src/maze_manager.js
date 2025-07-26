@@ -428,7 +428,7 @@ export default class MazeManager {
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
 
-    const isRestPoint = progress === 8;
+    const isRestPoint = progress === 13 || progress === 28;
 
     let chunk;
     if (isRestPoint) {
