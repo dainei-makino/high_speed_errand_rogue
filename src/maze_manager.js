@@ -790,8 +790,15 @@ export default class MazeManager {
     const size = chunk.size;
     const t = chunk.tiles;
     const candidates = [];
-    for (let y = 1; y < size - 1; y++) {
-      for (let x = 1; x < size - 1; x++) {
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (
+          (x === 0 && y === 0) ||
+          (x === 0 && y === size - 1) ||
+          (x === size - 1 && y === 0) ||
+          (x === size - 1 && y === size - 1)
+        )
+          continue;
         if (t[y * size + x] !== TILE.WALL) continue;
         if (this._isNearEntranceOrExit(chunk, x, y)) continue;
         candidates.push({ x, y });
@@ -808,8 +815,15 @@ export default class MazeManager {
     const size = chunk.size;
     const t = chunk.tiles;
     const candidates = [];
-    for (let y = 1; y < size - 1; y++) {
-      for (let x = 1; x < size - 1; x++) {
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (
+          (x === 0 && y === 0) ||
+          (x === 0 && y === size - 1) ||
+          (x === size - 1 && y === 0) ||
+          (x === size - 1 && y === size - 1)
+        )
+          continue;
         if (t[y * size + x] !== TILE.WALL) continue;
         if (this._isNearEntranceOrExit(chunk, x, y)) continue;
         candidates.push({ x, y });
@@ -825,8 +839,15 @@ export default class MazeManager {
     const size = chunk.size;
     const t = chunk.tiles;
     const candidates = [];
-    for (let y = 1; y < size - 1; y++) {
-      for (let x = 1; x < size - 1; x++) {
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (
+          (x === 0 && y === 0) ||
+          (x === 0 && y === size - 1) ||
+          (x === size - 1 && y === 0) ||
+          (x === size - 1 && y === size - 1)
+        )
+          continue;
         if (t[y * size + x] !== TILE.WALL) continue;
         if (this._isNearEntranceOrExit(chunk, x, y)) continue;
         if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y)
