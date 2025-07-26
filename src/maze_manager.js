@@ -91,38 +91,48 @@ export default class MazeManager {
 
         let sprite = null;
         switch (tile) {
-          case TILE.WALL:
-            if (isCorner) {
-              sprite = Characters.createWallCorner(this.scene);
-              if (x === chunk.size - 1 && y === 0) {
+          case TILE.WALL: {
+            const west = x > 0 && chunk.tiles[y * chunk.size + (x - 1)] === TILE.WALL;
+            const east = x < chunk.size - 1 && chunk.tiles[y * chunk.size + (x + 1)] === TILE.WALL;
+            const north = y > 0 && chunk.tiles[(y - 1) * chunk.size + x] === TILE.WALL;
+            const south =
+              y < chunk.size - 1 && chunk.tiles[(y + 1) * chunk.size + x] === TILE.WALL;
+            const neighborCount =
+              (west ? 1 : 0) + (east ? 1 : 0) + (north ? 1 : 0) + (south ? 1 : 0);
+
+            if (neighborCount === 1) {
+              sprite = Characters.createWallEnd(this.scene);
+              if (south) {
+                sprite.setAngle(0);
+              } else if (west) {
                 sprite.setAngle(90);
-              } else if (x === chunk.size - 1 && y === chunk.size - 1) {
+              } else if (north) {
                 sprite.setAngle(180);
-              } else if (x === 0 && y === chunk.size - 1) {
+              } else if (east) {
                 sprite.setAngle(270);
               }
-            } else {
-              const west = x > 0 && chunk.tiles[y * chunk.size + (x - 1)] === TILE.WALL;
-              const east = x < chunk.size - 1 && chunk.tiles[y * chunk.size + (x + 1)] === TILE.WALL;
-              const north = y > 0 && chunk.tiles[(y - 1) * chunk.size + x] === TILE.WALL;
-              const south = y < chunk.size - 1 && chunk.tiles[(y + 1) * chunk.size + x] === TILE.WALL;
-              const neighborCount = (west ? 1 : 0) + (east ? 1 : 0) + (north ? 1 : 0) + (south ? 1 : 0);
-              if (neighborCount === 1) {
-                sprite = Characters.createWallEnd(this.scene);
-                if (south) {
+            } else if (neighborCount === 2) {
+              const isCornerShape =
+                (east && south) || (south && west) || (west && north) || (north && east);
+              if (isCornerShape) {
+                sprite = Characters.createWallCorner(this.scene);
+                if (east && south) {
                   sprite.setAngle(0);
-                } else if (west) {
+                } else if (south && west) {
                   sprite.setAngle(90);
-                } else if (north) {
+                } else if (west && north) {
                   sprite.setAngle(180);
-                } else if (east) {
+                } else if (north && east) {
                   sprite.setAngle(270);
                 }
               } else {
                 sprite = Characters.createWall(this.scene);
               }
+            } else {
+              sprite = Characters.createWall(this.scene);
             }
             break;
+          }
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
             info.oxygenSprite = sprite;
