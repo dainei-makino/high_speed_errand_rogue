@@ -138,10 +138,15 @@ export function spawnAfterimage(
   x,
   y,
   flipX = false,
+  displayWidth = null,
+  displayHeight = null,
   duration = 300,
-  alpha = 0.5
+  alpha = 0.3
 ) {
   const img = scene.add.image(x, y, textureKey).setOrigin(0.5);
+  if (displayWidth && displayHeight) {
+    img.setDisplaySize(displayWidth, displayHeight);
+  }
   img.setFlipX(flipX);
   img.setAlpha(alpha);
   img.setDepth(0);

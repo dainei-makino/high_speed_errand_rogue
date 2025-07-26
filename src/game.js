@@ -676,7 +676,9 @@ class GameScene extends Phaser.Scene {
             this.rivalImage.texture.key,
             this.rivalSprite.x,
             this.rivalSprite.y,
-            this.rivalImage.flipX
+            this.rivalImage.flipX,
+            this.rivalImage.displayWidth,
+            this.rivalImage.displayHeight
           );
         };
         spawnTrail();
