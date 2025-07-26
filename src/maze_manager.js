@@ -110,69 +110,9 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL: {
-            // Count surrounding wall-like tiles (including doors) in all 8 directions
-            const isWallLike = t =>
-              t === TILE.WALL ||
-              t === TILE.DOOR ||
-              t === TILE.SILVER_DOOR ||
-              t === TILE.AUTO_GATE;
-            const check = (cx, cy) =>
-              cx >= 0 &&
-              cy >= 0 &&
-              cx < chunk.size &&
-              cy < chunk.size &&
-              isWallLike(chunk.tiles[cy * chunk.size + cx]);
-
-            const west = check(x - 1, y);
-            const east = check(x + 1, y);
-            const north = check(x, y - 1);
-            const south = check(x, y + 1);
-            const nw = check(x - 1, y - 1);
-            const ne = check(x + 1, y - 1);
-            const sw = check(x - 1, y + 1);
-            const se = check(x + 1, y + 1);
-
-            const neighborCount =
-              (west ? 1 : 0) +
-              (east ? 1 : 0) +
-              (north ? 1 : 0) +
-              (south ? 1 : 0) +
-              (nw ? 1 : 0) +
-              (ne ? 1 : 0) +
-              (sw ? 1 : 0) +
-              (se ? 1 : 0);
-
-            if (neighborCount === 1) {
-              sprite = Characters.createWallEnd(this.scene);
-              if (south) {
-                sprite.setAngle(0);
-              } else if (west) {
-                sprite.setAngle(90);
-              } else if (north) {
-                sprite.setAngle(180);
-              } else if (east) {
-                sprite.setAngle(270);
-              }
-            } else if (neighborCount === 2) {
-              const isCornerShape =
-                (east && south) || (south && west) || (west && north) || (north && east);
-              if (isCornerShape) {
-                sprite = Characters.createWallCorner(this.scene);
-                if (east && south) {
-                  sprite.setAngle(0);
-                } else if (south && west) {
-                  sprite.setAngle(90);
-                } else if (west && north) {
-                  sprite.setAngle(180);
-                } else if (north && east) {
-                  sprite.setAngle(270);
-                }
-              } else {
-                sprite = Characters.createWall(this.scene);
-              }
-            } else {
-              sprite = Characters.createWall(this.scene);
-            }
+            // For debugging purposes, disable autotiling and render all walls
+            // using the same tile sprite.
+            sprite = Characters.createWall(this.scene);
 
             if (
               chunk.brokenPod &&
