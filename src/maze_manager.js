@@ -87,6 +87,10 @@ export default class MazeManager {
     );
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
+        // Skip rendering the top-left tile of the chunk for debugging
+        if (x === 0 && y === 0) {
+          continue;
+        }
         const tile = chunk.tiles[y * chunk.size + x];
         const isCorner =
           (x === 0 && y === 0) ||
