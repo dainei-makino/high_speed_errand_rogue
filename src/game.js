@@ -258,7 +258,7 @@ class GameScene extends Phaser.Scene {
             (tileInfo.cell === TILE.WALL ||
               tileInfo.cell === TILE.REACTOR ||
               (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-              (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+              (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited && !tileInfo.chunk.chunk.doorOpen) ||
               (tileInfo.cell === TILE.AUTO_GATE &&
                 tileInfo.chunk.chunk.autoGates &&
                 tileInfo.chunk.chunk.autoGates.find(
@@ -461,7 +461,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-        if (this.hero.useKey()) {
+        if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
           this.mazeManager.openDoor(curTile.chunk);
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
