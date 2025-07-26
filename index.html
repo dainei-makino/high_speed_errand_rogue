@@ -26,5 +26,22 @@
 <body>
   <div id="game-container"></div>
   <script type="module" src="src/game.js"></script>
+  <script>
+    // Hide the mouse cursor after a short period of inactivity once the game is
+    // running. Moving the mouse will make it visible again.
+    const HIDE_DELAY = 2000; // milliseconds
+    let hideTimer;
+    function hideCursor() {
+      document.body.style.cursor = 'none';
+    }
+    function resetCursorTimer() {
+      document.body.style.cursor = 'default';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hideCursor, HIDE_DELAY);
+    }
+    window.addEventListener('mousemove', resetCursorTimer);
+    // Start the timer once the page loads so the cursor disappears if idle.
+    resetCursorTimer();
+  </script>
 </body>
 </html>
