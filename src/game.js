@@ -331,11 +331,26 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.chunk.chunk.electricMachines) {
-        const active = curTile.chunk.chunk.electricMachines.some(m => {
-          const dx = Math.abs(m.x - curTile.tx);
-          const dy = Math.abs(m.y - curTile.ty);
-          return dx + dy <= 1 && m.active;
-        });
+        const tileSize = this.mazeManager.tileSize;
+        const heroX = this.heroSprite.x;
+        const heroY = this.heroSprite.y;
+        let active = false;
+        for (const info of this.mazeManager.activeChunks) {
+          if (!info.chunk.electricMachines) continue;
+          const hx = Math.floor((heroX - info.offsetX) / tileSize);
+          const hy = Math.floor((heroY - info.offsetY) / tileSize);
+          if (
+            info.chunk.electricMachines.some(m => {
+              if (!m.active) return false;
+              const dx = Math.abs(m.x - hx);
+              const dy = Math.abs(m.y - hy);
+              return dx + dy <= 1;
+            })
+          ) {
+            active = true;
+            break;
+          }
+        }
         const sameTile =
           active &&
           this.lastElectricTile &&
