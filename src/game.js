@@ -345,6 +345,7 @@ class GameScene extends Phaser.Scene {
         if (active && !sameTile) {
           this.cameras.main.flash(100, 0, 0, 0);
           this.cameraManager.shakeSmall();
+          // electric shock uses the same sound as spike damage
           this.sound.play('spike_damage');
           this.hero.oxygen = Math.max(this.hero.oxygen - ELECTRIC_DAMAGE, 0);
           this.events.emit(
