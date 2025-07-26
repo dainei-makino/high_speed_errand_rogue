@@ -113,9 +113,12 @@ function _createSlidingDoor(scene, orientation) {
   const scale = scene.mazeManager ? scene.mazeManager.tileSize / 32 : 0.5;
   dom.setScale(scale);
 
+  const root = dom.node;
+  const query = id => root.querySelector(`#${id}`);
+
   if (orientation === 'vertical') {
-    const left = dom.node.getElementById('left');
-    const right = dom.node.getElementById('right');
+    const left = query('left');
+    const right = query('right');
     dom.open = () => {
       scene.tweens.addCounter({
         from: 0,
@@ -129,8 +132,8 @@ function _createSlidingDoor(scene, orientation) {
       });
     };
   } else {
-    const top = dom.node.getElementById('top');
-    const bottom = dom.node.getElementById('bottom');
+    const top = query('top');
+    const bottom = query('bottom');
     dom.open = () => {
       scene.tweens.addCounter({
         from: 0,
