@@ -146,8 +146,14 @@ class GameScene extends Phaser.Scene {
         });
       }
 
+      if (!data.info || !data.info.restPoint) {
+        if (this.bgm) {
+          this.bgm.stop();
+          this.bgm.play();
+        }
+      }
+
       if (data.info && data.info.index === 1) {
-        this.bgm.play();
         this.destroyIntroText();
       }
     });
@@ -432,10 +438,6 @@ class GameScene extends Phaser.Scene {
           this.checkMeteorFieldActivation();
           if (MIDPOINTS.includes(gameState.clearedMazes)) {
             this.sound.play('midpoint');
-            if (this.bgm) {
-              this.bgm.stop();
-              this.bgm.play();
-            }
             const ui = this.scene.get('UIScene');
             if (ui && ui.showMidpoint) {
               ui.showMidpoint(gameState.clearedMazes);
