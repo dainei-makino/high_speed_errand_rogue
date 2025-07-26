@@ -420,8 +420,20 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const { size } = pickMazeConfig(progress + 1, progress);
-    const chunk = createChunk(this._nextSeed(), size, entryDir);
+
+    const isRestPoint = progress === 8;
+
+    let chunk;
+    if (isRestPoint) {
+      chunk = createChunk(this._nextSeed(), 7, entryDir);
+      this._ensureEntrance(chunk);
+      this._addOxygenConsole(chunk);
+      chunk.electricMachines = [];
+      chunk.restPoint = true;
+    } else {
+      const { size } = pickMazeConfig(progress + 1, progress);
+      chunk = createChunk(this._nextSeed(), size, entryDir);
+    }
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
 
@@ -483,7 +495,7 @@ export default class MazeManager {
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
-    if (progress >= 1) {
+    if (!isRestPoint && progress >= 1) {
       if (progress >= 19) {
         const total = Math.floor(Math.random() * 3) + 1; // 1-3 doors
         this._addMixedDoors(chunk, total);
@@ -502,12 +514,15 @@ export default class MazeManager {
       const advanced = progress >= 4 && Math.random() < 0.1;
       this._addAirTank(chunk, advanced);
     }
-    if (progress >= 2) {
+    if (!isRestPoint && progress >= 2) {
       this._addSpikes(chunk);
       this._addElectricMachine(chunk, progress);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
+    if (chunk.restPoint) {
+      info.restPoint = true;
+    }
     info.entranceDoorSprite = fromObj.doorSprite;
     if (fromObj.doorSprite) {
       fromObj.sprites = fromObj.sprites.filter(s => s !== fromObj.doorSprite);
