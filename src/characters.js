@@ -10,6 +10,7 @@ const SPRITES = {
   door_open: 'airlock_open.svg',
   treasure: 'treasure.svg',
   sleep_pod: 'sleep_pod.svg',
+  sleep_pod_broken: 'sleep_pod_broken.svg',
   hero_plain: 'hero_plain.svg',
   hero_idle: 'hero.svg',
   hero_walk1: 'hero_walk1.svg',
@@ -24,6 +25,7 @@ const SPRITES = {
   arrow: 'arrow.svg',
   key: 'key.svg',
   air_tank: 'air_tank.svg',
+  air_tank_dark: 'air_tank_dark.svg',
   oxygen_console: 'oxygen_supply_console.svg',
   spikes: 'floor_spikes.svg',
   meteor: 'meteor.svg',
@@ -122,6 +124,10 @@ function createAirTank(scene) {
   return scene.add.image(0, 0, 'air_tank').setOrigin(0);
 }
 
+function createAirTankDark(scene) {
+  return scene.add.image(0, 0, 'air_tank_dark').setOrigin(0);
+}
+
 function createOxygenConsole(scene) {
   return scene.add.image(0, 0, 'oxygen_console').setOrigin(0);
 }
@@ -132,6 +138,10 @@ function createSpike(scene) {
 
 function createSleepPod(scene) {
   return scene.add.image(0, 0, 'sleep_pod').setOrigin(0);
+}
+
+function createSleepPodBroken(scene) {
+  return scene.add.image(0, 0, 'sleep_pod_broken').setOrigin(0);
 }
 
 function createMeteor(scene) {
@@ -170,9 +180,11 @@ export default {
   createTreasure,
   createKey,
   createAirTank,
+  createAirTankDark,
   createOxygenConsole,
   createSpike,
   createSleepPod,
+  createSleepPodBroken,
   createMeteor,
   createMeteorExplosion,
   createHero,

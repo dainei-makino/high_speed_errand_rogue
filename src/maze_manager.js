@@ -35,10 +35,11 @@ export default class MazeManager {
   }
 
   spawnInitial() {
-    const { size } = pickMazeConfig(1);
+    const { size } = pickMazeConfig(1, 0);
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
+    this._addBrokenSleepPod(chunk);
     return this.addChunk(chunk, 0, 0);
   }
 
@@ -152,6 +153,14 @@ export default class MazeManager {
               } else {
                 sprite = Characters.createWall(this.scene);
               }
+            if (
+              chunk.brokenPod &&
+              chunk.brokenPod.x === x &&
+              chunk.brokenPod.y === y
+            ) {
+              sprite = Characters.createSleepPodBroken(this.scene);
+            }
+              
             } else {
               sprite = Characters.createWall(this.scene);
             }
@@ -194,11 +203,16 @@ export default class MazeManager {
             info.chestSprite = sprite;
             info.chestPosition = { x, y };
             break;
-          case TILE.OXYGEN:
-            sprite = Characters.createAirTank(this.scene);
+          case TILE.OXYGEN: {
+            const at = info.chunk.airTank;
+            const isAdvanced = at && at.x === x && at.y === y && at.advanced;
+            sprite = isAdvanced
+              ? Characters.createAirTankDark(this.scene)
+              : Characters.createAirTank(this.scene);
             info.airTankSprite = sprite;
             info.airTankPosition = { x, y };
             break;
+          }
         }
 
         if (sprite) {
@@ -317,7 +331,7 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const { size } = pickMazeConfig(progress + 1);
+    const { size } = pickMazeConfig(progress + 1, progress);
     const chunk = createChunk(this._nextSeed(), size, entryDir);
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
@@ -396,7 +410,8 @@ export default class MazeManager {
       } else {
         this._addSilverDoor(chunk);
       }
-      this._addAirTank(chunk);
+      const advanced = progress >= 4 && Math.random() < 0.1;
+      this._addAirTank(chunk, advanced);
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
@@ -603,7 +618,7 @@ export default class MazeManager {
     chunk.autoGates = gates;
   }
 
-  _addAirTank(chunk) {
+  _addAirTank(chunk, advanced = false) {
     const size = chunk.size;
     const t = chunk.tiles;
     let x, y;
@@ -615,7 +630,7 @@ export default class MazeManager {
       this._isNearEntranceOrExit(chunk, x, y)
     );
     t[y * size + x] = TILE.OXYGEN;
-    chunk.airTank = { x, y, collected: false };
+    chunk.airTank = { x, y, collected: false, advanced };
   }
 
   _addOxygenConsole(chunk) {
@@ -633,6 +648,23 @@ export default class MazeManager {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       t[spot.y * size + spot.x] = TILE.SPECIAL;
       chunk.oxygenConsole = { x: spot.x, y: spot.y };
+    }
+  }
+
+  _addBrokenSleepPod(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        candidates.push({ x, y });
+      }
+    }
+    if (candidates.length) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      chunk.brokenPod = { x: spot.x, y: spot.y };
     }
   }
 

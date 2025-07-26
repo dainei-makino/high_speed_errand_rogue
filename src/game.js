@@ -284,9 +284,11 @@ class GameScene extends Phaser.Scene {
       ) {
         curTile.chunk.chunk.airTank.collected = true;
         this.mazeManager.removeAirTank(curTile.chunk);
-        this.sound.play('pick_up');
+        const advanced = curTile.chunk.chunk.airTank.advanced;
+        this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
+        const amount = curTile.chunk.chunk.airTank.advanced ? 8 : 5;
         this.hero.oxygen = Math.min(
-          this.hero.oxygen + 5,
+          this.hero.oxygen + amount,
           this.hero.maxOxygen
         );
         this.events.emit(

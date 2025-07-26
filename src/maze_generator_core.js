@@ -151,7 +151,12 @@ export class MazeChunk {
     const size = this.size;
     const tiles = this.tiles;
     const max = Math.max(1, Math.floor(size / 3));
-    const count = rng.nextInt(max) + 1;
+    let count = rng.nextInt(max) + 1;
+    if (size >= 13) {
+      count += 2;
+    } else if (size >= 11) {
+      count += 1;
+    }
     for (let i = 0; i < count; i++) {
       const x = rng.nextInt(size - 2) + 1;
       const y = rng.nextInt(size - 2) + 1;
