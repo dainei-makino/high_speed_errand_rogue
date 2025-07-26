@@ -13,6 +13,7 @@ import GameOverScene from './game_over_scene.js';
 import { computeTetherPoints, isHorizontal, isVertical } from './utils.js';
 import Shield from './shield.js';
 import MeteorField from './meteor_field.js';
+import { DEBUG_CHUNK_COUNTER } from './debug_flags.js';
 
 // Trigger a special flash when reaching these cleared chunk counts
 // Include the first chunk to show the new "RUN!" message
@@ -173,6 +174,22 @@ class GameScene extends Phaser.Scene {
       this.events.emit('updateChunks', gameState.clearedMazes);
       this.checkMeteorFieldActivation();
     });
+
+    if (DEBUG_CHUNK_COUNTER) {
+      this.input.keyboard.on('keydown-I', () => {
+        gameState.incrementMazeCount();
+        this.events.emit('updateChunks', gameState.clearedMazes);
+        this.checkMeteorFieldActivation();
+      });
+      this.input.keyboard.on('keydown-U', () => {
+        if (gameState.clearedMazes > 0) {
+          gameState.clearedMazes -= 1;
+          this.events.emit('updateChunks', gameState.clearedMazes);
+          this.checkMeteorFieldActivation();
+        }
+      });
+      this.events.emit('showDebugChunks', true);
+    }
 
     this.input.keyboard.on('keydown-Q', () => {
       this.cameraManager.setZoom(Math.min(this.cameraManager.cam.zoom + 0.1, 2), 100);
