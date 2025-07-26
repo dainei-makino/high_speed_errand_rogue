@@ -31,8 +31,8 @@
   </g>
   <!-- Decorative stripes -->
   <g>
-    <rect x="5" y="18" width="22" height="2" fill="#567792"/>
-    <rect x="5" y="22" width="22" height="2" fill="#567792"/>
+    <rect x="5" y="8" width="22" height="2" fill="#ffcc00"/>
+    <rect x="5" y="12" width="22" height="2" fill="#ffcc00"/>
   </g>
   <!-- Central O₂ label overlay -->
   <text x="16" y="16" text-anchor="middle" dominant-baseline="middle"
