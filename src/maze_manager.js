@@ -133,11 +133,16 @@ export default class MazeManager {
             info.chestSprite = sprite;
             info.chestPosition = { x, y };
             break;
-          case TILE.OXYGEN:
-            sprite = Characters.createAirTank(this.scene);
+          case TILE.OXYGEN: {
+            const at = info.chunk.airTank;
+            const isAdvanced = at && at.x === x && at.y === y && at.advanced;
+            sprite = isAdvanced
+              ? Characters.createAirTankDark(this.scene)
+              : Characters.createAirTank(this.scene);
             info.airTankSprite = sprite;
             info.airTankPosition = { x, y };
             break;
+          }
         }
 
         if (sprite) {
@@ -327,7 +332,8 @@ export default class MazeManager {
       } else {
         this._addSilverDoor(chunk);
       }
-      this._addAirTank(chunk);
+      const advanced = progress >= 4 && Math.random() < 0.1;
+      this._addAirTank(chunk, advanced);
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
@@ -534,7 +540,7 @@ export default class MazeManager {
     chunk.autoGates = gates;
   }
 
-  _addAirTank(chunk) {
+  _addAirTank(chunk, advanced = false) {
     const size = chunk.size;
     const t = chunk.tiles;
     let x, y;
@@ -546,7 +552,7 @@ export default class MazeManager {
       this._isNearEntranceOrExit(chunk, x, y)
     );
     t[y * size + x] = TILE.OXYGEN;
-    chunk.airTank = { x, y, collected: false };
+    chunk.airTank = { x, y, collected: false, advanced };
   }
 
   _addOxygenConsole(chunk) {
