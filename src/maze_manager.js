@@ -209,7 +209,16 @@ export default class MazeManager {
         }
 
         if (sprite) {
-          sprite.setDisplaySize(size, size);
+          if (
+            sprite.texture &&
+            (sprite.texture.key === 'sleep_pod' ||
+              sprite.texture.key === 'sleep_pod_broken')
+          ) {
+            const ratio = sprite.height / sprite.width;
+            sprite.setDisplaySize(size, size * ratio);
+          } else {
+            sprite.setDisplaySize(size, size);
+          }
           const posX = info.offsetX + x * size;
           const posY = info.offsetY + y * size;
           // Center-origin sprites (like wall corners) should be positioned
