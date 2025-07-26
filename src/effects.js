@@ -129,3 +129,28 @@ export function addReactorPulse(scene, sprite, size) {
   createPulse(1000);
   return container;
 }
+
+// Create a fading afterimage at the specified position using the
+// given texture. Primarily used for rival movement trails.
+export function spawnAfterimage(
+  scene,
+  textureKey,
+  x,
+  y,
+  flipX = false,
+  duration = 300,
+  alpha = 0.5
+) {
+  const img = scene.add.image(x, y, textureKey).setOrigin(0.5);
+  img.setFlipX(flipX);
+  img.setAlpha(alpha);
+  img.setDepth(0);
+  scene.worldLayer.add(img);
+  scene.tweens.add({
+    targets: img,
+    alpha: 0,
+    duration,
+    ease: 'Quad.easeOut',
+    onComplete: () => img.destroy()
+  });
+}
