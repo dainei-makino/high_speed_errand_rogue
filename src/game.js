@@ -49,6 +49,8 @@ class GameScene extends Phaser.Scene {
     this.rivalAnimTimer = null;
     this.rivalAnimIndex = 0;
     this.rivalSwitchTimer = null;
+    this.rivalSpikeTimer = null;
+    this.lastRivalSpikeTile = null;
     this.stopTile = null;
   }
 
@@ -458,11 +460,16 @@ class GameScene extends Phaser.Scene {
           if (this.hero.oxygen <= 0) {
             this.handleGameOver();
           }
-          this.lastSpikeTile = {
-            chunkIndex: curTile.chunk.index,
-            x: curTile.tx,
-            y: curTile.ty
-          };
+          if (hit.temporary) {
+            this.mazeManager.removeSpike(curTile.chunk, hit.x, hit.y);
+            this.lastSpikeTile = null;
+          } else {
+            this.lastSpikeTile = {
+              chunkIndex: curTile.chunk.index,
+              x: curTile.tx,
+              y: curTile.ty
+            };
+          }
         } else if (!hit) {
           this.lastSpikeTile = null;
         }
@@ -624,6 +631,41 @@ class GameScene extends Phaser.Scene {
         this.sound.play('item_spawn');
         const adv = Math.random() < 0.5;
         this.mazeManager.spawnAirTankDrop(rTile.chunk, adv);
+      }
+
+      if (rTile.chunk.chunk.spikes) {
+        const hit = rTile.chunk.chunk.spikes.find(
+          s => s.x === rTile.tx && s.y === rTile.ty
+        );
+        const sameTile =
+          hit &&
+          this.lastRivalSpikeTile &&
+          this.lastRivalSpikeTile.chunkIndex === rTile.chunk.index &&
+          this.lastRivalSpikeTile.x === rTile.tx &&
+          this.lastRivalSpikeTile.y === rTile.ty;
+        if (hit && !sameTile) {
+          this.sound.play('spike_damage');
+          this.rival.oxygen = Math.max(this.rival.oxygen - 1, 0);
+          this.events.emit(
+            'updateRivalOxygen',
+            this.rival.oxygen / this.rival.maxOxygen
+          );
+          if (this.rival.oxygen <= 0) {
+            this.handleRivalDeath();
+          }
+          if (hit.temporary) {
+            this.mazeManager.removeSpike(rTile.chunk, hit.x, hit.y);
+            this.lastRivalSpikeTile = null;
+          } else {
+            this.lastRivalSpikeTile = {
+              chunkIndex: rTile.chunk.index,
+              x: rTile.tx,
+              y: rTile.ty
+            };
+          }
+        } else if (!hit) {
+          this.lastRivalSpikeTile = null;
+        }
       }
     }
   }
@@ -802,6 +844,21 @@ class GameScene extends Phaser.Scene {
     schedule();
   }
 
+  startRivalSpikeTimer() {
+    if (!this.rival) return;
+    this.rivalSpikeTimer = this.time.addEvent({
+      delay: 3000,
+      loop: true,
+      callback: () => {
+        if (!this.rival || this.isGameOver) return;
+        const tile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
+        if (tile) {
+          this.mazeManager.spawnSpike(tile.chunk, true);
+        }
+      }
+    });
+  }
+
   _findNearestRivalTarget() {
     if (!this.rivalSprite) return null;
     const rx = this.rivalSprite.x;
@@ -888,6 +945,7 @@ class GameScene extends Phaser.Scene {
     this.worldLayer.add(this.rivalSprite);
     this.startRivalOxygenTimer();
     this.startRivalSwitchTimer();
+    this.startRivalSpikeTimer();
     this.events.emit('updateRivalOxygen', 1);
   }
 
@@ -901,6 +959,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalSwitchTimer) {
       this.rivalSwitchTimer.remove();
       this.rivalSwitchTimer = null;
+    }
+    if (this.rivalSpikeTimer) {
+      this.rivalSpikeTimer.remove();
+      this.rivalSpikeTimer = null;
     }
     if (this.rivalAnimTimer) {
       this.rivalAnimTimer.remove();
@@ -957,6 +1019,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalSwitchTimer) {
       this.rivalSwitchTimer.remove();
       this.rivalSwitchTimer = null;
+    }
+    if (this.rivalSpikeTimer) {
+      this.rivalSpikeTimer.remove();
+      this.rivalSpikeTimer = null;
     }
     if (this.bgm) {
       this.bgm.stop();

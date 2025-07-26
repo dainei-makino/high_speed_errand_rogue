@@ -977,7 +977,7 @@ export default class MazeManager {
         tries < 20
       );
       if (tries < 20) {
-        spikes.push({ x, y });
+        spikes.push({ x, y, temporary: false });
       }
     }
     chunk.spikes = spikes;
@@ -1314,6 +1314,43 @@ export default class MazeManager {
     info.itemSwitchSprite = sprite;
     info.itemSwitchPosition = { x, y };
     info.chunk.itemSwitch = { x, y, triggered: false };
+  }
+
+  spawnSpike(info, temporary = true) {
+    if (!info) return;
+    const spot = this._findDropSpot(info.chunk);
+    if (!spot) return;
+    const { x, y } = spot;
+    const size = this.tileSize;
+    const sprite = Characters.createSpike(this.scene);
+    sprite.setDisplaySize(size, size);
+    sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+    sprite.alpha = 0;
+    this.scene.worldLayer.add(sprite);
+    this.scene.tweens.add({ targets: sprite, alpha: 1, duration: 200 });
+    info.spikeSprites.push({ x, y, sprite });
+    if (!info.chunk.spikes) info.chunk.spikes = [];
+    info.chunk.spikes.push({ x, y, temporary });
+  }
+
+  removeSpike(info, x, y) {
+    if (!info || !info.spikeSprites) return;
+    const idx = info.spikeSprites.findIndex(s => s.x === x && s.y === y);
+    if (idx !== -1) {
+      const { sprite } = info.spikeSprites.splice(idx, 1)[0];
+      this.scene.tweens.add({
+        targets: sprite,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => sprite.destroy()
+      });
+    }
+    if (info.chunk.spikes) {
+      const sIdx = info.chunk.spikes.findIndex(s => s.x === x && s.y === y);
+      if (sIdx !== -1) {
+        info.chunk.spikes.splice(sIdx, 1);
+      }
+    }
   }
 
   _findDropSpot(chunk) {
