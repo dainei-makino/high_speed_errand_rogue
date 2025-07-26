@@ -300,46 +300,49 @@ export default class MazeManager {
       if (obj.chunk.electricMachines && obj.chunk.electricMachines.length) {
         for (const machine of obj.chunk.electricMachines) {
           machine.timer += delta;
-          const active = machine.timer % 4000 >= 3000;
-          if (active && !machine.active) {
-            machine.active = true;
-            machine.effects = [];
-            const dirs = [
-              { dx: 1, dy: 0 },
-              { dx: -1, dy: 0 },
-              { dx: 0, dy: 1 },
-              { dx: 0, dy: -1 }
-            ];
-            for (const { dx, dy } of dirs) {
-              const tx = machine.x + dx;
-              const ty = machine.y + dy;
-              if (
-                tx >= 0 &&
-                ty >= 0 &&
-                tx < obj.chunk.size &&
-                ty < obj.chunk.size &&
-                obj.chunk.tiles[ty * obj.chunk.size + tx] === TILE.FLOOR
-              ) {
-                const ex = obj.offsetX + tx * this.tileSize + this.tileSize / 2;
-                const ey = obj.offsetY + ty * this.tileSize + this.tileSize / 2;
-                const rect = this.scene.add.rectangle(
-                  ex,
-                  ey,
-                  this.tileSize,
-                  this.tileSize,
-                  0xffff00
-                );
-                rect.setAlpha(0.5);
-                machine.effects.push(rect);
-                obj.sprites.push(rect);
+          const cycle = machine.timer % 4000;
+          const active = cycle >= 3000;
+          const leak = !active && cycle % 1000 < 200;
+          const cx = obj.offsetX + machine.x * this.tileSize + this.tileSize / 2;
+          const cy = obj.offsetY + machine.y * this.tileSize + this.tileSize / 2;
+
+          if (active) {
+            if (machine.timer - (machine.lastEffect || 0) > 120) {
+              machine.lastEffect = machine.timer;
+              const dirs = [
+                { dx: 1, dy: 0 },
+                { dx: -1, dy: 0 },
+                { dx: 0, dy: 1 },
+                { dx: 0, dy: -1 }
+              ];
+              for (const { dx, dy } of dirs) {
+                const tx = machine.x + dx;
+                const ty = machine.y + dy;
+                if (
+                  tx >= 0 &&
+                  ty >= 0 &&
+                  tx < obj.chunk.size &&
+                  ty < obj.chunk.size &&
+                  obj.chunk.tiles[ty * obj.chunk.size + tx] === TILE.FLOOR
+                ) {
+                  const ex =
+                    obj.offsetX + tx * this.tileSize + this.tileSize / 2;
+                  const ey =
+                    obj.offsetY + ty * this.tileSize + this.tileSize / 2;
+                  this._createLightning(cx, cy, ex, ey, 2);
+                }
               }
             }
-          } else if (!active && machine.active) {
-            machine.active = false;
-            if (machine.effects) {
-              machine.effects.forEach(e => e.destroy());
-              obj.sprites = obj.sprites.filter(s => !machine.effects.includes(s));
-              machine.effects = [];
+          }
+
+          if (leak) {
+            if (machine.timer - (machine.lastLeak || 0) > 100) {
+              machine.lastLeak = machine.timer;
+              const angle = Math.random() * Math.PI * 2;
+              const dist = (this.tileSize / 2) * Math.random();
+              const ex = cx + Math.cos(angle) * dist;
+              const ey = cy + Math.sin(angle) * dist;
+              this._createLightning(cx, cy, ex, ey, 1);
             }
           }
         }
@@ -771,6 +774,37 @@ export default class MazeManager {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       chunk.electricMachines.push({ x: spot.x, y: spot.y, timer: 0, active: false, effects: [] });
     }
+  }
+
+  _createLightning(x1, y1, x2, y2, width = 2) {
+    const gfx = this.scene.add.graphics();
+    gfx.lineStyle(width, 0xffff66, 1);
+    gfx.setBlendMode(Phaser.BlendModes.ADD);
+    gfx.beginPath();
+    const segs = 3;
+    gfx.moveTo(x1, y1);
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    for (let i = 1; i < segs; i++) {
+      const t = i / segs;
+      const nx = x1 + dx * t;
+      const ny = y1 + dy * t;
+      const off = (Math.random() - 0.5) * 6;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const offX = (-dy / len) * off;
+      const offY = (dx / len) * off;
+      gfx.lineTo(nx + offX, ny + offY);
+    }
+    gfx.lineTo(x2, y2);
+    gfx.strokePath();
+    this.scene.worldLayer.add(gfx);
+    this.scene.tweens.add({
+      targets: gfx,
+      alpha: 0,
+      duration: 200,
+      onComplete: () => gfx.destroy()
+    });
+    return gfx;
   }
 
   openDoor(info) {
