@@ -8,6 +8,16 @@ export function pickMazeConfig(stage, progress = 0) {
   if (progress >= 30) {
     return { size: 13 };
   }
+  // Force larger 13x13 chunks for specific progress ranges
+  if (progress >= 22) {
+    if (progress < 29) {
+      return { size: 13 };
+    }
+  } else if (progress >= 12) {
+    if (progress < 17) {
+      return { size: 13 };
+    }
+  }
   const entry = [...MAZE_TABLE].reverse().find(e => stage >= e.stage) || MAZE_TABLE[0];
   let sizes = entry.sizes.slice();
   // Gate larger chunk sizes by progress
