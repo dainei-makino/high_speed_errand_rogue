@@ -10,9 +10,5 @@
     </linearGradient>
   </defs>
   <rect width="32" height="32" fill="url(#wallBase)"/>
-  <rect x="4" y="8" width="24" height="6" rx="3" fill="url(#pipeBlue)"/>
-  <rect x="4" y="18" width="24" height="6" rx="3" fill="url(#pipeBlue)"/>
-  <rect x="6" y="5" width="4" height="22" rx="2" fill="url(#pipeBlue)"/>
-  <rect x="22" y="5" width="4" height="22" rx="2" fill="url(#pipeBlue)"/>
-  <rect width="32" height="32" fill="none" stroke="#869ab3" stroke-width="1"/>
+  <rect width="32" height="32" fill="none" stroke="#627a90" stroke-width="1"/>
 </svg>
