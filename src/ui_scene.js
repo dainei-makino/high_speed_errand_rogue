@@ -8,6 +8,7 @@ const GAUGE_CENTER_X = VIRTUAL_WIDTH * 2 - 120;
 const GAUGE_CENTER_Y = VIRTUAL_HEIGHT * 2 - 120;
 const GAUGE_RADIUS = 90;
 const GAUGE_THICKNESS = 32;
+const RIVAL_GAUGE_CENTER_X = 120;
 
 export default class UIScene extends Phaser.Scene {
   constructor() {
@@ -39,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
+    gameScene.events.on('updateRivalOxygen', this.updateRivalOxygen, this);
     gameScene.events.on('updateKeys', this.updateKeys, this);
     this.debugVisibleHandler = visible => {
       if (this.debugChunkText) this.debugChunkText.setVisible(visible);
@@ -49,6 +51,7 @@ export default class UIScene extends Phaser.Scene {
       this.scale.off('resize', this.resizeHandler);
       gameScene.events.off('updateChunks', this.updateChunks, this);
       gameScene.events.off('updateOxygen', this.updateOxygen, this);
+      gameScene.events.off('updateRivalOxygen', this.updateRivalOxygen, this);
       gameScene.events.off('updateKeys', this.updateKeys, this);
       gameScene.events.off('showDebugChunks', this.debugVisibleHandler, this);
     };
@@ -56,6 +59,13 @@ export default class UIScene extends Phaser.Scene {
 
     this.oxygenGfx = this.add.graphics();
     this.o2Label = this.add.text(0, 0, 'O2 Timer', {
+      fontFamily: 'monospace',
+      fontSize: '19px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    this.rivalOxygenGfx = this.add.graphics();
+    this.rivalLabel = this.add.text(0, 0, 'Rival O2', {
       fontFamily: 'monospace',
       fontSize: '19px',
       color: '#ffffff'
@@ -72,6 +82,7 @@ export default class UIScene extends Phaser.Scene {
     this.keyContainer.setVisible(false);
 
     this.updateOxygen(1);
+    this.updateRivalOxygen(0);
 
 
     this.fpsText = this.add.text(420, 8, '', {
@@ -155,6 +166,57 @@ export default class UIScene extends Phaser.Scene {
       this.oxygenGfx.arc(centerX, centerY, innerRadius, start, start + Phaser.Math.DegToRad(360 * extraRatio), false);
       this.oxygenGfx.strokePath();
     }
+  }
+
+  updateRivalOxygen(ratio) {
+    if (!this.rivalOxygenGfx) return;
+    const centerX = RIVAL_GAUGE_CENTER_X;
+    const centerY = GAUGE_CENTER_Y;
+    const radius = GAUGE_RADIUS;
+    const thickness = GAUGE_THICKNESS;
+    const start = Phaser.Math.DegToRad(-90);
+
+    this.rivalLabel.setPosition(centerX, centerY - radius - 36);
+
+    this.rivalOxygenGfx.clear();
+    this.rivalOxygenGfx.lineStyle(thickness, 0x333333, 0.5);
+    this.rivalOxygenGfx.beginPath();
+    this.rivalOxygenGfx.arc(centerX, centerY, radius, 0, Phaser.Math.PI2, false);
+    this.rivalOxygenGfx.strokePath();
+
+    const mainRatio = Math.min(ratio, 1);
+    const extraRatio = Math.max(Math.min(ratio - 1, 1), 0);
+
+    const ringColor = 0x00aaff;
+
+    this.rivalOxygenGfx.lineStyle(thickness, ringColor, 1);
+    this.rivalOxygenGfx.beginPath();
+    this.rivalOxygenGfx.arc(
+      centerX,
+      centerY,
+      radius,
+      start,
+      start + Phaser.Math.DegToRad(360 * mainRatio),
+      false
+    );
+    this.rivalOxygenGfx.strokePath();
+
+    if (extraRatio > 0) {
+      const innerRadius = radius - thickness - 4;
+      this.rivalOxygenGfx.lineStyle(thickness, 0x00ffff, 1);
+      this.rivalOxygenGfx.beginPath();
+      this.rivalOxygenGfx.arc(
+        centerX,
+        centerY,
+        innerRadius,
+        start,
+        start + Phaser.Math.DegToRad(360 * extraRatio),
+        false
+      );
+      this.rivalOxygenGfx.strokePath();
+    }
+    this.rivalOxygenGfx.setVisible(ratio > 0);
+    this.rivalLabel.setVisible(ratio > 0);
   }
 
   showMidpoint(num) {
