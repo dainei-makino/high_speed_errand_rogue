@@ -153,22 +153,48 @@ export default class UIScene extends Phaser.Scene {
       onComplete: () => flash.destroy()
     });
 
-    const text = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, num.toString(), {
+    const str = num === 1 ? 'RUN!' : num.toString();
+    const style = {
       fontFamily: 'monospace',
       fontSize: '192px',
       stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5);
-    text.setDepth(1000);
-    text.setShadow(4, 4, '#000000', 4, true, true);
-    text.setTintFill(0xffffff, 0xffffff, 0xffffff, 0xcd853f);
+      strokeThickness: 4,
+      color: '#ffffff'
+    };
+    const base = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, str, style).setOrigin(0.5);
+    base.setDepth(1000);
+    // Neon glow
+    base.setShadow(0, 0, '#00ffff', 16, true, true);
+
+    // Create tinted duplicates for a simple glitch effect
+    const glitchStyle1 = { ...style, color: '#ff00ff' };
+    const glitchStyle2 = { ...style, color: '#00ffff' };
+    const g1 = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, str, glitchStyle1).setOrigin(0.5);
+    const g2 = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, str, glitchStyle2).setOrigin(0.5);
+    g1.setDepth(999);
+    g2.setDepth(999);
+    g1.setBlendMode(Phaser.BlendModes.ADD);
+    g2.setBlendMode(Phaser.BlendModes.ADD);
+
+    const jitter = () => {
+      g1.x = VIRTUAL_WIDTH + Phaser.Math.Between(-4, 4);
+      g1.y = VIRTUAL_HEIGHT + Phaser.Math.Between(-4, 4);
+      g2.x = VIRTUAL_WIDTH + Phaser.Math.Between(-4, 4);
+      g2.y = VIRTUAL_HEIGHT + Phaser.Math.Between(-4, 4);
+    };
+    this.time.addEvent({ delay: 50, repeat: 20, callback: jitter });
+
     this.tweens.add({
-      targets: text,
+      targets: [base, g1, g2],
       scale: 2,
       alpha: 0,
       duration: 2000,
       ease: 'Quad.easeOut',
-      onComplete: () => text.destroy()
+      onComplete: () => {
+        base.destroy();
+        g1.destroy();
+        g2.destroy();
+      }
     });
   }
 
