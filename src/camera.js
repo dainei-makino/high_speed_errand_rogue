@@ -3,8 +3,8 @@ export default class CameraManager {
     this.scene = scene;
     this.mazeManager = mazeManager;
     this.cam = scene.cameras.main;
-    // Start a bit closer to make the maze appear larger
-    this.defaultZoom = 2;
+    // Use a 1x zoom baseline so tiles render at their native size
+    this.defaultZoom = 1;
     this.cam.setZoom(this.defaultZoom);
     this.bounds = { minX: -1000, minY: -1000, maxX: 9000, maxY: 9000 };
     this.cam.setBounds(
