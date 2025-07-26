@@ -240,14 +240,15 @@ export default class UIScene extends Phaser.Scene {
 
     const str = num === 1 ? 'RUN!' : num.toString();
     const baseFontSize = str === 'SURVIVE!' ? 96 : 192;
-    const tweenDuration = str === 'SURVIVE!' ? 1600 : 800;
+    const tweenDuration = str === 'SURVIVE!' ? 1400 : 600;
     const jitterRepeats = str === 'SURVIVE!' ? 15 : 7;
     const style = {
       fontFamily: 'monospace',
       fontSize: `${baseFontSize}px`,
       stroke: '#000000',
       strokeThickness: 4,
-      color: '#ffffff'
+      color: '#ffffff',
+      fontStyle: 'bold'
     };
     const base = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, str, style).setOrigin(0.5);
     base.setDepth(1000);
@@ -278,6 +279,7 @@ export default class UIScene extends Phaser.Scene {
       scale: 2,
       alpha: 0,
       duration: tweenDuration,
+      delay: 400,
       ease: 'Quad.easeOut',
       onComplete: () => {
         base.destroy();
