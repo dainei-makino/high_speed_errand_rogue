@@ -274,10 +274,16 @@ export default class MazeManager {
             break;
           }
           case TILE.REACTOR:
-            sprite = Characters.createReactorCore(this.scene);
-            sprite._noAutoSize = true;
-            sprite.setDisplaySize(size * 6, size * 6);
-            info.reactorSprite = sprite;
+            if (
+              chunk.reactorCore &&
+              x === chunk.reactorCore.x &&
+              y === chunk.reactorCore.y
+            ) {
+              sprite = Characters.createReactorCore(this.scene);
+              sprite._noAutoSize = true;
+              sprite.setDisplaySize(size * 3, size * 3);
+              info.reactorSprite = sprite;
+            }
             break;
         }
 
@@ -968,7 +974,13 @@ export default class MazeManager {
 
   _addReactorCore(chunk) {
     const c = Math.floor(chunk.size / 2);
-    chunk.tiles[c * chunk.size + c] = TILE.REACTOR;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const x = c + dx;
+        const y = c + dy;
+        chunk.tiles[y * chunk.size + x] = TILE.REACTOR;
+      }
+    }
     chunk.reactorCore = { x: c, y: c };
   }
 
