@@ -75,27 +75,97 @@ export default class MazeManager {
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
         const tile = chunk.tiles[y * chunk.size + x];
-        const floor = Characters.createFloor(this.scene);
-        floor.setDisplaySize(size, size);
-        floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
-        // Floors should always render behind other objects
-        floor.setDepth(-1);
-        this.scene.worldLayer.add(floor);
-        info.sprites.push(floor);
+        const isCorner =
+          (x === 0 && y === 0) ||
+          (x === chunk.size - 1 && y === 0) ||
+          (x === 0 && y === chunk.size - 1) ||
+          (x === chunk.size - 1 && y === chunk.size - 1);
+        if (!isCorner) {
+          const floor = Characters.createFloor(this.scene);
+          floor.setDisplaySize(size, size);
+          floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+          // Floors should always render behind other objects
+          floor.setDepth(-1);
+          this.scene.worldLayer.add(floor);
+          info.sprites.push(floor);
+        }
 
         let sprite = null;
         switch (tile) {
-          case TILE.WALL:
+          case TILE.WALL: {
+            // Count surrounding wall-like tiles (including doors) in all 8 directions
+            const isWallLike = t =>
+              t === TILE.WALL ||
+              t === TILE.DOOR ||
+              t === TILE.SILVER_DOOR ||
+              t === TILE.AUTO_GATE;
+            const check = (cx, cy) =>
+              cx >= 0 &&
+              cy >= 0 &&
+              cx < chunk.size &&
+              cy < chunk.size &&
+              isWallLike(chunk.tiles[cy * chunk.size + cx]);
+
+            const west = check(x - 1, y);
+            const east = check(x + 1, y);
+            const north = check(x, y - 1);
+            const south = check(x, y + 1);
+            const nw = check(x - 1, y - 1);
+            const ne = check(x + 1, y - 1);
+            const sw = check(x - 1, y + 1);
+            const se = check(x + 1, y + 1);
+
+            const neighborCount =
+              (west ? 1 : 0) +
+              (east ? 1 : 0) +
+              (north ? 1 : 0) +
+              (south ? 1 : 0) +
+              (nw ? 1 : 0) +
+              (ne ? 1 : 0) +
+              (sw ? 1 : 0) +
+              (se ? 1 : 0);
+
+            if (neighborCount === 1) {
+              sprite = Characters.createWallEnd(this.scene);
+              if (south) {
+                sprite.setAngle(0);
+              } else if (west) {
+                sprite.setAngle(90);
+              } else if (north) {
+                sprite.setAngle(180);
+              } else if (east) {
+                sprite.setAngle(270);
+              }
+            } else if (neighborCount === 2) {
+              const isCornerShape =
+                (east && south) || (south && west) || (west && north) || (north && east);
+              if (isCornerShape) {
+                sprite = Characters.createWallCorner(this.scene);
+                if (east && south) {
+                  sprite.setAngle(0);
+                } else if (south && west) {
+                  sprite.setAngle(90);
+                } else if (west && north) {
+                  sprite.setAngle(180);
+                } else if (north && east) {
+                  sprite.setAngle(270);
+                }
+              } else {
+                sprite = Characters.createWall(this.scene);
+              }
             if (
               chunk.brokenPod &&
               chunk.brokenPod.x === x &&
               chunk.brokenPod.y === y
             ) {
               sprite = Characters.createSleepPodBroken(this.scene);
+            }
+              
             } else {
               sprite = Characters.createWall(this.scene);
             }
             break;
+          }
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
             info.oxygenSprite = sprite;
@@ -147,7 +217,15 @@ export default class MazeManager {
 
         if (sprite) {
           sprite.setDisplaySize(size, size);
-          sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+          const posX = info.offsetX + x * size;
+          const posY = info.offsetY + y * size;
+          // Center-origin sprites (like wall corners) should be positioned
+          // on the tile center so rotation works as expected
+          if (sprite.originX === 0.5 && sprite.originY === 0.5) {
+            sprite.setPosition(posX + size / 2, posY + size / 2);
+          } else {
+            sprite.setPosition(posX, posY);
+          }
           this.scene.worldLayer.add(sprite);
           info.sprites.push(sprite);
         }

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <linearGradient id="wallBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4f708e"/>
+      <stop offset="100%" stop-color="#2f4456"/>
+    </linearGradient>
+    <linearGradient id="pipeBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6e8fa6"/>
+      <stop offset="100%" stop-color="#3b5c75"/>
+    </linearGradient>
+    <clipPath id="clip">
+      <path d="M0,32 L32,32 L32,16 A16,16 0 0 0 16,0 A16,16 0 0 0 0,16 L0,32 Z" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip)">
+    <rect width="32" height="32" fill="url(#wallBase)"/>
+    <rect x="4" y="8" width="24" height="6" rx="3" fill="url(#pipeBlue)"/>
+    <rect x="4" y="18" width="24" height="6" rx="3" fill="url(#pipeBlue)"/>
+    <rect x="6" y="5" width="4" height="22" rx="2" fill="url(#pipeBlue)"/>
+    <rect x="22" y="5" width="4" height="22" rx="2" fill="url(#pipeBlue)"/>
+    <rect width="32" height="32" fill="none" stroke="#869ab3" stroke-width="1"/>
+  </g>
+</svg>
