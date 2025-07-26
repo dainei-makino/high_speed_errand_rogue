@@ -718,6 +718,7 @@ class GameScene extends Phaser.Scene {
 
   handleRivalDeath() {
     if (!this.rivalSprite) return;
+    this.sound.play('game_over');
     if (this.rivalTimer) {
       this.rivalTimer.remove();
       this.rivalTimer = null;
