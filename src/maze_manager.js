@@ -228,7 +228,9 @@ export default class MazeManager {
             info.oxygenPosition = { x, y };
             break;
           case TILE.DOOR:
-            sprite = Characters.createExit(this.scene);
+            sprite = chunk.doorOpen
+              ? Characters.createDoorOpen(this.scene)
+              : Characters.createExit(this.scene);
             info.doorSprite = sprite;
             info.doorPosition = { x, y };
             break;
@@ -506,6 +508,14 @@ export default class MazeManager {
     } else {
       const { size } = pickMazeConfig(progress + 1, progress);
       chunk = createChunk(this._nextSeed(), size, entryDir);
+      if (progress === 30 || progress === 31) {
+        if (chunk.chest) {
+          const idx = chunk.chest.y * size + chunk.chest.x;
+          chunk.tiles[idx] = TILE.FLOOR;
+          chunk.chest = null;
+        }
+        chunk.doorOpen = true;
+      }
     }
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
