@@ -30,7 +30,8 @@ const SPRITES = {
   meteor_explosion1: 'meteor_explosion1.svg',
   meteor_explosion2: 'meteor_explosion2.svg',
   meteor_explosion3: 'meteor_explosion3.svg',
-  wall_corner: 'wall_corner.svg'
+  wall_corner: 'wall_corner.svg',
+  wall_end: 'wall_end.svg'
 };
 
 const canvases = {};
@@ -78,6 +79,11 @@ function createWall(scene) {
 function createWallCorner(scene) {
   // Rotating this tile requires its origin to be centered
   return scene.add.image(0, 0, 'wall_corner').setOrigin(0.5);
+}
+
+function createWallEnd(scene) {
+  // Similar to wall_corner but with two rounded corners
+  return scene.add.image(0, 0, 'wall_end').setOrigin(0.5);
 }
 
 function createExit(scene) {
@@ -154,6 +160,7 @@ export default {
   createFloor,
   createWall,
   createWallCorner,
+  createWallEnd,
   createExit,
   createSilverDoor,
   createSilverDoorOpen,

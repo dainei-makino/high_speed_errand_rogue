@@ -102,7 +102,25 @@ export default class MazeManager {
                 sprite.setAngle(270);
               }
             } else {
-              sprite = Characters.createWall(this.scene);
+              const west = x > 0 && chunk.tiles[y * chunk.size + (x - 1)] === TILE.WALL;
+              const east = x < chunk.size - 1 && chunk.tiles[y * chunk.size + (x + 1)] === TILE.WALL;
+              const north = y > 0 && chunk.tiles[(y - 1) * chunk.size + x] === TILE.WALL;
+              const south = y < chunk.size - 1 && chunk.tiles[(y + 1) * chunk.size + x] === TILE.WALL;
+              const neighborCount = (west ? 1 : 0) + (east ? 1 : 0) + (north ? 1 : 0) + (south ? 1 : 0);
+              if (neighborCount === 1) {
+                sprite = Characters.createWallEnd(this.scene);
+                if (south) {
+                  sprite.setAngle(0);
+                } else if (west) {
+                  sprite.setAngle(90);
+                } else if (north) {
+                  sprite.setAngle(180);
+                } else if (east) {
+                  sprite.setAngle(270);
+                }
+              } else {
+                sprite = Characters.createWall(this.scene);
+              }
             }
             break;
           case TILE.SPECIAL:
