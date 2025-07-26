@@ -368,6 +368,9 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
+          if (this.inputBuffer && this.inputBuffer.clear) {
+            this.inputBuffer.clear();
+          }
           if (gameState.clearedMazes === 1 && !this.oxygenTimer) {
             this.startOxygenTimer();
           }
