@@ -79,9 +79,15 @@ class GameScene extends Phaser.Scene {
     // Shift sprite slightly downward so the hero sits lower in its tile
     this.heroImage.y = 0; // centered vertically
 
-    this.heroSprite = this.add.container(0, 0, [this.heroImage]);
-    this.heroSprite.x = firstInfo.offsetX + firstInfo.chunk.entrance.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
-    this.heroSprite.y = firstInfo.offsetY + firstInfo.chunk.entrance.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    const hx =
+      firstInfo.offsetX +
+      firstInfo.chunk.entrance.x * this.mazeManager.tileSize +
+      this.mazeManager.tileSize / 2;
+    const hy =
+      firstInfo.offsetY +
+      firstInfo.chunk.entrance.y * this.mazeManager.tileSize +
+      this.mazeManager.tileSize / 2;
+    this.heroSprite = this.add.container(hx, hy, [this.heroImage]);
     this.worldLayer.add(this.heroSprite);
 
     if (firstInfo.oxygenPosition) {
