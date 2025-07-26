@@ -182,13 +182,15 @@ export default class UIScene extends Phaser.Scene {
       g2.x = VIRTUAL_WIDTH + Phaser.Math.Between(-4, 4);
       g2.y = VIRTUAL_HEIGHT + Phaser.Math.Between(-4, 4);
     };
-    this.time.addEvent({ delay: 50, repeat: 20, callback: jitter });
+    // Shorten the jitter cycle to match the faster midpoint display
+    this.time.addEvent({ delay: 50, repeat: 7, callback: jitter });
 
     this.tweens.add({
       targets: [base, g1, g2],
       scale: 2,
       alpha: 0,
-      duration: 2000,
+      // Shortened from 2000ms so the whole effect plays 60% faster
+      duration: 800,
       ease: 'Quad.easeOut',
       onComplete: () => {
         base.destroy();
