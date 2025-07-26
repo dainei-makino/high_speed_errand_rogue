@@ -441,14 +441,14 @@ export default class MazeManager {
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
 
-    const isRestPoint = progress === 13 || progress === 28;
+    const isRestPoint = progress === 14 || progress === 29;
 
     let chunk;
     if (isRestPoint) {
       chunk = createChunk(this._nextSeed(), 7, entryDir);
       this._ensureEntrance(chunk);
       this._addOxygenConsole(chunk);
-      if (progress === 28) {
+      if (progress === 29) {
         this._addBrokenSleepPod(chunk);
       }
       this._addSleepPodsWithHero(chunk, 5);
