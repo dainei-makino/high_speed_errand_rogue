@@ -801,8 +801,9 @@ export default class MazeManager {
     if (progress >= 15) {
       chance = progress === 15 ? 1 : 0.6;
     }
-    if (candidates.length && Math.random() < chance) {
-      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+    const addMachine = () => {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
       chunk.electricMachines.push({
         x: spot.x,
         y: spot.y,
@@ -811,6 +812,19 @@ export default class MazeManager {
         lastEffect: -Infinity,
         lastLeak: -Infinity
       });
+    };
+
+    if (candidates.length && Math.random() < chance) {
+      addMachine();
+    }
+
+    if (progress >= 20 && chunk.electricMachines.length && candidates.length) {
+      if (Math.random() < 0.8 && candidates.length) {
+        addMachine();
+      }
+      if (Math.random() < 0.1 && candidates.length) {
+        addMachine();
+      }
     }
   }
 
