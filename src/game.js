@@ -141,8 +141,10 @@ class GameScene extends Phaser.Scene {
           alpha: 0,
           duration: 200,
           onComplete: () => {
-            this.oxygenLine.destroy();
-            this.oxygenLine = null;
+            if (this.oxygenLine) {
+              this.oxygenLine.destroy();
+              this.oxygenLine = null;
+            }
           }
         });
       }
