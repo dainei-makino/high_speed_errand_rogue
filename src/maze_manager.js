@@ -273,10 +273,24 @@ export default class MazeManager {
             info.airTankSprites.push({ x, y, sprite });
             break;
           }
+          case TILE.REACTOR:
+            if (
+              chunk.reactorCore &&
+              x === chunk.reactorCore.x &&
+              y === chunk.reactorCore.y
+            ) {
+              sprite = Characters.createReactorCore(this.scene);
+              sprite._noAutoSize = true;
+              sprite.setDisplaySize(size * 3, size * 3);
+              info.reactorSprite = sprite;
+            }
+            break;
         }
 
         if (sprite) {
-          sprite.setDisplaySize(size, size);
+          if (!sprite._noAutoSize) {
+            sprite.setDisplaySize(size, size);
+          }
           const posX = info.offsetX + x * size;
           const posY = info.offsetY + y * size;
           // Center-origin sprites (like wall corners) should be positioned
@@ -466,9 +480,12 @@ export default class MazeManager {
     const entryDir = this._oppositeDir(doorDir);
 
     const isRestPoint = progress === 14 || progress === 29;
+    const isBossRoom = progress === 32;
 
     let chunk;
-    if (isRestPoint) {
+    if (isBossRoom) {
+      chunk = this._createBossChunk(entryDir);
+    } else if (isRestPoint) {
       chunk = createChunk(this._nextSeed(), 7, entryDir);
       this._ensureEntrance(chunk);
       this._addOxygenConsole(chunk);
@@ -544,7 +561,7 @@ export default class MazeManager {
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
-    if (!isRestPoint && progress >= 1) {
+    if (!isRestPoint && !isBossRoom && progress >= 1) {
       if (progress === 30 || progress === 31) {
         // Only closed auto gates on the 31st and 32nd chunks
         this._addAutoGate(chunk, 3, true);
@@ -566,11 +583,11 @@ export default class MazeManager {
       const advanced = progress >= 4 && Math.random() < 0.1;
       this._addAirTank(chunk, advanced);
     }
-    if (!isRestPoint && progress >= 2) {
+    if (!isRestPoint && !isBossRoom && progress >= 2) {
       this._addSpikes(chunk);
       this._addElectricMachine(chunk, progress);
     }
-    if (!isRestPoint && progress >= 20) {
+    if (!isRestPoint && !isBossRoom && progress >= 20) {
       if (progress === 20 || Math.random() < 0.3) {
         this._addItemSwitch(chunk);
       }
@@ -954,6 +971,42 @@ export default class MazeManager {
         addMachine();
       }
     }
+  }
+
+  _addReactorCore(chunk) {
+    const c = Math.floor(chunk.size / 2);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const x = c + dx;
+        const y = c + dy;
+        chunk.tiles[y * chunk.size + x] = TILE.REACTOR;
+      }
+    }
+    chunk.reactorCore = { x: c, y: c };
+  }
+
+  _createBossChunk(entryDir) {
+    const size = 13;
+    const chunk = {
+      size,
+      seed: this._nextSeed(),
+      entry: entryDir,
+      tiles: new Uint8Array(size * size),
+      door: null,
+      chest: null
+    };
+    // fill with floor and walls around edges
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const idx = y * size + x;
+        chunk.tiles[idx] =
+          x === 0 || y === 0 || x === size - 1 || y === size - 1
+            ? TILE.WALL
+            : TILE.FLOOR;
+      }
+    }
+    this._addReactorCore(chunk);
+    return chunk;
   }
 
   _createLightning(x1, y1, x2, y2, width = 2, depth = 1) {
