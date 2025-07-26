@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <linearGradient id="panelSilver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#cccccc"/>
+      <stop offset="100%" stop-color="#888888"/>
+    </linearGradient>
+    <linearGradient id="frameSilver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eeeeee"/>
+      <stop offset="100%" stop-color="#aaaaaa"/>
+    </linearGradient>
+  </defs>
+  <!-- Sliding panel behind the frame -->
+  <rect id="doorPanel" x="4" y="4" width="24" height="24" fill="url(#panelSilver)" stroke="#666666" stroke-width="1"/>
+  <!-- Front frame -->
+  <rect id="doorFrame" x="2" y="2" width="28" height="28" fill="url(#frameSilver)" stroke="#bbbbbb" stroke-width="2"/>
+</svg>
