@@ -24,6 +24,15 @@ const SPRITES = {
   hero_right_walk1: 'hero_right_walk1.svg',
   hero_right_walk2: 'hero_right_walk2.svg',
   hero_right_walk3: 'hero_right_walk3.svg',
+  rival_walk1: 'rival_walk1.svg',
+  rival_walk2: 'rival_walk2.svg',
+  rival_walk3: 'rival_walk3.svg',
+  rival_back_walk1: 'rival_back_walk1.svg',
+  rival_back_walk2: 'rival_back_walk2.svg',
+  rival_back_walk3: 'rival_back_walk3.svg',
+  rival_right_walk1: 'rival_right_walk1.svg',
+  rival_right_walk2: 'rival_right_walk2.svg',
+  rival_right_walk3: 'rival_right_walk3.svg',
   arrow: 'arrow.svg',
   key: 'key.svg',
   air_tank: 'air_tank.svg',
@@ -190,6 +199,10 @@ function createHeroPlain(scene) {
   return scene.add.image(0, 0, 'hero_plain').setOrigin(0.5);
 }
 
+function createRival(scene) {
+  return scene.add.image(0, 0, 'rival_walk1').setOrigin(0.5);
+}
+
 function createArrow(scene) {
   return scene.add.image(0, 0, 'arrow').setOrigin(0.5);
 }
@@ -223,6 +236,7 @@ export default {
   createMeteorExplosion,
   createHero,
   createHeroPlain,
+  createRival,
   createArrow,
   createFloorDecal
 };

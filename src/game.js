@@ -1,5 +1,6 @@
 import gameState from './game-state.js';
 import HeroState from './hero_state.js';
+import RivalState from './rival_state.js';
 import CameraManager from './camera.js';
 import MazeManager from './maze_manager.js';
 import { TILE } from './maze_generator_core.js';
@@ -32,12 +33,19 @@ class GameScene extends Phaser.Scene {
     this.heroAnimationTimer = null;
     this.heroAnimIndex = 0;
     this.oxygenTimer = null;
+    this.rivalTimer = null;
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
     this.oxygenLine = null;
     this.oxygenConsole = null;
+    this.rival = null;
+    this.rivalSprite = null;
+    this.rivalImage = null;
+    this.rivalMoving = false;
+    this.rivalAnimTimer = null;
+    this.rivalAnimIndex = 0;
     this.stopTile = null;
   }
 
@@ -71,6 +79,9 @@ class GameScene extends Phaser.Scene {
         this.cameraManager.zoomBump();
       }
       this._seenFirstChunk = true;
+      if (info.index === 32) {
+        this.spawnRival(info);
+      }
     });
 
     const firstInfo = this.mazeManager.spawnInitial();
@@ -253,18 +264,23 @@ class GameScene extends Phaser.Scene {
             tileInfo.chunk.entranceDoorSprite.texture.key === 'exit' &&
             tileInfo.tx === tileInfo.chunk.chunk.entrance.x &&
             tileInfo.ty === tileInfo.chunk.chunk.entrance.y;
+          const rivalBlock =
+            this.rivalSprite &&
+            this.rivalSprite.x === targetX &&
+            this.rivalSprite.y === targetY;
           const blocked =
-            tileInfo &&
-            (tileInfo.cell === TILE.WALL ||
-              tileInfo.cell === TILE.REACTOR ||
-              (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-              (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
-              (tileInfo.cell === TILE.AUTO_GATE &&
-                tileInfo.chunk.chunk.autoGates &&
-                tileInfo.chunk.chunk.autoGates.find(
-                  g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed
-                )) ||
-              entranceClosed);
+            (tileInfo &&
+              (tileInfo.cell === TILE.WALL ||
+                tileInfo.cell === TILE.REACTOR ||
+                (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
+                (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+                (tileInfo.cell === TILE.AUTO_GATE &&
+                  tileInfo.chunk.chunk.autoGates &&
+                  tileInfo.chunk.chunk.autoGates.find(
+                    g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed
+                  )) ||
+                entranceClosed)) ||
+            rivalBlock;
           return { blocked, targetX, targetY };
         };
 
@@ -528,7 +544,78 @@ class GameScene extends Phaser.Scene {
     }
 
 
-    this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+  this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
+    if (this.rival && this.rivalSprite) {
+      this.rival.moveTo(this.rivalSprite.x, this.rivalSprite.y);
+    }
+
+    if (this.rivalSprite && !this.rivalMoving && !this.isGameOver) {
+      const dirs = ['up', 'down', 'left', 'right'];
+      Phaser.Utils.Array.Shuffle(dirs);
+      const size = this.mazeManager.tileSize;
+      const tryMove = dir => {
+        let dx = 0,
+          dy = 0;
+        if (dir === 'left') dx = -1;
+        else if (dir === 'right') dx = 1;
+        else if (dir === 'up') dy = -1;
+        else if (dir === 'down') dy = 1;
+        const targetX = this.rivalSprite.x + dx * size;
+        const targetY = this.rivalSprite.y + dy * size;
+        if (this.heroSprite.x === targetX && this.heroSprite.y === targetY) return true;
+        const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
+        const blocked =
+          !tileInfo ||
+          tileInfo.cell === TILE.WALL ||
+          tileInfo.cell === TILE.REACTOR ||
+          tileInfo.cell === TILE.SILVER_DOOR ||
+          tileInfo.cell === TILE.DOOR ||
+          (tileInfo.cell === TILE.AUTO_GATE &&
+            tileInfo.chunk.chunk.autoGates &&
+            tileInfo.chunk.chunk.autoGates.find(g => g.x === tileInfo.tx && g.y === tileInfo.ty && g.closed));
+        if (blocked) return true;
+
+        this.rivalMoving = true;
+        const duration = (size / this.rival.speed) * 1000;
+        let orientation = dir;
+        if (dir === 'left') orientation = 'right';
+        const frameMap = {
+          down: ['rival_walk1', 'rival_walk2', 'rival_walk3'],
+          up: ['rival_back_walk1', 'rival_back_walk2', 'rival_back_walk3'],
+          right: ['rival_right_walk1', 'rival_right_walk2', 'rival_right_walk3']
+        };
+        const frames = frameMap[orientation];
+        this.rivalImage.setFlipX(dir === 'left');
+        this.rivalAnimIndex = 0;
+        this.rivalImage.setTexture(frames[0]);
+        this.rivalAnimTimer = this.time.addEvent({
+          delay: duration / frames.length,
+          loop: true,
+          callback: () => {
+            this.rivalAnimIndex = (this.rivalAnimIndex + 1) % frames.length;
+            this.rivalImage.setTexture(frames[this.rivalAnimIndex]);
+          }
+        });
+        this.tweens.add({
+          targets: this.rivalSprite,
+          x: targetX,
+          y: targetY,
+          duration,
+          onComplete: () => {
+            this.rivalMoving = false;
+            if (this.rivalAnimTimer) {
+              this.rivalAnimTimer.remove();
+              this.rivalAnimTimer = null;
+            }
+            this.rivalImage.setTexture(frames[0]);
+          }
+        });
+        return true;
+      };
+      for (const d of dirs) {
+        if (tryMove(d)) break;
+      }
+    }
 
 
     if (this.oxygenLine && this.oxygenConsole) {
@@ -577,6 +664,84 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  startRivalOxygenTimer() {
+    if (!this.rival) return;
+    this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
+    this.rivalTimer = this.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: () => {
+        this.rival.oxygen -= 1;
+        this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
+        if (this.rival.oxygen <= 0) {
+          this.handleRivalDeath();
+        }
+      }
+    });
+  }
+
+  spawnRival(info) {
+    if (this.rival) return;
+    const chunk = info.chunk;
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.FLOOR) continue;
+        if (
+          (chunk.entrance && Math.abs(chunk.entrance.x - x) <= 1 && Math.abs(chunk.entrance.y - y) <= 1) ||
+          (chunk.door && Math.abs(chunk.door.x - x) <= 1 && Math.abs(chunk.door.y - y) <= 1)
+        )
+          continue;
+        candidates.push({ x, y });
+      }
+    }
+    if (candidates.length === 0) return;
+    const spot = candidates[Math.floor(Math.random() * candidates.length)];
+    const worldX = info.offsetX + spot.x * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    const worldY = info.offsetY + spot.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+
+    this.rival = new RivalState();
+    this.rivalImage = Characters.createRival(this);
+    const ratio = this.rivalImage.height / this.rivalImage.width;
+    this.rivalImage.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize * ratio);
+    this.rivalSprite = this.add.container(worldX, worldY, [this.rivalImage]);
+    this.worldLayer.add(this.rivalSprite);
+    this.startRivalOxygenTimer();
+    this.events.emit('updateRivalOxygen', 1);
+  }
+
+  handleRivalDeath() {
+    if (!this.rivalSprite) return;
+    if (this.rivalTimer) {
+      this.rivalTimer.remove();
+      this.rivalTimer = null;
+    }
+    const size = this.mazeManager.tileSize;
+    const evaporate = () => {
+      evaporateArea(
+        this,
+        this.rivalSprite.x - size / 2,
+        this.rivalSprite.y - size,
+        size,
+        size * 2,
+        0xffa500
+      );
+    };
+    evaporate();
+    const evapTimer = this.time.addEvent({ delay: 100, repeat: 5, callback: evaporate });
+    this.rivalSprite.setVisible(false);
+    this.events.emit('updateRivalOxygen', 0);
+    this.time.delayedCall(1000, () => {
+      evapTimer.remove();
+      this.rivalSprite.destroy();
+      this.rivalSprite = null;
+      this.rivalImage = null;
+      this.rival = null;
+    });
+  }
+
   checkMeteorFieldActivation() {
     if (
       this.meteorField &&
@@ -595,6 +760,10 @@ class GameScene extends Phaser.Scene {
       this.oxygenTimer.remove();
       this.oxygenTimer = null;
     }
+    if (this.rivalTimer) {
+      this.rivalTimer.remove();
+      this.rivalTimer = null;
+    }
     if (this.bgm) {
       this.bgm.stop();
     }
@@ -602,9 +771,16 @@ class GameScene extends Phaser.Scene {
     this.sound.play('game_over');
 
     this.tweens.killTweensOf(this.heroSprite);
+    if (this.rivalSprite) {
+      this.tweens.killTweensOf(this.rivalSprite);
+    }
     if (this.heroAnimationTimer) {
       this.heroAnimationTimer.remove();
       this.heroAnimationTimer = null;
+    }
+    if (this.rivalAnimTimer) {
+      this.rivalAnimTimer.remove();
+      this.rivalAnimTimer = null;
     }
     this.isMoving = false;
 
