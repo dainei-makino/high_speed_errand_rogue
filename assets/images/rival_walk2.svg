@@ -18,6 +18,7 @@
   <circle cx="22" cy="6" r="4" fill="#ffffff"/>
   <circle cx="10" cy="6" r="2" fill="#000000"/>
   <circle cx="22" cy="6" r="2" fill="#000000"/>
-  <path d="M12 12 Q16 16 20 12" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Angry mouth -->
+  <path d="M12 12 Q16 8 20 12" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
   <path d="M8 10 C10 8, 22 8, 24 10" stroke="#e07070" stroke-width="3" fill="none" stroke-linecap="round"/>
   </svg>

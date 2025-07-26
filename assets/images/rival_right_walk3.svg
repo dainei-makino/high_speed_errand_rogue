@@ -17,6 +17,7 @@
   <ellipse cx="24" cy="13" rx="4" ry="2" fill="#ff8080"/>
   <circle cx="22" cy="6" r="4" fill="#ffffff"/>
   <circle cx="22" cy="6" r="2" fill="#000000"/>
-  <path d="M14 12 Q18 16 22 12" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Angry mouth -->
+  <path d="M14 12 Q18 8 22 12" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
   <path d="M10 11 C12 9, 24 9, 26 11" stroke="#e07070" stroke-width="3" fill="none" stroke-linecap="round"/>
   </svg>
