@@ -368,9 +368,76 @@ class GameScene extends Phaser.Scene {
             curTile.chunk,
             this.heroSprite
           );
-          if (this.inputBuffer && this.inputBuffer.clear) {
-            this.inputBuffer.clear();
+
+          const doorDir =
+            (curTile.chunk.chunk.door && curTile.chunk.chunk.door.dir) || 'E';
+          const size = this.mazeManager.tileSize;
+          let tx = nextInfo.chunk.entrance.x;
+          let ty = nextInfo.chunk.entrance.y;
+          let moveDir = 'right';
+          switch (doorDir) {
+            case 'N':
+              ty -= 1;
+              moveDir = 'up';
+              break;
+            case 'S':
+              ty += 1;
+              moveDir = 'down';
+              break;
+            case 'W':
+              tx -= 1;
+              moveDir = 'left';
+              break;
+            case 'E':
+            default:
+              tx += 1;
+              moveDir = 'right';
+              break;
           }
+          const targetX = nextInfo.offsetX + tx * size + size / 2;
+          const targetY = nextInfo.offsetY + ty * size + size / 2;
+
+          this.isMoving = true;
+          const duration = (size / this.hero.speed) * 1000;
+          let orientation = moveDir;
+          if (moveDir === 'left') orientation = 'right';
+          this.hero.direction = orientation;
+          const frameMap = {
+            down: ['hero_walk1', 'hero_walk2', 'hero_walk3'],
+            up: ['hero_back_walk1', 'hero_back_walk2', 'hero_back_walk3'],
+            right: ['hero_right_walk1', 'hero_right_walk2', 'hero_right_walk3']
+          };
+          const frames = frameMap[orientation];
+          this.heroImage.setFlipX(moveDir === 'left');
+          this.heroAnimIndex = 0;
+          this.heroImage.setTexture(frames[0]);
+          this.heroAnimationTimer = this.time.addEvent({
+            delay: duration / frames.length,
+            loop: true,
+            callback: () => {
+              this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+              this.heroImage.setTexture(frames[this.heroAnimIndex]);
+            }
+          });
+
+          this.tweens.add({
+            targets: this.heroSprite,
+            x: targetX,
+            y: targetY,
+            duration,
+            onComplete: () => {
+              this.isMoving = false;
+              if (this.heroAnimationTimer) {
+                this.heroAnimationTimer.remove();
+                this.heroAnimationTimer = null;
+              }
+              this.heroImage.setTexture(frames[0]);
+              if (this.inputBuffer && this.inputBuffer.clear) {
+                this.inputBuffer.clear();
+              }
+            }
+          });
+
           if (gameState.clearedMazes === 1 && !this.oxygenTimer) {
             this.startOxygenTimer();
           }
