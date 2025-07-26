@@ -63,7 +63,7 @@ export default class MazeManager {
       doorSprite: null,
       entranceDoorSprite: null,
       chestSprite: null,
-      airTankSprite: null,
+      airTankSprites: [],
       oxygenSprite: null,
       oxygenPosition: null,
       itemSwitchSprite: null,
@@ -244,13 +244,14 @@ export default class MazeManager {
             info.chestPosition = { x, y };
             break;
           case TILE.OXYGEN: {
-            const at = info.chunk.airTank;
-            const isAdvanced = at && at.x === x && at.y === y && at.advanced;
+            const at =
+              info.chunk.airTanks &&
+              info.chunk.airTanks.find(t => t.x === x && t.y === y && !t.collected);
+            const isAdvanced = at && at.advanced;
             sprite = isAdvanced
               ? Characters.createAirTankDark(this.scene)
               : Characters.createAirTank(this.scene);
-            info.airTankSprite = sprite;
-            info.airTankPosition = { x, y };
+            info.airTankSprites.push({ x, y, sprite });
             break;
           }
         }
@@ -763,7 +764,8 @@ export default class MazeManager {
       this._isNearEntranceOrExit(chunk, x, y)
     );
     t[y * size + x] = TILE.OXYGEN;
-    chunk.airTank = { x, y, collected: false, advanced };
+    if (!chunk.airTanks) chunk.airTanks = [];
+    chunk.airTanks.push({ x, y, collected: false, advanced });
   }
 
   _addOxygenConsole(chunk) {
@@ -833,7 +835,7 @@ export default class MazeManager {
     } while (
       (t[y * size + x] !== TILE.FLOOR ||
         this._isNearEntranceOrExit(chunk, x, y) ||
-        (chunk.airTank && chunk.airTank.x === x && chunk.airTank.y === y) ||
+        (chunk.airTanks && chunk.airTanks.some(t => t.x === x && t.y === y && !t.collected)) ||
         (chunk.spikes && chunk.spikes.some(s => s.x === x && s.y === y)) ||
         (chunk.electricMachines &&
           chunk.electricMachines.some(m => m.x === x && m.y === y)) ||
@@ -1040,26 +1042,28 @@ export default class MazeManager {
     }
   }
 
-  removeAirTank(info) {
-    if (info && info.airTankSprite) {
-      const sprite = info.airTankSprite;
-      info.airTankSprite = null;
-      this.scene.tweens.add({
-        targets: sprite,
-        alpha: 0,
-        y: '-=8',
-        duration: 200,
-        onComplete: () => {
-          sprite.destroy();
-          if (info.chunk.airTank) {
-            const { x, y } = info.chunk.airTank;
-            const idx = y * info.chunk.size + x;
-            info.chunk.tiles[idx] = TILE.FLOOR;
-            info.chunk.airTank.collected = true;
+  removeAirTank(info, x, y) {
+    if (!info || !info.airTankSprites) return;
+    const idx = info.airTankSprites.findIndex(t => t.x === x && t.y === y);
+    if (idx === -1) return;
+    const { sprite } = info.airTankSprites.splice(idx, 1)[0];
+    this.scene.tweens.add({
+      targets: sprite,
+      alpha: 0,
+      y: '-=8',
+      duration: 200,
+      onComplete: () => {
+        sprite.destroy();
+        if (info.chunk.airTanks) {
+          const at = info.chunk.airTanks.find(t => t.x === x && t.y === y && !t.collected);
+          if (at) {
+            const index = y * info.chunk.size + x;
+            info.chunk.tiles[index] = TILE.FLOOR;
+            at.collected = true;
           }
         }
-      });
-    }
+      }
+    });
   }
 
   removeItemSwitch(info) {
@@ -1098,11 +1102,11 @@ export default class MazeManager {
       duration: 400,
       ease: 'Quad.easeIn',
       onComplete: () => {
-        info.airTankSprite = sprite;
-        info.airTankPosition = { x, y };
+        info.airTankSprites.push({ x, y, sprite });
         const idx = y * info.chunk.size + x;
         info.chunk.tiles[idx] = TILE.OXYGEN;
-        info.chunk.airTank = { x, y, collected: false, advanced };
+        if (!info.chunk.airTanks) info.chunk.airTanks = [];
+        info.chunk.airTanks.push({ x, y, collected: false, advanced });
       }
     });
   }
@@ -1118,7 +1122,7 @@ export default class MazeManager {
     } while (
       (t[y * size + x] !== TILE.FLOOR ||
         this._isNearEntranceOrExit(chunk, x, y) ||
-        (chunk.airTank && !chunk.airTank.collected && chunk.airTank.x === x && chunk.airTank.y === y) ||
+        (chunk.airTanks && chunk.airTanks.some(t => !t.collected && t.x === x && t.y === y)) ||
         (chunk.itemSwitch && !chunk.itemSwitch.triggered && chunk.itemSwitch.x === x && chunk.itemSwitch.y === y) ||
         (chunk.spikes && chunk.spikes.some(s => s.x === x && s.y === y)) ||
         (chunk.electricMachines && chunk.electricMachines.some(m => m.x === x && m.y === y)) ||

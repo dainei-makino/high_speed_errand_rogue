@@ -319,16 +319,18 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
-      if (
+      const tank =
         curTile.cell === TILE.OXYGEN &&
-        curTile.chunk.chunk.airTank &&
-        !curTile.chunk.chunk.airTank.collected
-      ) {
-        curTile.chunk.chunk.airTank.collected = true;
-        this.mazeManager.removeAirTank(curTile.chunk);
-        const advanced = curTile.chunk.chunk.airTank.advanced;
+        curTile.chunk.chunk.airTanks &&
+        curTile.chunk.chunk.airTanks.find(
+          t => t.x === curTile.tx && t.y === curTile.ty && !t.collected
+        );
+      if (tank) {
+        tank.collected = true;
+        this.mazeManager.removeAirTank(curTile.chunk, tank.x, tank.y);
+        const advanced = tank.advanced;
         this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
-        const amount = curTile.chunk.chunk.airTank.advanced ? 8 : 5;
+        const amount = advanced ? 8 : 5;
         this.hero.oxygen = Math.min(
           this.hero.oxygen + amount,
           this.hero.maxOxygen
