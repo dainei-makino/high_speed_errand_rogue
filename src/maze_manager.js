@@ -34,13 +34,41 @@ export default class MazeManager {
     return `${this.seedBase}-${this.seedCount++}`;
   }
 
+  _cloneChunk(chunk) {
+    const copy = {
+      size: chunk.size,
+      seed: chunk.seed,
+      entry: chunk.entry,
+      tiles: new Uint8Array(chunk.tiles)
+    };
+    if (chunk.door) copy.door = { ...chunk.door };
+    if (chunk.chest) copy.chest = { ...chunk.chest };
+    if (chunk.entrance) copy.entrance = { ...chunk.entrance };
+    if (chunk.oxygenConsole) copy.oxygenConsole = { ...chunk.oxygenConsole };
+    if (chunk.brokenPod) copy.brokenPod = { ...chunk.brokenPod };
+    if (chunk.airTank) copy.airTank = { ...chunk.airTank };
+    if (chunk.silverDoors)
+      copy.silverDoors = chunk.silverDoors.map(d => ({ ...d }));
+    if (chunk.autoGates)
+      copy.autoGates = chunk.autoGates.map(g => ({ ...g }));
+    if (chunk.spikes) copy.spikes = chunk.spikes.map(s => ({ ...s }));
+    return copy;
+  }
+
   spawnInitial() {
     const { size } = pickMazeConfig(1, 0);
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
     this._addBrokenSleepPod(chunk);
-    return this.addChunk(chunk, 0, 0);
+    const info = this.addChunk(chunk, 0, 0);
+
+    // Debug: show a duplicate of the initial chunk to the right
+    const clone = this._cloneChunk(chunk);
+    const offset = chunk.size * this.tileSize + this.chunkSpacing;
+    this.addChunk(clone, offset, 0);
+
+    return info;
   }
 
   addChunk(chunk, offsetX, offsetY) {
