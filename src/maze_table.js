@@ -5,6 +5,9 @@ export const MAZE_TABLE = [
 ];
 
 export function pickMazeConfig(stage, progress = 0) {
+  if (progress >= 30) {
+    return { size: 13 };
+  }
   const entry = [...MAZE_TABLE].reverse().find(e => stage >= e.stage) || MAZE_TABLE[0];
   let sizes = entry.sizes.slice();
   // Gate larger chunk sizes by progress

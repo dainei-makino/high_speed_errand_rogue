@@ -240,13 +240,19 @@ export default class MazeManager {
             }
             break;
           case TILE.AUTO_GATE:
-            sprite = Characters.createAutoGateOpen(this.scene);
             if (chunk.autoGates) {
               const g = chunk.autoGates.find(v => v.x === x && v.y === y);
               if (g) {
+                sprite = g.closed
+                  ? Characters.createAutoGateClosed(this.scene)
+                  : Characters.createAutoGateOpen(this.scene);
                 g.sprite = sprite;
                 info.autoGates.push(g);
+              } else {
+                sprite = Characters.createAutoGateOpen(this.scene);
               }
+            } else {
+              sprite = Characters.createAutoGateOpen(this.scene);
             }
             break;
           case TILE.CHEST:
@@ -538,7 +544,10 @@ export default class MazeManager {
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
     if (!isRestPoint && progress >= 1) {
-      if (progress >= 19) {
+      if (progress === 30 || progress === 31) {
+        // Only closed auto gates on the 31st and 32nd chunks
+        this._addAutoGate(chunk, 3, true);
+      } else if (progress >= 19) {
         const total = Math.floor(Math.random() * 3) + 1; // 1-3 doors
         this._addMixedDoors(chunk, total);
       } else if (progress >= 10) {
@@ -728,7 +737,7 @@ export default class MazeManager {
     chunk.silverDoors = doors;
   }
 
-  _addAutoGate(chunk, count) {
+  _addAutoGate(chunk, count, closed = false) {
     const size = chunk.size;
     const candidates = this._getDoorCandidates(chunk);
     const gates = [];
@@ -743,7 +752,7 @@ export default class MazeManager {
         const idx = Math.floor(Math.random() * candidates.length);
         const spot = candidates.splice(idx, 1)[0];
         chunk.tiles[spot.y * size + spot.x] = TILE.AUTO_GATE;
-        gates.push({ x: spot.x, y: spot.y, closed: false, passed: false });
+        gates.push({ x: spot.x, y: spot.y, closed, passed: false });
       }
     }
     chunk.autoGates = gates;
