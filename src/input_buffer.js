@@ -102,4 +102,10 @@ export default class InputBuffer {
       this.holdOrder.unshift(dir);
     }
   }
+
+  clear() {
+    this.buffer = [];
+    this.holdKeys = {};
+    this.holdOrder = [];
+  }
 }
