@@ -41,7 +41,8 @@ const SPRITES = {
   floor_dirt1: 'floor_dirt1.svg',
   floor_dirt2: 'floor_dirt2.svg',
   floor_scratch1: 'floor_scratch1.svg',
-  floor_scratch2: 'floor_scratch2.svg'
+  floor_scratch2: 'floor_scratch2.svg',
+  item_switch: 'floor_switch_red.svg'
 };
 
 const canvases = {};
@@ -144,6 +145,10 @@ function createOxygenConsole(scene) {
   return scene.add.image(0, 0, 'oxygen_console').setOrigin(0);
 }
 
+function createItemSwitch(scene) {
+  return scene.add.image(0, 0, 'item_switch').setOrigin(0);
+}
+
 function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
@@ -202,6 +207,7 @@ export default {
   createAirTank,
   createAirTankDark,
   createOxygenConsole,
+  createItemSwitch,
   createSpike,
   createElectricMachine,
   createSleepPod,

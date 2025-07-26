@@ -342,16 +342,18 @@ class GameScene extends Phaser.Scene {
         this.events.emit('updateKeys', this.hero.keys);
       }
 
-      if (
+      const tank =
         curTile.cell === TILE.OXYGEN &&
-        curTile.chunk.chunk.airTank &&
-        !curTile.chunk.chunk.airTank.collected
-      ) {
-        curTile.chunk.chunk.airTank.collected = true;
-        this.mazeManager.removeAirTank(curTile.chunk);
-        const advanced = curTile.chunk.chunk.airTank.advanced;
+        curTile.chunk.chunk.airTanks &&
+        curTile.chunk.chunk.airTanks.find(
+          t => t.x === curTile.tx && t.y === curTile.ty && !t.collected
+        );
+      if (tank) {
+        tank.collected = true;
+        this.mazeManager.removeAirTank(curTile.chunk, tank.x, tank.y);
+        const advanced = tank.advanced;
         this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
-        const amount = curTile.chunk.chunk.airTank.advanced ? 8 : 5;
+        const amount = advanced ? 8 : 5;
         this.hero.oxygen = Math.min(
           this.hero.oxygen + amount,
           this.hero.maxOxygen
@@ -360,6 +362,18 @@ class GameScene extends Phaser.Scene {
           'updateOxygen',
           this.hero.oxygen / this.hero.maxOxygen
         );
+      }
+
+      if (
+        curTile.chunk.chunk.itemSwitch &&
+        !curTile.chunk.chunk.itemSwitch.triggered &&
+        curTile.chunk.chunk.itemSwitch.x === curTile.tx &&
+        curTile.chunk.chunk.itemSwitch.y === curTile.ty
+      ) {
+        this.mazeManager.removeItemSwitch(curTile.chunk);
+        this.sound.play('item_spawn');
+        const advanced = Math.random() < 0.5;
+        this.mazeManager.spawnAirTankDrop(curTile.chunk, advanced);
       }
 
       if (curTile.chunk.chunk.spikes) {

@@ -63,9 +63,11 @@ export default class MazeManager {
       doorSprite: null,
       entranceDoorSprite: null,
       chestSprite: null,
-      airTankSprite: null,
+      airTankSprites: [],
       oxygenSprite: null,
       oxygenPosition: null,
+      itemSwitchSprite: null,
+      itemSwitchPosition: null,
       silverDoors: [],
       autoGates: [],
       spikeSprites: [],
@@ -255,13 +257,14 @@ export default class MazeManager {
             info.chestPosition = { x, y };
             break;
           case TILE.OXYGEN: {
-            const at = info.chunk.airTank;
-            const isAdvanced = at && at.x === x && at.y === y && at.advanced;
+            const at =
+              info.chunk.airTanks &&
+              info.chunk.airTanks.find(t => t.x === x && t.y === y && !t.collected);
+            const isAdvanced = at && at.advanced;
             sprite = isAdvanced
               ? Characters.createAirTankDark(this.scene)
               : Characters.createAirTank(this.scene);
-            info.airTankSprite = sprite;
-            info.airTankPosition = { x, y };
+            info.airTankSprites.push({ x, y, sprite });
             break;
           }
         }
@@ -291,6 +294,21 @@ export default class MazeManager {
             info.sprites.push(spikeSprite);
             info.spikeSprites.push({ x, y, sprite: spikeSprite });
           }
+        }
+
+        if (
+          chunk.itemSwitch &&
+          !chunk.itemSwitch.triggered &&
+          chunk.itemSwitch.x === x &&
+          chunk.itemSwitch.y === y
+        ) {
+          const sw = Characters.createItemSwitch(this.scene);
+          sw.setDisplaySize(size, size);
+          sw.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+          this.scene.worldLayer.add(sw);
+          info.sprites.push(sw);
+          info.itemSwitchSprite = sw;
+          info.itemSwitchPosition = { x, y };
         }
       }
     }
@@ -542,6 +560,11 @@ export default class MazeManager {
       this._addSpikes(chunk);
       this._addElectricMachine(chunk, progress);
     }
+    if (!isRestPoint && progress >= 20) {
+      if (progress === 20 || Math.random() < 0.3) {
+        this._addItemSwitch(chunk);
+      }
+    }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
     if (chunk.restPoint) {
@@ -759,7 +782,8 @@ export default class MazeManager {
       this._isNearEntranceOrExit(chunk, x, y)
     );
     t[y * size + x] = TILE.OXYGEN;
-    chunk.airTank = { x, y, collected: false, advanced };
+    if (!chunk.airTanks) chunk.airTanks = [];
+    chunk.airTanks.push({ x, y, collected: false, advanced });
   }
 
   _addOxygenConsole(chunk) {
@@ -816,6 +840,33 @@ export default class MazeManager {
       const spot = candidates.splice(idx, 1)[0];
       chunk.heroSleepPods.push({ x: spot.x, y: spot.y });
     }
+  }
+
+  _addItemSwitch(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    let x, y, tries = 0;
+    do {
+      x = Math.floor(Math.random() * (size - 2)) + 1;
+      y = Math.floor(Math.random() * (size - 2)) + 1;
+      tries++;
+    } while (
+      (t[y * size + x] !== TILE.FLOOR ||
+        this._isNearEntranceOrExit(chunk, x, y) ||
+        (chunk.airTanks && chunk.airTanks.some(t => t.x === x && t.y === y && !t.collected)) ||
+        (chunk.spikes && chunk.spikes.some(s => s.x === x && s.y === y)) ||
+        (chunk.electricMachines &&
+          chunk.electricMachines.some(m => m.x === x && m.y === y)) ||
+        (chunk.oxygenConsole &&
+          chunk.oxygenConsole.x === x &&
+          chunk.oxygenConsole.y === y) ||
+        (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) ||
+        (chunk.heroSleepPods &&
+          chunk.heroSleepPods.some(p => p.x === x && p.y === y))) &&
+      tries < 50
+    );
+    if (tries >= 50) return;
+    chunk.itemSwitch = { x, y, triggered: false };
   }
 
   _addSpikes(chunk) {
@@ -1009,25 +1060,96 @@ export default class MazeManager {
     }
   }
 
-  removeAirTank(info) {
-    if (info && info.airTankSprite) {
-      const sprite = info.airTankSprite;
-      info.airTankSprite = null;
+  removeAirTank(info, x, y) {
+    if (!info || !info.airTankSprites) return;
+    const idx = info.airTankSprites.findIndex(t => t.x === x && t.y === y);
+    if (idx === -1) return;
+    const { sprite } = info.airTankSprites.splice(idx, 1)[0];
+    this.scene.tweens.add({
+      targets: sprite,
+      alpha: 0,
+      y: '-=8',
+      duration: 200,
+      onComplete: () => {
+        sprite.destroy();
+        if (info.chunk.airTanks) {
+          const at = info.chunk.airTanks.find(t => t.x === x && t.y === y && !t.collected);
+          if (at) {
+            const index = y * info.chunk.size + x;
+            info.chunk.tiles[index] = TILE.FLOOR;
+            at.collected = true;
+          }
+        }
+      }
+    });
+  }
+
+  removeItemSwitch(info) {
+    if (info && info.itemSwitchSprite) {
+      const sprite = info.itemSwitchSprite;
+      info.itemSwitchSprite = null;
       this.scene.tweens.add({
         targets: sprite,
         alpha: 0,
-        y: '-=8',
         duration: 200,
-        onComplete: () => {
-          sprite.destroy();
-          if (info.chunk.airTank) {
-            const { x, y } = info.chunk.airTank;
-            const idx = y * info.chunk.size + x;
-            info.chunk.tiles[idx] = TILE.FLOOR;
-            info.chunk.airTank.collected = true;
-          }
-        }
+        onComplete: () => sprite.destroy()
       });
+      if (info.chunk.itemSwitch) {
+        info.chunk.itemSwitch.triggered = true;
+      }
     }
+  }
+
+  spawnAirTankDrop(info, advanced = false) {
+    const spot = this._findDropSpot(info.chunk);
+    if (!spot) return;
+    const { x, y } = spot;
+    const size = this.tileSize;
+    const sprite = advanced
+      ? Characters.createAirTankDark(this.scene)
+      : Characters.createAirTank(this.scene);
+    sprite.setDisplaySize(size, size);
+    const startY = this.scene.cameras.main.worldView.y - size;
+    sprite.setPosition(info.offsetX + x * size, startY);
+    sprite.alpha = 0;
+    this.scene.worldLayer.add(sprite);
+    this.scene.tweens.add({ targets: sprite, alpha: 1, duration: 200 });
+    this.scene.tweens.add({
+      targets: sprite,
+      y: info.offsetY + y * size,
+      duration: 400,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        info.airTankSprites.push({ x, y, sprite });
+        const idx = y * info.chunk.size + x;
+        info.chunk.tiles[idx] = TILE.OXYGEN;
+        if (!info.chunk.airTanks) info.chunk.airTanks = [];
+        info.chunk.airTanks.push({ x, y, collected: false, advanced });
+      }
+    });
+  }
+
+  _findDropSpot(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    let x, y, tries = 0;
+    do {
+      x = Math.floor(Math.random() * (size - 2)) + 1;
+      y = Math.floor(Math.random() * (size - 2)) + 1;
+      tries++;
+    } while (
+      (t[y * size + x] !== TILE.FLOOR ||
+        this._isNearEntranceOrExit(chunk, x, y) ||
+        (chunk.airTanks && chunk.airTanks.some(t => !t.collected && t.x === x && t.y === y)) ||
+        (chunk.itemSwitch && !chunk.itemSwitch.triggered && chunk.itemSwitch.x === x && chunk.itemSwitch.y === y) ||
+        (chunk.spikes && chunk.spikes.some(s => s.x === x && s.y === y)) ||
+        (chunk.electricMachines && chunk.electricMachines.some(m => m.x === x && m.y === y)) ||
+        (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) ||
+        (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) ||
+        (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === x && p.y === y))) &&
+      tries < 50
+    );
+    if (tries >= 50) return null;
+    return { x, y };
   }
 }
