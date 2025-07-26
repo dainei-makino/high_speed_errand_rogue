@@ -48,6 +48,7 @@ class GameScene extends Phaser.Scene {
     this.rivalMoving = false;
     this.rivalAnimTimer = null;
     this.rivalAnimIndex = 0;
+    this.rivalSwitchTimer = null;
     this.stopTile = null;
   }
 
@@ -587,13 +588,54 @@ class GameScene extends Phaser.Scene {
 
 
   this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
-    if (this.rival && this.rivalSprite) {
-      this.rival.moveTo(this.rivalSprite.x, this.rivalSprite.y);
+  if (this.rival && this.rivalSprite) {
+    this.rival.moveTo(this.rivalSprite.x, this.rivalSprite.y);
+    const rTile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
+    if (rTile) {
+      const tank =
+        rTile.cell === TILE.OXYGEN &&
+        rTile.chunk.chunk.airTanks &&
+        rTile.chunk.chunk.airTanks.find(
+          t => t.x === rTile.tx && t.y === rTile.ty && !t.collected
+        );
+      if (tank) {
+        tank.collected = true;
+        this.mazeManager.removeAirTank(rTile.chunk, tank.x, tank.y);
+        const advanced = tank.advanced;
+        this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
+        const amount = advanced ? 8 : 5;
+        this.rival.oxygen = Math.min(
+          this.rival.oxygen + amount,
+          this.rival.maxOxygen
+        );
+        this.events.emit(
+          'updateRivalOxygen',
+          this.rival.oxygen / this.rival.maxOxygen
+        );
+      }
+
+      if (
+        rTile.chunk.chunk.itemSwitch &&
+        !rTile.chunk.chunk.itemSwitch.triggered &&
+        rTile.chunk.chunk.itemSwitch.x === rTile.tx &&
+        rTile.chunk.chunk.itemSwitch.y === rTile.ty
+      ) {
+        this.mazeManager.removeItemSwitch(rTile.chunk);
+        this.sound.play('item_spawn');
+        const adv = Math.random() < 0.5;
+        this.mazeManager.spawnAirTankDrop(rTile.chunk, adv);
+      }
     }
+  }
 
     if (this.rivalSprite && !this.rivalMoving && !this.isGameOver) {
-      const dirs = ['up', 'down', 'left', 'right'];
-      Phaser.Utils.Array.Shuffle(dirs);
+      let dirs = null;
+      const target = this._findNearestRivalTarget();
+      if (target) {
+        dirs = this._dirsToward(target.x, target.y);
+      } else {
+        dirs = Phaser.Utils.Array.Shuffle(['up', 'down', 'left', 'right']);
+      }
       const size = this.mazeManager.tileSize;
       const tryMove = dir => {
         let dx = 0,
@@ -742,6 +784,80 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  startRivalSwitchTimer() {
+    if (!this.rival) return;
+    const schedule = () => {
+      this.rivalSwitchTimer = this.time.delayedCall(
+        Phaser.Math.Between(2000, 4000),
+        () => {
+          if (!this.rival || this.isGameOver) return;
+          const tile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
+          if (tile) {
+            this.mazeManager.spawnItemSwitch(tile.chunk);
+          }
+          schedule();
+        }
+      );
+    };
+    schedule();
+  }
+
+  _findNearestRivalTarget() {
+    if (!this.rivalSprite) return null;
+    const rx = this.rivalSprite.x;
+    const ry = this.rivalSprite.y;
+    const size = this.mazeManager.tileSize;
+    let best = null;
+    let bestDist = Infinity;
+    for (const info of this.mazeManager.activeChunks) {
+      if (
+        info.itemSwitchSprite &&
+        info.chunk.itemSwitch &&
+        !info.chunk.itemSwitch.triggered
+      ) {
+        const wx = info.offsetX + info.itemSwitchPosition.x * size + size / 2;
+        const wy = info.offsetY + info.itemSwitchPosition.y * size + size / 2;
+        const d = Phaser.Math.Distance.Between(rx, ry, wx, wy);
+        if (d < bestDist) {
+          bestDist = d;
+          best = { x: wx, y: wy };
+        }
+      }
+      if (info.chunk.airTanks) {
+        for (const t of info.chunk.airTanks) {
+          if (t.collected) continue;
+          const wx = info.offsetX + t.x * size + size / 2;
+          const wy = info.offsetY + t.y * size + size / 2;
+          const d = Phaser.Math.Distance.Between(rx, ry, wx, wy);
+          if (d < bestDist) {
+            bestDist = d;
+            best = { x: wx, y: wy };
+          }
+        }
+      }
+    }
+    return best;
+  }
+
+  _dirsToward(tx, ty) {
+    const dirs = [];
+    const dx = tx - this.rivalSprite.x;
+    const dy = ty - this.rivalSprite.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      dirs.push(dx > 0 ? 'right' : 'left');
+      dirs.push(dy > 0 ? 'down' : 'up');
+    } else {
+      dirs.push(dy > 0 ? 'down' : 'up');
+      dirs.push(dx > 0 ? 'right' : 'left');
+    }
+    const all = ['up', 'down', 'left', 'right'];
+    Phaser.Utils.Array.Shuffle(all);
+    for (const d of all) {
+      if (!dirs.includes(d)) dirs.push(d);
+    }
+    return dirs;
+  }
+
   spawnRival(info) {
     if (this.rival) return;
     const chunk = info.chunk;
@@ -771,6 +887,7 @@ class GameScene extends Phaser.Scene {
     this.rivalSprite = this.add.container(worldX, worldY, [this.rivalImage]);
     this.worldLayer.add(this.rivalSprite);
     this.startRivalOxygenTimer();
+    this.startRivalSwitchTimer();
     this.events.emit('updateRivalOxygen', 1);
   }
 
@@ -780,6 +897,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalTimer) {
       this.rivalTimer.remove();
       this.rivalTimer = null;
+    }
+    if (this.rivalSwitchTimer) {
+      this.rivalSwitchTimer.remove();
+      this.rivalSwitchTimer = null;
     }
     if (this.rivalAnimTimer) {
       this.rivalAnimTimer.remove();
@@ -832,6 +953,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalTimer) {
       this.rivalTimer.remove();
       this.rivalTimer = null;
+    }
+    if (this.rivalSwitchTimer) {
+      this.rivalSwitchTimer.remove();
+      this.rivalSwitchTimer = null;
     }
     if (this.bgm) {
       this.bgm.stop();
