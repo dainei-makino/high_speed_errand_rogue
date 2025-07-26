@@ -56,6 +56,14 @@ export default class MazeManager {
   }
 
   spawnInitial() {
+    // Clean any stray sprites that may remain from a previous scene
+    if (this.scene.worldLayer) {
+      for (const child of [...this.scene.worldLayer.list]) {
+        if (child && child.texture && child.texture.key === 'wall') {
+          child.destroy();
+        }
+      }
+    }
     const { size } = pickMazeConfig(1, 0);
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
@@ -352,6 +360,20 @@ export default class MazeManager {
             this.activeChunks = this.activeChunks.filter(c => c !== obj);
           }
         });
+      }
+    }
+    // Remove any leftover wall sprite anchored at the origin
+    if (this.scene.worldLayer) {
+      for (const child of [...this.scene.worldLayer.list]) {
+        if (
+          child &&
+          child.texture &&
+          child.texture.key === 'wall' &&
+          child.x === 0 &&
+          child.y === 0
+        ) {
+          child.destroy();
+        }
       }
     }
   }
