@@ -52,6 +52,7 @@ export default class InputBuffer {
     if (!dir) return;
     if (this.holdKeys[dir]) {
       delete this.holdKeys[dir];
+      this.buffer = this.buffer.filter(entry => entry.dir !== dir);
       const index = this.holdOrder.indexOf(dir);
       if (index !== -1) {
         this.holdOrder.splice(index, 1);
