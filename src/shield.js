@@ -4,13 +4,14 @@ export default class Shield {
     // Fixed ellipse 240px wide by 200px tall
     this.radiusX = 120;
     this.radiusY = 100;
+    this.baseAlpha = 0;
     this.sprite = scene
       .add
       .image(0, 0, this._createTexture(this.radiusX, this.radiusY))
       .setOrigin(0.5);
     this.sprite.setDepth(8);
     this.sprite.setScrollFactor(0);
-    this.sprite.setAlpha(0);
+    this.sprite.setAlpha(this.baseAlpha);
     this.updatePosition();
   }
 
@@ -28,11 +29,16 @@ export default class Shield {
     return { x: cam.scrollX + cam.centerX, y: cam.scrollY + cam.centerY };
   }
 
+  setBaseAlpha(alpha) {
+    this.baseAlpha = alpha;
+    this.sprite.setAlpha(alpha);
+  }
+
   flash() {
     this.sprite.setAlpha(1);
     this.scene.tweens.add({
       targets: this.sprite,
-      alpha: 0,
+      alpha: this.baseAlpha,
       duration: 300
     });
   }

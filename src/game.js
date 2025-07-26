@@ -61,7 +61,7 @@ class GameScene extends Phaser.Scene {
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.starField = new StarField(this);
     this.shield = new Shield(this);
-    this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 33);
+    this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 32);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
@@ -152,6 +152,10 @@ class GameScene extends Phaser.Scene {
           this.bgm.stop();
           this.bgm.play();
         }
+      }
+
+      if (data.info && data.info.bossRoom) {
+        this.checkMeteorFieldActivation();
       }
 
       if (data.info && data.info.index === 1) {
@@ -582,9 +586,12 @@ class GameScene extends Phaser.Scene {
       this.meteorField &&
       this.meteorField.spawnTimer &&
       this.meteorField.spawnTimer.paused &&
-      gameState.clearedMazes >= 33
+      gameState.clearedMazes >= 32
     ) {
       this.meteorField.start();
+      if (this.shield && this.shield.setBaseAlpha) {
+        this.shield.setBaseAlpha(0.5);
+      }
     }
   }
 
