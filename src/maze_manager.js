@@ -149,7 +149,15 @@ export default class MazeManager {
 
         if (sprite) {
           sprite.setDisplaySize(size, size);
-          sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+          const posX = info.offsetX + x * size;
+          const posY = info.offsetY + y * size;
+          // Center-origin sprites (like wall corners) should be positioned
+          // on the tile center so rotation works as expected
+          if (sprite.originX === 0.5 && sprite.originY === 0.5) {
+            sprite.setPosition(posX + size / 2, posY + size / 2);
+          } else {
+            sprite.setPosition(posX, posY);
+          }
           this.scene.worldLayer.add(sprite);
           info.sprites.push(sprite);
         }

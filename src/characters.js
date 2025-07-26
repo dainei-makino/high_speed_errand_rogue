@@ -76,7 +76,8 @@ function createWall(scene) {
 }
 
 function createWallCorner(scene) {
-  return scene.add.image(0, 0, 'wall_corner').setOrigin(0);
+  // Rotating this tile requires its origin to be centered
+  return scene.add.image(0, 0, 'wall_corner').setOrigin(0.5);
 }
 
 function createExit(scene) {
