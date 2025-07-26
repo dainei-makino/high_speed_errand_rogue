@@ -111,6 +111,10 @@ class GameScene extends Phaser.Scene {
           this.oxygenLine = this.add.graphics();
           this.worldLayer.add(this.oxygenLine);
         }
+        if (this.bgm && this.bgm.isPlaying) {
+          this.bgm.stop();
+        }
+        this.sound.play('pick_up');
         this.hero.oxygen = this.hero.maxOxygen;
         this.events.emit('updateOxygen', 1);
         if (this.oxygenTimer) {

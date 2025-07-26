@@ -121,6 +121,13 @@ export default class MazeManager {
               info.electricMachineSprites.push(machine);
               break;
             }
+            if (
+              chunk.heroSleepPods &&
+              chunk.heroSleepPods.find(p => p.x === x && p.y === y)
+            ) {
+              sprite = Characters.createSleepPodWithHero(this.scene);
+              break;
+            }
             // Display a broken sleep pod instead of a wall if this position
             // is marked as such. This must be done before creating any wall
             // sprites to avoid leaving unused wall graphics in the scene.
@@ -428,6 +435,7 @@ export default class MazeManager {
       chunk = createChunk(this._nextSeed(), 7, entryDir);
       this._ensureEntrance(chunk);
       this._addOxygenConsole(chunk);
+      this._addSleepPodsWithHero(chunk, 5);
       chunk.electricMachines = [];
       chunk.restPoint = true;
     } else {
@@ -773,6 +781,27 @@ export default class MazeManager {
     }
   }
 
+  _addSleepPodsWithHero(chunk, count = 1) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y)
+          continue;
+        candidates.push({ x, y });
+      }
+    }
+    chunk.heroSleepPods = [];
+    for (let i = 0; i < count && candidates.length; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
+      chunk.heroSleepPods.push({ x: spot.x, y: spot.y });
+    }
+  }
+
   _addSpikes(chunk) {
     const size = chunk.size;
     const t = chunk.tiles;
@@ -808,6 +837,11 @@ export default class MazeManager {
         if (this._isNearEntranceOrExit(chunk, x, y)) continue;
         if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) continue;
         if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) continue;
+        if (
+          chunk.heroSleepPods &&
+          chunk.heroSleepPods.some(p => p.x === x && p.y === y)
+        )
+          continue;
         candidates.push({ x, y });
       }
     }

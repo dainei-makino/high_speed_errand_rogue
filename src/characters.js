@@ -11,6 +11,7 @@ const SPRITES = {
   treasure: 'treasure.svg',
   sleep_pod: 'sleep_pod.svg',
   sleep_pod_broken: 'sleep_pod_broken.svg',
+  sleep_pod_with_hero: 'sleep_pod_with_hero.svg',
   hero_plain: 'hero_plain.svg',
   hero_idle: 'hero.svg',
   hero_walk1: 'hero_walk1.svg',
@@ -159,6 +160,10 @@ function createSleepPodBroken(scene) {
   return scene.add.image(0, 0, 'sleep_pod_broken').setOrigin(0);
 }
 
+function createSleepPodWithHero(scene) {
+  return scene.add.image(0, 0, 'sleep_pod_with_hero').setOrigin(0);
+}
+
 function createMeteor(scene) {
   return scene.add.image(0, 0, 'meteor').setOrigin(0.5);
 }
@@ -201,6 +206,7 @@ export default {
   createElectricMachine,
   createSleepPod,
   createSleepPodBroken,
+  createSleepPodWithHero,
   createMeteor,
   createMeteorExplosion,
   createHero,
