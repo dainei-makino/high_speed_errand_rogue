@@ -23,14 +23,22 @@ export default class GameOverScene extends Phaser.Scene {
 
     this.letters = this.createFloatingText('RETRY?', VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
+    // Show how many chunks the player cleared above the RETRY text
+    const cleared = `${gameState.clearedMazes} CHUNK`;
+    this.createFloatingText(cleared, VIRTUAL_WIDTH, VIRTUAL_HEIGHT - 80, 32);
+
     this.input.keyboard.once('keydown-W', () => this.restartGame());
     this.input.keyboard.once('keydown-A', () => this.restartGame());
     this.input.keyboard.once('keydown-S', () => this.restartGame());
     this.input.keyboard.once('keydown-D', () => this.restartGame());
   }
 
-  createFloatingText(str, centerX, y) {
-    const style = { fontFamily: 'monospace', fontSize: '48px', color: '#ffffff' };
+  createFloatingText(str, centerX, y, size = 48) {
+    const style = {
+      fontFamily: 'monospace',
+      fontSize: size + 'px',
+      color: '#ffffff'
+    };
     const measure = this.add.text(0, 0, str, style).setOrigin(0.5);
     const total = measure.width;
     measure.destroy();
