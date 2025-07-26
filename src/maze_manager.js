@@ -729,16 +729,19 @@ export default class MazeManager {
     decal.setDisplaySize(this.tileSize, this.tileSize);
     const baseX = info.offsetX + x * this.tileSize;
     const baseY = info.offsetY + y * this.tileSize;
-    const jitter = this.tileSize * 0.25;
-    let posX = baseX + jitter * (Math.random() - 0.5);
-    let posY = baseY + jitter * (Math.random() - 0.5);
-    if (Math.random() < 0.25) {
-      if (Math.random() < 0.5) {
-        posX += this.tileSize * (Math.random() < 0.5 ? -0.5 : 0.5);
-      } else {
-        posY += this.tileSize * (Math.random() < 0.5 ? -0.5 : 0.5);
-      }
-    }
+
+    const OFFSET_RANGE = 16;
+    const chunkSizePx = info.chunk.size * this.tileSize;
+    let posX = baseX + Phaser.Math.Between(-OFFSET_RANGE, OFFSET_RANGE);
+    let posY = baseY + Phaser.Math.Between(-OFFSET_RANGE, OFFSET_RANGE);
+
+    const minX = info.offsetX;
+    const maxX = info.offsetX + chunkSizePx - this.tileSize;
+    const minY = info.offsetY;
+    const maxY = info.offsetY + chunkSizePx - this.tileSize;
+    posX = Math.min(Math.max(posX, minX), maxX);
+    posY = Math.min(Math.max(posY, minY), maxY);
+
     decal.setPosition(posX + this.tileSize / 2, posY + this.tileSize / 2);
     decal.setAngle(Math.floor(Math.random() * 360));
     decal.setDepth(-0.5);
