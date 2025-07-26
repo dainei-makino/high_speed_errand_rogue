@@ -340,6 +340,20 @@ export default class MazeManager {
           info.itemSwitchSprite = sw;
           info.itemSwitchPosition = { x, y };
         }
+
+        if (chunk.monitors) {
+          const m = chunk.monitors.find(v => v.x === x && v.y === y);
+          if (m) {
+            const mon =
+              m.type === 'display'
+                ? Characters.createMonitorDisplay(this.scene)
+                : Characters.createMonitorComputer(this.scene);
+            mon.setDisplaySize(size, size);
+            mon.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+            this.scene.worldLayer.add(mon);
+            info.sprites.push(mon);
+          }
+        }
       }
     }
   }
@@ -499,9 +513,12 @@ export default class MazeManager {
 
     const isRestPoint = progress === 14 || progress === 29;
     const isBossRoom = progress === 32;
+    const isEndingRoom = progress === 33;
 
     let chunk;
-    if (isBossRoom) {
+    if (isEndingRoom) {
+      chunk = this._createEndingChunk(entryDir);
+    } else if (isBossRoom) {
       chunk = this._createBossChunk(entryDir);
     } else if (isRestPoint) {
       chunk = createChunk(this._nextSeed(), 7, 7, entryDir);
@@ -587,7 +604,7 @@ export default class MazeManager {
     }
     chunk.entrance = entrance;
     this._ensureEntrance(chunk);
-    if (!isRestPoint && !isBossRoom && progress >= 1) {
+    if (!isRestPoint && !isBossRoom && !isEndingRoom && progress >= 1) {
       if (progress === 30 || progress === 31) {
         // Only closed auto gates on the 31st and 32nd chunks
         this._addAutoGate(chunk, 3, true);
@@ -609,17 +626,17 @@ export default class MazeManager {
       const advanced = progress >= 4 && Math.random() < 0.1;
       this._addAirTank(chunk, advanced);
     }
-    if (!isRestPoint && !isBossRoom && progress >= 2) {
+    if (!isRestPoint && !isBossRoom && !isEndingRoom && progress >= 2) {
       this._addSpikes(chunk);
       this._addElectricMachine(chunk, progress);
     }
-    if (!isRestPoint && !isBossRoom && progress >= 20) {
+    if (!isRestPoint && !isBossRoom && !isEndingRoom && progress >= 20) {
       if (progress === 20 || Math.random() < 0.3) {
         this._addItemSwitch(chunk);
       }
     }
 
-    if (!isRestPoint && !isBossRoom) {
+    if (!isRestPoint && !isBossRoom && !isEndingRoom) {
       if (progress === 25) {
         this._addSleepPodsWithHero(chunk, 1);
       } else if (progress === 26) {
@@ -638,6 +655,9 @@ export default class MazeManager {
     if (isBossRoom) {
       info.isBossRoom = true;
     }
+    if (isEndingRoom) {
+      info.isEndingRoom = true;
+    }
     info.entranceDoorSprite = fromObj.doorSprite;
     if (fromObj.doorSprite) {
       fromObj.sprites = fromObj.sprites.filter(s => s !== fromObj.doorSprite);
@@ -645,7 +665,7 @@ export default class MazeManager {
       fromObj.doorSprite = null;
     }
 
-    if (isBossRoom) {
+    if (isBossRoom || isEndingRoom) {
       if (info.entranceDoorSprite) {
         info.entranceDoorSprite.setTexture('exit');
       }
@@ -1107,6 +1127,35 @@ export default class MazeManager {
       }
     }
     this._addReactorCore(chunk);
+    return chunk;
+  }
+
+  _createEndingChunk(entryDir) {
+    const size = 9;
+    const chunk = {
+      width: size,
+      height: size,
+      size,
+      seed: this._nextSeed(),
+      entry: entryDir,
+      tiles: new Uint8Array(size * size),
+      door: null,
+      chest: null,
+      monitors: []
+    };
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const idx = y * size + x;
+        chunk.tiles[idx] =
+          x === 0 || y === 0 || x === size - 1 || y === size - 1
+            ? TILE.WALL
+            : TILE.FLOOR;
+      }
+    }
+    for (let x = 2; x < size - 2; x += 2) {
+      chunk.monitors.push({ x, y: 2, type: 'computer' });
+      chunk.monitors.push({ x, y: size - 3, type: 'display' });
+    }
     return chunk;
   }
 

@@ -53,7 +53,9 @@ const SPRITES = {
   floor_scratch1: 'floor_scratch1.svg',
   floor_scratch2: 'floor_scratch2.svg',
   item_switch: 'floor_switch_red.svg',
-  hero_spacesuit: 'hero_spacesuit.svg'
+  hero_spacesuit: 'hero_spacesuit.svg',
+  monitor_computer: 'monitor_computer.svg',
+  monitor_display: 'monitor_display.svg'
 };
 
 const canvases = {};
@@ -212,6 +214,14 @@ function createHeroSpacesuit(scene) {
   return scene.add.image(0, 0, 'hero_spacesuit').setOrigin(0);
 }
 
+function createMonitorComputer(scene) {
+  return scene.add.image(0, 0, 'monitor_computer').setOrigin(0);
+}
+
+function createMonitorDisplay(scene) {
+  return scene.add.image(0, 0, 'monitor_display').setOrigin(0);
+}
+
 export default {
   ready,
   registerTextures,
@@ -244,5 +254,7 @@ export default {
   createRival,
   createHeroSpacesuit,
   createArrow,
-  createFloorDecal
+  createFloorDecal,
+  createMonitorComputer,
+  createMonitorDisplay
 };

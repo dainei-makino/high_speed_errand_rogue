@@ -173,6 +173,13 @@ class GameScene extends Phaser.Scene {
         });
       }
 
+      if (data.info && data.info.isEndingRoom) {
+        if (this.oxygenTimer) {
+          this.oxygenTimer.remove();
+          this.oxygenTimer = null;
+        }
+      }
+
       if (!data.info || !data.info.restPoint) {
         if (data.info && data.info.isBossRoom) {
           if (this.bgm && this.bgm.isPlaying) {
