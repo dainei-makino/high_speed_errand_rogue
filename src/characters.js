@@ -28,6 +28,7 @@ const SPRITES = {
   air_tank_dark: 'air_tank_dark.svg',
   oxygen_console: 'oxygen_supply_console.svg',
   spikes: 'floor_spikes.svg',
+  electric_machine: 'electric_machine.svg',
   meteor: 'meteor.svg',
   meteor_explosion1: 'meteor_explosion1.svg',
   meteor_explosion2: 'meteor_explosion2.svg',
@@ -136,6 +137,10 @@ function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
 
+function createElectricMachine(scene) {
+  return scene.add.image(0, 0, 'electric_machine').setOrigin(0);
+}
+
 function createSleepPod(scene) {
   return scene.add.image(0, 0, 'sleep_pod').setOrigin(0);
 }
@@ -183,6 +188,7 @@ export default {
   createAirTankDark,
   createOxygenConsole,
   createSpike,
+  createElectricMachine,
   createSleepPod,
   createSleepPodBroken,
   createMeteor,

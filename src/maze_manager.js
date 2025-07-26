@@ -40,6 +40,7 @@ export default class MazeManager {
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
     this._addBrokenSleepPod(chunk);
+    chunk.electricMachines = [];
     return this.addChunk(chunk, 0, 0);
   }
 
@@ -58,6 +59,7 @@ export default class MazeManager {
       silverDoors: [],
       autoGates: [],
       spikeSprites: [],
+      electricMachineSprites: [],
       sprites: []
     };
     this.renderChunk(chunk, info);
@@ -93,6 +95,15 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL: {
+            const machine =
+              chunk.electricMachines &&
+              chunk.electricMachines.find(m => m.x === x && m.y === y);
+            if (machine) {
+              sprite = Characters.createElectricMachine(this.scene);
+              machine.sprite = sprite;
+              info.electricMachineSprites.push(machine);
+              break;
+            }
             // Count surrounding wall-like tiles (including doors) in all 8 directions
             const isWallLike = t =>
               t === TILE.WALL ||
@@ -285,6 +296,54 @@ export default class MazeManager {
           }
         }
       }
+
+      if (obj.chunk.electricMachines && obj.chunk.electricMachines.length) {
+        for (const machine of obj.chunk.electricMachines) {
+          machine.timer += delta;
+          const active = machine.timer % 4000 >= 3000;
+          if (active && !machine.active) {
+            machine.active = true;
+            machine.effects = [];
+            const dirs = [
+              { dx: 1, dy: 0 },
+              { dx: -1, dy: 0 },
+              { dx: 0, dy: 1 },
+              { dx: 0, dy: -1 }
+            ];
+            for (const { dx, dy } of dirs) {
+              const tx = machine.x + dx;
+              const ty = machine.y + dy;
+              if (
+                tx >= 0 &&
+                ty >= 0 &&
+                tx < obj.chunk.size &&
+                ty < obj.chunk.size &&
+                obj.chunk.tiles[ty * obj.chunk.size + tx] === TILE.FLOOR
+              ) {
+                const ex = obj.offsetX + tx * this.tileSize + this.tileSize / 2;
+                const ey = obj.offsetY + ty * this.tileSize + this.tileSize / 2;
+                const rect = this.scene.add.rectangle(
+                  ex,
+                  ey,
+                  this.tileSize,
+                  this.tileSize,
+                  0xffff00
+                );
+                rect.setAlpha(0.5);
+                machine.effects.push(rect);
+                obj.sprites.push(rect);
+              }
+            }
+          } else if (!active && machine.active) {
+            machine.active = false;
+            if (machine.effects) {
+              machine.effects.forEach(e => e.destroy());
+              obj.sprites = obj.sprites.filter(s => !machine.effects.includes(s));
+              machine.effects = [];
+            }
+          }
+        }
+      }
       if (heroIdx >= obj.index + 2) {
         if (this.isHeroInside(hero, obj)) {
           this.scene.handleGameOver();
@@ -415,6 +474,7 @@ export default class MazeManager {
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
+      this._addElectricMachine(chunk);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -691,6 +751,26 @@ export default class MazeManager {
       }
     }
     chunk.spikes = spikes;
+  }
+
+  _addElectricMachine(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) continue;
+        if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) continue;
+        candidates.push({ x, y });
+      }
+    }
+    chunk.electricMachines = [];
+    if (candidates.length && Math.random() < 0.9) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      chunk.electricMachines.push({ x: spot.x, y: spot.y, timer: 0, active: false, effects: [] });
+    }
   }
 
   openDoor(info) {
