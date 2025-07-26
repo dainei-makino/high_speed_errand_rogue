@@ -1246,6 +1246,7 @@ export default class MazeManager {
     sprite.setPosition(info.offsetX + x * size, startY);
     sprite.alpha = 0;
     this.scene.worldLayer.add(sprite);
+    info.sprites.push(sprite);
     this.scene.tweens.add({ targets: sprite, alpha: 1, duration: 200 });
     this.scene.tweens.add({
       targets: sprite,
