@@ -85,7 +85,23 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+            if (
+              (x === 0 && y === 0) ||
+              (x === chunk.size - 1 && y === 0) ||
+              (x === 0 && y === chunk.size - 1) ||
+              (x === chunk.size - 1 && y === chunk.size - 1)
+            ) {
+              sprite = Characters.createWallCorner(this.scene);
+              if (x === chunk.size - 1 && y === 0) {
+                sprite.setAngle(90);
+              } else if (x === chunk.size - 1 && y === chunk.size - 1) {
+                sprite.setAngle(180);
+              } else if (x === 0 && y === chunk.size - 1) {
+                sprite.setAngle(270);
+              }
+            } else {
+              sprite = Characters.createWall(this.scene);
+            }
             break;
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);

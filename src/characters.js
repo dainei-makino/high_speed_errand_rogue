@@ -29,7 +29,8 @@ const SPRITES = {
   meteor: 'meteor.svg',
   meteor_explosion1: 'meteor_explosion1.svg',
   meteor_explosion2: 'meteor_explosion2.svg',
-  meteor_explosion3: 'meteor_explosion3.svg'
+  meteor_explosion3: 'meteor_explosion3.svg',
+  wall_corner: 'wall_corner.svg'
 };
 
 const canvases = {};
@@ -72,6 +73,10 @@ function createFloor(scene) {
 
 function createWall(scene) {
   return scene.add.image(0, 0, 'wall').setOrigin(0);
+}
+
+function createWallCorner(scene) {
+  return scene.add.image(0, 0, 'wall_corner').setOrigin(0);
 }
 
 function createExit(scene) {
@@ -147,6 +152,7 @@ export default {
   registerTextures,
   createFloor,
   createWall,
+  createWallCorner,
   createExit,
   createSilverDoor,
   createSilverDoorOpen,
