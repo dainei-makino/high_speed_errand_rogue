@@ -333,6 +333,12 @@ export default class MazeManager {
                   this._createLightning(cx, cy, ex, ey, 2);
                 }
               }
+
+              const angle = Math.random() * Math.PI * 2;
+              const dist = (this.tileSize / 2) * Math.random();
+              const ex = cx + Math.cos(angle) * dist;
+              const ey = cy + Math.sin(angle) * dist;
+              this._createLightning(cx, cy, ex, ey, 2);
             }
           }
 
