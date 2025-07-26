@@ -645,6 +645,17 @@ export default class MazeManager {
       fromObj.doorSprite = null;
     }
 
+    if (isBossRoom) {
+      if (info.entranceDoorSprite) {
+        info.entranceDoorSprite.setTexture('exit');
+      }
+      const w = fromObj.chunk.width * this.tileSize;
+      const h = fromObj.chunk.height * this.tileSize;
+      evaporateChunk(this.scene, fromObj.offsetX, fromObj.offsetY, w, h);
+      fromObj.sprites.forEach(s => s.destroy());
+      this.activeChunks = this.activeChunks.filter(c => c !== fromObj);
+    }
+
     heroSprite.x = offsetX + chunk.entrance.x * this.tileSize + this.tileSize / 2;
     heroSprite.y = offsetY + chunk.entrance.y * this.tileSize + this.tileSize / 2;
 
