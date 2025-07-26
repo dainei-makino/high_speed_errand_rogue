@@ -166,7 +166,7 @@ export default class UIScene extends Phaser.Scene {
       targets: text,
       scale: 2,
       alpha: 0,
-      duration: 1000,
+      duration: 2000,
       ease: 'Quad.easeOut',
       onComplete: () => text.destroy()
     });
