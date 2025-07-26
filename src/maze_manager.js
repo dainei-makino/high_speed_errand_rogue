@@ -75,20 +75,13 @@ export default class MazeManager {
     for (let y = 0; y < chunk.size; y++) {
       for (let x = 0; x < chunk.size; x++) {
         const tile = chunk.tiles[y * chunk.size + x];
-        const isCorner =
-          (x === 0 && y === 0) ||
-          (x === chunk.size - 1 && y === 0) ||
-          (x === 0 && y === chunk.size - 1) ||
-          (x === chunk.size - 1 && y === chunk.size - 1);
-        if (!isCorner) {
-          const floor = Characters.createFloor(this.scene);
-          floor.setDisplaySize(size, size);
-          floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
-          // Floors should always render behind other objects
-          floor.setDepth(-1);
-          this.scene.worldLayer.add(floor);
-          info.sprites.push(floor);
-        }
+        const floor = Characters.createFloor(this.scene);
+        floor.setDisplaySize(size, size);
+        floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+        // Floors should always render behind other objects
+        floor.setDepth(-1);
+        this.scene.worldLayer.add(floor);
+        info.sprites.push(floor);
 
         let sprite = null;
         switch (tile) {
