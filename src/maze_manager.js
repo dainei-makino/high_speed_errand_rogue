@@ -35,7 +35,7 @@ export default class MazeManager {
   }
 
   spawnInitial() {
-    const { size } = pickMazeConfig(1);
+    const { size } = pickMazeConfig(1, 0);
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
@@ -253,7 +253,7 @@ export default class MazeManager {
     const door = fromObj.chunk.door || { dir: 'E', x: fromObj.chunk.size - 1, y: 0 };
     const doorDir = door.dir;
     const entryDir = this._oppositeDir(doorDir);
-    const { size } = pickMazeConfig(progress + 1);
+    const { size } = pickMazeConfig(progress + 1, progress);
     const chunk = createChunk(this._nextSeed(), size, entryDir);
 
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
