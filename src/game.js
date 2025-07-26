@@ -35,6 +35,8 @@ class GameScene extends Phaser.Scene {
     this.oxygenTimer = null;
     this.rivalTimer = null;
     this.bgm = null;
+    this.bossBgm1 = null;
+    this.bossBgm2 = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
@@ -62,6 +64,8 @@ class GameScene extends Phaser.Scene {
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
+    this.bossBgm1 = this.sound.add('boss_bgm_1', { loop: true });
+    this.bossBgm2 = this.sound.add('boss_bgm_2', { loop: true });
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -132,6 +136,12 @@ class GameScene extends Phaser.Scene {
         if (this.bgm && this.bgm.isPlaying) {
           this.bgm.stop();
         }
+        if (this.bossBgm1 && this.bossBgm1.isPlaying) {
+          this.bossBgm1.stop();
+        }
+        if (this.bossBgm2 && this.bossBgm2.isPlaying) {
+          this.bossBgm2.stop();
+        }
         this.sound.play('pick_up');
         this.hero.oxygen = this.hero.maxOxygen;
         this.events.emit('updateOxygen', 1);
@@ -163,9 +173,29 @@ class GameScene extends Phaser.Scene {
       }
 
       if (!data.info || !data.info.restPoint) {
-        if (this.bgm) {
-          this.bgm.stop();
-          this.bgm.play();
+        if (data.info && data.info.isBossRoom) {
+          if (this.bgm && this.bgm.isPlaying) {
+            this.bgm.stop();
+          }
+          if (this.bossBgm1) {
+            this.bossBgm1.stop();
+            this.bossBgm1.play();
+          }
+          if (this.bossBgm2) {
+            this.bossBgm2.stop();
+            this.bossBgm2.play();
+          }
+        } else {
+          if (this.bossBgm1 && this.bossBgm1.isPlaying) {
+            this.bossBgm1.stop();
+          }
+          if (this.bossBgm2 && this.bossBgm2.isPlaying) {
+            this.bossBgm2.stop();
+          }
+          if (this.bgm) {
+            this.bgm.stop();
+            this.bgm.play();
+          }
         }
       }
 
@@ -797,6 +827,12 @@ class GameScene extends Phaser.Scene {
     }
     if (this.bgm) {
       this.bgm.stop();
+    }
+    if (this.bossBgm1) {
+      this.bossBgm1.stop();
+    }
+    if (this.bossBgm2) {
+      this.bossBgm2.stop();
     }
     this.sound.stopAll();
     this.sound.play('game_over');
