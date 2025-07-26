@@ -239,9 +239,12 @@ export default class UIScene extends Phaser.Scene {
     });
 
     const str = num === 1 ? 'RUN!' : num.toString();
+    const baseFontSize = str === 'SURVIVE!' ? 96 : 192;
+    const tweenDuration = str === 'SURVIVE!' ? 1600 : 800;
+    const jitterRepeats = str === 'SURVIVE!' ? 15 : 7;
     const style = {
       fontFamily: 'monospace',
-      fontSize: '192px',
+      fontSize: `${baseFontSize}px`,
       stroke: '#000000',
       strokeThickness: 4,
       color: '#ffffff'
@@ -267,15 +270,14 @@ export default class UIScene extends Phaser.Scene {
       g2.x = VIRTUAL_WIDTH + Phaser.Math.Between(-4, 4);
       g2.y = VIRTUAL_HEIGHT + Phaser.Math.Between(-4, 4);
     };
-    // Shorten the jitter cycle to match the faster midpoint display
-    this.time.addEvent({ delay: 50, repeat: 7, callback: jitter });
+    // Adjust jitter cycle based on message length
+    this.time.addEvent({ delay: 50, repeat: jitterRepeats, callback: jitter });
 
     this.tweens.add({
       targets: [base, g1, g2],
       scale: 2,
       alpha: 0,
-      // Shortened from 2000ms so the whole effect plays 60% faster
-      duration: 800,
+      duration: tweenDuration,
       ease: 'Quad.easeOut',
       onComplete: () => {
         base.destroy();

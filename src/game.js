@@ -199,6 +199,14 @@ class GameScene extends Phaser.Scene {
         }
       }
 
+      if (data.info && data.info.isBossRoom) {
+        this.sound.play('midpoint');
+        const ui = this.scene.get('UIScene');
+        if (ui && ui.showMidpoint) {
+          ui.showMidpoint('SURVIVE!');
+        }
+      }
+
       if (data.info && data.info.index === 1) {
         this.destroyIntroText();
       }
