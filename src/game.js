@@ -555,6 +555,9 @@ const config = {
     width: VIRTUAL_WIDTH * 2,
     height: VIRTUAL_HEIGHT * 2
   },
+  dom: {
+    createContainer: true
+  },
   scene: [LoadingScene, GameScene, UIScene, GameOverScene]
 };
 

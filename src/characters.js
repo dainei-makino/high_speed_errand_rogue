@@ -42,6 +42,13 @@ const SPRITES = {
   floor_scratch2: 'floor_scratch2.svg'
 };
 
+const SLIDING_DOOR_FILES = {
+  vertical: 'door_vertical.svg',
+  horizontal: 'door_horizontal.svg'
+};
+
+const rawSvgs = {};
+
 const canvases = {};
 
 async function loadAll() {
@@ -63,7 +70,10 @@ async function loadAll() {
     ctx.drawImage(img, 0, 0);
     canvases[key] = canvas;
   });
-  await Promise.all(entries);
+  const doorEntries = Object.entries(SLIDING_DOOR_FILES).map(async ([key, file]) => {
+    rawSvgs[key] = await fetch(ASSET_PATH + file).then(r => r.text());
+  });
+  await Promise.all([...entries, ...doorEntries]);
 }
 
 const ready = loadAll();
@@ -94,8 +104,53 @@ function createWallEnd(scene) {
   return scene.add.image(0, 0, 'wall_end').setOrigin(0.5);
 }
 
-function createExit(scene) {
-  return scene.add.image(0, 0, 'exit').setOrigin(0);
+function _createSlidingDoor(scene, orientation) {
+  const svgText = rawSvgs[orientation];
+  const dom = scene.add.dom(0, 0).createFromHTML(svgText);
+  dom.setOrigin(0);
+  dom.node.style.pointerEvents = 'none';
+
+  const scale = scene.mazeManager ? scene.mazeManager.tileSize / 32 : 0.5;
+  dom.setScale(scale);
+
+  if (orientation === 'vertical') {
+    const left = dom.node.getElementById('left');
+    const right = dom.node.getElementById('right');
+    dom.open = () => {
+      scene.tweens.addCounter({
+        from: 0,
+        to: 16,
+        duration: 200,
+        onUpdate: tween => {
+          const v = tween.getValue();
+          left.setAttribute('transform', `translate(${-v},0)`);
+          right.setAttribute('transform', `translate(${v},0)`);
+        }
+      });
+    };
+  } else {
+    const top = dom.node.getElementById('top');
+    const bottom = dom.node.getElementById('bottom');
+    dom.open = () => {
+      scene.tweens.addCounter({
+        from: 0,
+        to: 16,
+        duration: 200,
+        onUpdate: tween => {
+          const v = tween.getValue();
+          top.setAttribute('transform', `translate(0,${-v})`);
+          bottom.setAttribute('transform', `translate(0,${v})`);
+        }
+      });
+    };
+  }
+
+  dom.orientation = orientation;
+  return dom;
+}
+
+function createExit(scene, orientation = 'vertical') {
+  return _createSlidingDoor(scene, orientation);
 }
 
 function createSilverDoor(scene) {

@@ -95,7 +95,13 @@ export default class MazeManager {
           (x === chunk.size - 1 && y === chunk.size - 1);
         if (!isCorner) {
           const floor = Characters.createFloor(this.scene);
-          floor.setDisplaySize(size, size);
+          if (typeof floor.setDisplaySize === 'function') {
+            floor.setDisplaySize(size, size);
+          } else {
+            const sx = size / floor.width;
+            const sy = size / floor.height;
+            floor.setScale(sx, sy);
+          }
           floor.setPosition(info.offsetX + x * size, info.offsetY + y * size);
           // Floors should always render behind other objects
           floor.setDepth(-1);
@@ -188,11 +194,14 @@ export default class MazeManager {
             info.oxygenSprite = sprite;
             info.oxygenPosition = { x, y };
             break;
-          case TILE.DOOR:
-            sprite = Characters.createExit(this.scene);
+          case TILE.DOOR: {
+            const dir = chunk.door && chunk.door.x === x && chunk.door.y === y ? chunk.door.dir : 'E';
+            const orientation = dir === 'N' || dir === 'S' ? 'horizontal' : 'vertical';
+            sprite = Characters.createExit(this.scene, orientation);
             info.doorSprite = sprite;
             info.doorPosition = { x, y };
             break;
+          }
           case TILE.SILVER_DOOR:
             sprite = Characters.createSilverDoor(this.scene);
             if (chunk.silverDoors) {
@@ -233,7 +242,13 @@ export default class MazeManager {
         }
 
         if (sprite) {
-          sprite.setDisplaySize(size, size);
+          if (typeof sprite.setDisplaySize === 'function') {
+            sprite.setDisplaySize(size, size);
+          } else {
+            const sx = size / sprite.width;
+            const sy = size / sprite.height;
+            sprite.setScale(sx, sy);
+          }
           const posX = info.offsetX + x * size;
           const posY = info.offsetY + y * size;
           // Center-origin sprites (like wall corners) should be positioned
@@ -251,7 +266,13 @@ export default class MazeManager {
           const s = chunk.spikes.find(v => v.x === x && v.y === y);
           if (s) {
             const spikeSprite = Characters.createSpike(this.scene);
-            spikeSprite.setDisplaySize(size, size);
+            if (typeof spikeSprite.setDisplaySize === 'function') {
+              spikeSprite.setDisplaySize(size, size);
+            } else {
+              const sx = size / spikeSprite.width;
+              const sy = size / spikeSprite.height;
+              spikeSprite.setScale(sx, sy);
+            }
             spikeSprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
             this.scene.worldLayer.add(spikeSprite);
             info.sprites.push(spikeSprite);
@@ -726,7 +747,13 @@ export default class MazeManager {
 
     const key = DECAL_KEYS[Math.floor(Math.random() * DECAL_KEYS.length)];
     const decal = Characters.createFloorDecal(this.scene, key);
-    decal.setDisplaySize(this.tileSize, this.tileSize);
+    if (typeof decal.setDisplaySize === 'function') {
+      decal.setDisplaySize(this.tileSize, this.tileSize);
+    } else {
+      const sx = this.tileSize / decal.width;
+      const sy = this.tileSize / decal.height;
+      decal.setScale(sx, sy);
+    }
     const baseX = info.offsetX + x * this.tileSize;
     const baseY = info.offsetY + y * this.tileSize;
 
@@ -751,11 +778,11 @@ export default class MazeManager {
   }
 
   openDoor(info) {
-    if (info && info.doorSprite) {
-      info.doorSprite.setTexture('door_open');
+    if (info && info.doorSprite && info.doorSprite.open) {
+      info.doorSprite.open();
     }
-    if (info && info.entranceDoorSprite) {
-      info.entranceDoorSprite.setTexture('exit');
+    if (info && info.entranceDoorSprite && info.entranceDoorSprite.open) {
+      info.entranceDoorSprite.open();
     }
   }
 
