@@ -103,31 +103,52 @@ class GameScene extends Phaser.Scene {
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
       this.sound.play('chunk_generate_2');
+
+      if (data.info && data.info.restPoint) {
+        const size = this.mazeManager.tileSize;
+        const cx = data.info.offsetX + data.info.oxygenPosition.x * size + size / 2;
+        const cy = data.info.offsetY + data.info.oxygenPosition.y * size + size / 2;
+        this.oxygenConsole = { x: cx, y: cy };
+        if (!this.oxygenLine) {
+          this.oxygenLine = this.add.graphics();
+          this.worldLayer.add(this.oxygenLine);
+        }
+        if (this.bgm && this.bgm.isPlaying) {
+          this.bgm.stop();
+        }
+        this.sound.play('pick_up');
+        this.hero.oxygen = this.hero.maxOxygen;
+        this.events.emit('updateOxygen', 1);
+        if (this.oxygenTimer) {
+          this.oxygenTimer.remove();
+          this.oxygenTimer = null;
+        }
+      } else if (this.oxygenLine) {
+        const hx = this.heroSprite.x;
+        const hy = this.heroSprite.y;
+        const cx = this.oxygenConsole.x;
+        const cy = this.oxygenConsole.y;
+        const points = computeTetherPoints(cx, cy, hx, hy, this.mazeManager.tileSize, 5);
+        points.forEach((p, i) => {
+          if (i === 0) return;
+          this.time.delayedCall(i * 40, () => {
+            evaporateArea(this, p.x - 4, p.y - 4, 8, 8, 0xffffff);
+          });
+        });
+        this.tweens.add({
+          targets: this.oxygenLine,
+          alpha: 0,
+          duration: 200,
+          onComplete: () => {
+            this.oxygenLine.destroy();
+            this.oxygenLine = null;
+          }
+        });
+      }
+
       if (data.info && data.info.index === 1) {
         this.bgm.play();
         this.destroyIntroText();
-        if (this.oxygenLine) {
-          const hx = this.heroSprite.x;
-          const hy = this.heroSprite.y;
-          const cx = this.oxygenConsole.x;
-          const cy = this.oxygenConsole.y;
-          const points = computeTetherPoints(cx, cy, hx, hy, this.mazeManager.tileSize, 5);
-          points.forEach((p, i) => {
-            if (i === 0) return;
-            this.time.delayedCall(i * 40, () => {
-              evaporateArea(this, p.x - 4, p.y - 4, 8, 8, 0xffffff);
-            });
-          });
-          this.tweens.add({
-            targets: this.oxygenLine,
-            alpha: 0,
-            duration: 200,
-            onComplete: () => {
-              this.oxygenLine.destroy();
-              this.oxygenLine = null;
-            }
-          });
-        }
       }
     });
 
@@ -450,7 +471,10 @@ class GameScene extends Phaser.Scene {
             tx: sx,
             ty: sy
           };
-          if (gameState.clearedMazes === 1 && !this.oxygenTimer) {
+          if (
+            (gameState.clearedMazes === 1 || gameState.clearedMazes === 9) &&
+            !this.oxygenTimer
+          ) {
             this.startOxygenTimer();
           }
         } else {
