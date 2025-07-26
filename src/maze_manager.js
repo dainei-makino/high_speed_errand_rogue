@@ -732,7 +732,52 @@ export default class MazeManager {
     const jitter = this.tileSize * 0.25;
     let posX = baseX + jitter * (Math.random() - 0.5);
     let posY = baseY + jitter * (Math.random() - 0.5);
+
+    // slight pixel shift in a random direction (0-2px)
+    const pixelShift = Math.floor(Math.random() * 3); // 0-2
+    switch (Math.floor(Math.random() * 4)) {
+      case 0:
+        posY -= pixelShift;
+        break;
+      case 1:
+        posY += pixelShift;
+        break;
+      case 2:
+        posX -= pixelShift;
+        break;
+      default:
+        posX += pixelShift;
+        break;
+    }
+
+    const t = info.chunk.tiles;
+    const size = info.chunk.size;
+    let placedBetween = false;
     if (Math.random() < 0.25) {
+      const candidates = [];
+      if (
+        x < size - 1 &&
+        t[y * size + (x + 1)] === TILE.FLOOR &&
+        !decalMap[y][x + 1]
+      ) {
+        candidates.push({ dx: 0.5, dy: 0, mx: x + 1, my: y });
+      }
+      if (
+        y < size - 1 &&
+        t[(y + 1) * size + x] === TILE.FLOOR &&
+        !decalMap[y + 1][x]
+      ) {
+        candidates.push({ dx: 0, dy: 0.5, mx: x, my: y + 1 });
+      }
+      if (candidates.length) {
+        const c = candidates[Math.floor(Math.random() * candidates.length)];
+        posX = baseX + this.tileSize * c.dx;
+        posY = baseY + this.tileSize * c.dy;
+        decalMap[c.my][c.mx] = true; // mark neighbor used
+        placedBetween = true;
+      }
+    }
+    if (!placedBetween && Math.random() < 0.25) {
       if (Math.random() < 0.5) {
         posX += this.tileSize * (Math.random() < 0.5 ? -0.5 : 0.5);
       } else {
