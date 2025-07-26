@@ -468,8 +468,9 @@ export default class MazeManager {
       this._addOxygenConsole(chunk);
       if (progress === 29) {
         this._addBrokenSleepPod(chunk);
+      } else {
+        this._addSleepPodsWithHero(chunk, 5);
       }
-      this._addSleepPodsWithHero(chunk, 5);
       chunk.electricMachines = [];
       chunk.restPoint = true;
     } else {
