@@ -8,6 +8,7 @@ const SPRITES = {
   auto_gate_open: 'auto_gate_open.svg',
   auto_gate_closed: 'auto_gate_closed.svg',
   door_open: 'airlock_open.svg',
+  reactor_core: 'core_reactor.svg',
   treasure: 'treasure.svg',
   sleep_pod: 'sleep_pod.svg',
   sleep_pod_broken: 'sleep_pod_broken.svg',
@@ -117,6 +118,10 @@ function createAutoGateClosed(scene) {
   return scene.add.image(0, 0, 'auto_gate_closed').setOrigin(0);
 }
 
+function createReactorCore(scene) {
+  return scene.add.image(0, 0, 'reactor_core').setOrigin(0.5);
+}
+
 function createDoorOpen(scene) {
   return scene.add.image(0, 0, 'door_open').setOrigin(0);
 }
@@ -210,6 +215,7 @@ export default {
   createItemSwitch,
   createSpike,
   createElectricMachine,
+  createReactorCore,
   createSleepPod,
   createSleepPodBroken,
   createSleepPodWithHero,
