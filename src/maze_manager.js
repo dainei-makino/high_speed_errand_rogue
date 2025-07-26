@@ -153,16 +153,16 @@ export default class MazeManager {
               } else {
                 sprite = Characters.createWall(this.scene);
               }
+            } else {
+              sprite = Characters.createWall(this.scene);
+            }
+
             if (
               chunk.brokenPod &&
               chunk.brokenPod.x === x &&
               chunk.brokenPod.y === y
             ) {
               sprite = Characters.createSleepPodBroken(this.scene);
-            }
-              
-            } else {
-              sprite = Characters.createWall(this.scene);
             }
             break;
           }
