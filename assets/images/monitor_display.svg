@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="24" viewBox="0 0 32 24">
+  <defs>
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#666"/>
+      <stop offset="100%" stop-color="#333"/>
+    </linearGradient>
+    <radialGradient id="highlight" cx="0.3" cy="0.2" r="0.7">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <!-- Monitor frame -->
+  <g filter="url(#shadow)">
+    <rect x="1" y="1" width="30" height="18" rx="2" fill="url(#frame)" stroke="#222" stroke-width="1.5"/>
+    <rect x="1" y="1" width="30" height="18" rx="2" fill="url(#highlight)"/>
+  </g>
+  <!-- Screen -->
+  <rect x="4" y="4" width="24" height="12" rx="1" fill="#001a11" stroke="#0f0" stroke-width="0.8"/>
+  <polyline points="5,14 8,10 12,12 15,8 18,11 21,7 24,10 27,6" fill="none" stroke="#0f0" stroke-width="1"/>
+  <!-- Stand -->
+  <rect x="14" y="19" width="4" height="3" fill="#444"/>
+  <rect x="10" y="22" width="12" height="2" rx="1" fill="#555"/>
+</svg>
