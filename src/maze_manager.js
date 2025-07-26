@@ -50,6 +50,7 @@ export default class MazeManager {
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
     this._addBrokenSleepPod(chunk);
+    chunk.electricMachines = [];
     return this.addChunk(chunk, 0, 0);
   }
 
@@ -68,6 +69,7 @@ export default class MazeManager {
       silverDoors: [],
       autoGates: [],
       spikeSprites: [],
+      electricMachineSprites: [],
       sprites: []
     };
     this.renderChunk(chunk, info);
@@ -110,6 +112,15 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL: {
+            const machine =
+              chunk.electricMachines &&
+              chunk.electricMachines.find(m => m.x === x && m.y === y);
+            if (machine) {
+              sprite = Characters.createElectricMachine(this.scene);
+              machine.sprite = sprite;
+              info.electricMachineSprites.push(machine);
+              break;
+            }
             // Count surrounding wall-like tiles (including doors) in all 8 directions
             const isWallLike = t =>
               t === TILE.WALL ||
@@ -302,6 +313,64 @@ export default class MazeManager {
           }
         }
       }
+
+      if (obj.chunk.electricMachines && obj.chunk.electricMachines.length) {
+        for (const machine of obj.chunk.electricMachines) {
+          machine.timer += delta;
+          const cycle = machine.timer % 4000;
+          const active = cycle >= 3000;
+          const leak = !active && cycle % 1000 < 200;
+          machine.active = active;
+          const cx = obj.offsetX + machine.x * this.tileSize + this.tileSize / 2;
+          const cy = obj.offsetY + machine.y * this.tileSize + this.tileSize / 2;
+
+          if (active) {
+            if (machine.timer - (machine.lastEffect || -Infinity) > 120) {
+              machine.lastEffect = machine.timer;
+              const dirs = [
+                { dx: 1, dy: 0 },
+                { dx: -1, dy: 0 },
+                { dx: 0, dy: 1 },
+                { dx: 0, dy: -1 }
+              ];
+              for (const { dx, dy } of dirs) {
+                const tx = machine.x + dx;
+                const ty = machine.y + dy;
+                if (
+                  tx >= 0 &&
+                  ty >= 0 &&
+                  tx < obj.chunk.size &&
+                  ty < obj.chunk.size &&
+                  obj.chunk.tiles[ty * obj.chunk.size + tx] === TILE.FLOOR
+                ) {
+                  const ex =
+                    obj.offsetX + tx * this.tileSize + this.tileSize / 2;
+                  const ey =
+                    obj.offsetY + ty * this.tileSize + this.tileSize / 2;
+                  this._createLightning(cx, cy, ex, ey, 2);
+                }
+              }
+
+              const angle = Math.random() * Math.PI * 2;
+              const dist = (this.tileSize / 2) * Math.random();
+              const ex = cx + Math.cos(angle) * dist;
+              const ey = cy + Math.sin(angle) * dist;
+              this._createLightning(cx, cy, ex, ey, 2);
+            }
+          }
+
+          if (leak) {
+            if (machine.timer - (machine.lastLeak || -Infinity) > 100) {
+              machine.lastLeak = machine.timer;
+              const angle = Math.random() * Math.PI * 2;
+              const dist = (this.tileSize / 2) * Math.random();
+              const ex = cx + Math.cos(angle) * dist;
+              const ey = cy + Math.sin(angle) * dist;
+              this._createLightning(cx, cy, ex, ey, 1);
+            }
+          }
+        }
+      }
       if (heroIdx >= obj.index + 2) {
         if (this.isHeroInside(hero, obj)) {
           this.scene.handleGameOver();
@@ -432,6 +501,7 @@ export default class MazeManager {
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
+      this._addElectricMachine(chunk, progress);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -708,6 +778,69 @@ export default class MazeManager {
       }
     }
     chunk.spikes = spikes;
+  }
+
+  _addElectricMachine(chunk, progress = 0) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) continue;
+        if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) continue;
+        candidates.push({ x, y });
+      }
+    }
+    chunk.electricMachines = [];
+    let chance = 0;
+    if (progress >= 15) {
+      chance = progress === 15 ? 1 : 0.6;
+    }
+    if (candidates.length && Math.random() < chance) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      chunk.electricMachines.push({
+        x: spot.x,
+        y: spot.y,
+        timer: 0,
+        active: false,
+        lastEffect: -Infinity,
+        lastLeak: -Infinity
+      });
+    }
+  }
+
+  _createLightning(x1, y1, x2, y2, width = 2, depth = 1) {
+    const gfx = this.scene.add.graphics();
+    gfx.lineStyle(width, 0xffff66, 1);
+    gfx.setBlendMode(Phaser.BlendModes.ADD);
+    gfx.setDepth(depth);
+    gfx.beginPath();
+    const segs = 3;
+    gfx.moveTo(x1, y1);
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    for (let i = 1; i < segs; i++) {
+      const t = i / segs;
+      const nx = x1 + dx * t;
+      const ny = y1 + dy * t;
+      const off = (Math.random() - 0.5) * 6;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const offX = (-dy / len) * off;
+      const offY = (dx / len) * off;
+      gfx.lineTo(nx + offX, ny + offY);
+    }
+    gfx.lineTo(x2, y2);
+    gfx.strokePath();
+    this.scene.worldLayer.add(gfx);
+    this.scene.tweens.add({
+      targets: gfx,
+      alpha: 0,
+      duration: 200,
+      onComplete: () => gfx.destroy()
+    });
+    return gfx;
   }
 
   _maybeAddFloorDecal(info, decalMap, x, y) {
