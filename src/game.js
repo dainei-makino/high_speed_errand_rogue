@@ -339,6 +339,18 @@ class GameScene extends Phaser.Scene {
         );
       }
 
+      if (
+        curTile.chunk.chunk.itemSwitch &&
+        !curTile.chunk.chunk.itemSwitch.triggered &&
+        curTile.chunk.chunk.itemSwitch.x === curTile.tx &&
+        curTile.chunk.chunk.itemSwitch.y === curTile.ty
+      ) {
+        this.mazeManager.removeItemSwitch(curTile.chunk);
+        this.sound.play('item_spawn');
+        const advanced = Math.random() < 0.5;
+        this.mazeManager.spawnAirTankDrop(curTile.chunk, advanced);
+      }
+
       if (curTile.chunk.chunk.spikes) {
         const hit = curTile.chunk.chunk.spikes.find(
           s => s.x === curTile.tx && s.y === curTile.ty
