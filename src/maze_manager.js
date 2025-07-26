@@ -501,6 +501,15 @@ export default class MazeManager {
       chunk = createChunk(this._nextSeed(), size, entryDir);
     }
 
+    if (progress === 30 || progress === 31) {
+      if (chunk.chest) {
+        const idx = chunk.chest.y * chunk.size + chunk.chest.x;
+        chunk.tiles[idx] = TILE.FLOOR;
+        chunk.chest = null;
+      }
+      chunk.exited = true;
+    }
+
     let { offsetX, offsetY } = this._calcOffset(fromObj, chunk.size, doorDir);
 
     const doorWorldX = fromObj.offsetX + door.x * this.tileSize;
@@ -606,6 +615,9 @@ export default class MazeManager {
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
+    if (progress === 30 || progress === 31) {
+      this.openDoor(info);
+    }
     if (chunk.restPoint) {
       info.restPoint = true;
     }

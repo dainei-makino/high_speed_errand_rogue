@@ -329,6 +329,55 @@ class GameScene extends Phaser.Scene {
           });
         }
       }
+
+      if (
+        curTile.cell === TILE.DOOR &&
+        curTile.chunk.chunk.exited &&
+        !curTile.chunk.chunk._autoSpawned
+      ) {
+        curTile.chunk.chunk._autoSpawned = true;
+        gameState.incrementMazeCount();
+        this.checkMeteorFieldActivation();
+        if (MIDPOINTS.includes(gameState.clearedMazes)) {
+          this.sound.play('midpoint');
+          const ui = this.scene.get('UIScene');
+          if (ui && ui.showMidpoint) {
+            ui.showMidpoint(gameState.clearedMazes);
+          }
+        }
+        this.events.emit('updateChunks', gameState.clearedMazes);
+        const nextInfo = this.mazeManager.spawnNext(
+          gameState.clearedMazes,
+          curTile.chunk,
+          this.heroSprite
+        );
+        let sx = nextInfo.chunk.entrance.x;
+        let sy = nextInfo.chunk.entrance.y;
+        switch (nextInfo.chunk.entry) {
+          case 'N':
+            sy += 1;
+            break;
+          case 'S':
+            sy -= 1;
+            break;
+          case 'W':
+            sx += 1;
+            break;
+          case 'E':
+          default:
+            sx -= 1;
+            break;
+        }
+        this.stopTile = { chunkIndex: nextInfo.index, tx: sx, ty: sy };
+        if (
+          (gameState.clearedMazes === 1 ||
+            gameState.clearedMazes === 15 ||
+            gameState.clearedMazes === 30) &&
+          !this.oxygenTimer
+        ) {
+          this.startOxygenTimer();
+        }
+      }
     }
 
     this.mazeManager.update(delta, this.heroSprite);
