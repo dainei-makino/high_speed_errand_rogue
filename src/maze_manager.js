@@ -11,7 +11,7 @@ const DECAL_KEYS = [
   'floor_scratch1',
   'floor_scratch2'
 ];
-const DECAL_CHANCE = 0.1;
+const DECAL_CHANCE = 0.15;
 
 export default class MazeManager {
   constructor(scene) {
