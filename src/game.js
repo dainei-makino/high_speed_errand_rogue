@@ -472,7 +472,9 @@ class GameScene extends Phaser.Scene {
             ty: sy
           };
           if (
-            (gameState.clearedMazes === 1 || gameState.clearedMazes === 9) &&
+            (gameState.clearedMazes === 1 ||
+              gameState.clearedMazes === 14 ||
+              gameState.clearedMazes === 29) &&
             !this.oxygenTimer
           ) {
             this.startOxygenTimer();
