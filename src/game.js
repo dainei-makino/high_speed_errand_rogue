@@ -330,6 +330,11 @@ class GameScene extends Phaser.Scene {
         }
       }
 
+    }
+
+    this.mazeManager.update(delta, this.heroSprite);
+    const curTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
+    if (curTile) {
       if (
         curTile.cell === TILE.DOOR &&
         curTile.chunk.chunk.exited &&
@@ -378,11 +383,6 @@ class GameScene extends Phaser.Scene {
           this.startOxygenTimer();
         }
       }
-    }
-
-    this.mazeManager.update(delta, this.heroSprite);
-    const curTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
-    if (curTile) {
       if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
         curTile.chunk.chunk.chestOpened = true;
         this.sound.play('chest_open');
