@@ -98,6 +98,9 @@ class GameScene extends Phaser.Scene {
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
       this.sound.play('chunk_generate_2');
+      if (this.inputBuffer && this.inputBuffer.reset) {
+        this.inputBuffer.reset();
+      }
       if (data.info && data.info.index === 1) {
         this.bgm.play();
         this.destroyIntroText();
