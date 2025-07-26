@@ -484,7 +484,7 @@ export default class MazeManager {
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
-      this._addElectricMachine(chunk);
+      this._addElectricMachine(chunk, progress);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -763,7 +763,7 @@ export default class MazeManager {
     chunk.spikes = spikes;
   }
 
-  _addElectricMachine(chunk) {
+  _addElectricMachine(chunk, progress = 0) {
     const size = chunk.size;
     const t = chunk.tiles;
     const candidates = [];
@@ -777,7 +777,11 @@ export default class MazeManager {
       }
     }
     chunk.electricMachines = [];
-    if (candidates.length && Math.random() < 0.9) {
+    let chance = 0.9;
+    if (progress >= 15) {
+      chance = progress === 15 ? 1 : 0.6;
+    }
+    if (candidates.length && Math.random() < chance) {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       chunk.electricMachines.push({
         x: spot.x,
