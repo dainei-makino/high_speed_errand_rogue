@@ -39,6 +39,7 @@ export default class MazeManager {
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
+    this._addBrokenSleepPod(chunk);
     return this.addChunk(chunk, 0, 0);
   }
 
@@ -85,7 +86,15 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+            if (
+              chunk.brokenPod &&
+              chunk.brokenPod.x === x &&
+              chunk.brokenPod.y === y
+            ) {
+              sprite = Characters.createSleepPodBroken(this.scene);
+            } else {
+              sprite = Characters.createWall(this.scene);
+            }
             break;
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
@@ -555,6 +564,23 @@ export default class MazeManager {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       t[spot.y * size + spot.x] = TILE.SPECIAL;
       chunk.oxygenConsole = { x: spot.x, y: spot.y };
+    }
+  }
+
+  _addBrokenSleepPod(chunk) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        candidates.push({ x, y });
+      }
+    }
+    if (candidates.length) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      chunk.brokenPod = { x: spot.x, y: spot.y };
     }
   }
 
