@@ -130,6 +130,13 @@ export default class MazeManager {
               sprite = Characters.createSleepPodWithHero(this.scene);
               break;
             }
+            if (
+              chunk.sleepPods &&
+              chunk.sleepPods.find(p => p.x === x && p.y === y)
+            ) {
+              sprite = Characters.createSleepPod(this.scene);
+              break;
+            }
             // Display a broken sleep pod instead of a wall if this position
             // is marked as such. This must be done before creating any wall
             // sprites to avoid leaving unused wall graphics in the scene.
@@ -147,6 +154,7 @@ export default class MazeManager {
             const hasReplacement = (cx, cy) => {
               if (chunk.brokenPod && chunk.brokenPod.x === cx && chunk.brokenPod.y === cy) return true;
               if (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === cx && p.y === cy)) return true;
+              if (chunk.sleepPods && chunk.sleepPods.some(p => p.x === cx && p.y === cy)) return true;
               if (chunk.electricMachines && chunk.electricMachines.some(m => m.x === cx && m.y === cy)) return true;
               return false;
             };
@@ -576,6 +584,11 @@ export default class MazeManager {
       }
     }
 
+    if (!isRestPoint && progress >= 24 && progress <= 27) {
+      const counts = { 24: 1, 25: 3, 26: 5, 27: 10 };
+      this._addSleepPods(chunk, counts[progress]);
+    }
+
     const info = this.addChunk(chunk, offsetX, offsetY);
     if (chunk.restPoint) {
       info.restPoint = true;
@@ -854,6 +867,33 @@ export default class MazeManager {
     }
   }
 
+  _addSleepPods(chunk, count = 1) {
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y)
+          continue;
+        if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y)
+          continue;
+        if (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === x && p.y === y))
+          continue;
+        if (chunk.electricMachines && chunk.electricMachines.some(m => m.x === x && m.y === y))
+          continue;
+        candidates.push({ x, y });
+      }
+    }
+    chunk.sleepPods = [];
+    for (let i = 0; i < count && candidates.length; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
+      chunk.sleepPods.push({ x: spot.x, y: spot.y });
+    }
+  }
+
   _addItemSwitch(chunk) {
     const size = chunk.size;
     const t = chunk.tiles;
@@ -874,7 +914,9 @@ export default class MazeManager {
           chunk.oxygenConsole.y === y) ||
         (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) ||
         (chunk.heroSleepPods &&
-          chunk.heroSleepPods.some(p => p.x === x && p.y === y))) &&
+          chunk.heroSleepPods.some(p => p.x === x && p.y === y)) ||
+        (chunk.sleepPods &&
+          chunk.sleepPods.some(p => p.x === x && p.y === y))) &&
       tries < 50
     );
     if (tries >= 50) return;
@@ -920,6 +962,8 @@ export default class MazeManager {
           chunk.heroSleepPods &&
           chunk.heroSleepPods.some(p => p.x === x && p.y === y)
         )
+          continue;
+        if (chunk.sleepPods && chunk.sleepPods.some(p => p.x === x && p.y === y))
           continue;
         candidates.push({ x, y });
       }
@@ -1158,7 +1202,8 @@ export default class MazeManager {
         (chunk.electricMachines && chunk.electricMachines.some(m => m.x === x && m.y === y)) ||
         (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) ||
         (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) ||
-        (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === x && p.y === y))) &&
+        (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === x && p.y === y)) ||
+        (chunk.sleepPods && chunk.sleepPods.some(p => p.x === x && p.y === y))) &&
       tries < 50
     );
     if (tries >= 50) return null;
