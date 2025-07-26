@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46">
+  <!-- Suit Torso -->
+  <rect x="10" y="18" width="12" height="14" rx="3" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Arms -->
+  <rect x="5" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <rect x="22" y="21" width="5" height="9" rx="2" fill="#ffffff" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- Suit Belt with buckle detail -->
+  <rect x="10" y="26" width="12" height="3" fill="#c0c0c0"/>
+  <rect x="15" y="26" width="2" height="3" fill="#808080"/>
+  <!-- Boots -->
+  <rect x="8" y="36" width="6" height="6" rx="1" fill="#4e5d39" stroke="#2d3724" stroke-width="1"/>
+  <rect x="18" y="36" width="6" height="6" rx="1" fill="#4e5d39" stroke="#2d3724" stroke-width="1"/>
+  <!-- Helmet -->
+  <circle cx="16" cy="12" r="12" fill="#e0f7ff" fill-opacity="0.5" stroke="#99ccff" stroke-width="2"/>
+</svg>
