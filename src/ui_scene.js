@@ -278,6 +278,7 @@ export default class UIScene extends Phaser.Scene {
       scale: 2,
       alpha: 0,
       duration: tweenDuration,
+      delay: 400,
       ease: 'Quad.easeOut',
       onComplete: () => {
         base.destroy();
