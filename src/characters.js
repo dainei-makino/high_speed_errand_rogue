@@ -43,7 +43,8 @@ const SPRITES = {
   floor_dirt2: 'floor_dirt2.svg',
   floor_scratch1: 'floor_scratch1.svg',
   floor_scratch2: 'floor_scratch2.svg',
-  item_switch: 'floor_switch_red.svg'
+  item_switch: 'floor_switch_red.svg',
+  hero_spacesuit: 'hero_spacesuit.svg'
 };
 
 const canvases = {};
@@ -194,6 +195,10 @@ function createArrow(scene) {
   return scene.add.image(0, 0, 'arrow').setOrigin(0.5);
 }
 
+function createHeroSpacesuit(scene) {
+  return scene.add.image(0, 0, 'hero_spacesuit').setOrigin(0);
+}
+
 export default {
   ready,
   registerTextures,
@@ -223,6 +228,7 @@ export default {
   createMeteorExplosion,
   createHero,
   createHeroPlain,
+  createHeroSpacesuit,
   createArrow,
   createFloorDecal
 };
