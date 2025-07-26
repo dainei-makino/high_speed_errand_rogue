@@ -777,7 +777,7 @@ export default class MazeManager {
       }
     }
     chunk.electricMachines = [];
-    let chance = 0.9;
+    let chance = 0;
     if (progress >= 15) {
       chance = progress === 15 ? 1 : 0.6;
     }
