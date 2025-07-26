@@ -303,11 +303,12 @@ export default class MazeManager {
           const cycle = machine.timer % 4000;
           const active = cycle >= 3000;
           const leak = !active && cycle % 1000 < 200;
+          machine.active = active;
           const cx = obj.offsetX + machine.x * this.tileSize + this.tileSize / 2;
           const cy = obj.offsetY + machine.y * this.tileSize + this.tileSize / 2;
 
           if (active) {
-            if (machine.timer - (machine.lastEffect || 0) > 120) {
+            if (machine.timer - (machine.lastEffect || -Infinity) > 120) {
               machine.lastEffect = machine.timer;
               const dirs = [
                 { dx: 1, dy: 0 },
@@ -330,19 +331,22 @@ export default class MazeManager {
                   const ey =
                     obj.offsetY + ty * this.tileSize + this.tileSize / 2;
                   this._createLightning(cx, cy, ex, ey, 2);
+                  this._flashTile(obj, machine.x, machine.y);
+                  this._flashTile(obj, tx, ty);
                 }
               }
             }
           }
 
           if (leak) {
-            if (machine.timer - (machine.lastLeak || 0) > 100) {
+            if (machine.timer - (machine.lastLeak || -Infinity) > 100) {
               machine.lastLeak = machine.timer;
               const angle = Math.random() * Math.PI * 2;
               const dist = (this.tileSize / 2) * Math.random();
               const ex = cx + Math.cos(angle) * dist;
               const ey = cy + Math.sin(angle) * dist;
               this._createLightning(cx, cy, ex, ey, 1);
+              this._flashTile(obj, machine.x, machine.y);
             }
           }
         }
@@ -772,7 +776,14 @@ export default class MazeManager {
     chunk.electricMachines = [];
     if (candidates.length && Math.random() < 0.9) {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
-      chunk.electricMachines.push({ x: spot.x, y: spot.y, timer: 0, active: false, effects: [] });
+      chunk.electricMachines.push({
+        x: spot.x,
+        y: spot.y,
+        timer: 0,
+        active: false,
+        lastEffect: -Infinity,
+        lastLeak: -Infinity
+      });
     }
   }
 
@@ -805,6 +816,26 @@ export default class MazeManager {
       onComplete: () => gfx.destroy()
     });
     return gfx;
+  }
+
+  _flashTile(info, x, y) {
+    const size = this.tileSize;
+    const rect = this.scene.add.rectangle(
+      info.offsetX + x * size + size / 2,
+      info.offsetY + y * size + size / 2,
+      size,
+      size,
+      0xff0000,
+      0.3
+    );
+    rect.setBlendMode(Phaser.BlendModes.ADD);
+    this.scene.worldLayer.add(rect);
+    this.scene.tweens.add({
+      targets: rect,
+      alpha: 0,
+      duration: 200,
+      onComplete: () => rect.destroy()
+    });
   }
 
   openDoor(info) {
