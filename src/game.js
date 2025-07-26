@@ -15,8 +15,8 @@ import Shield from './shield.js';
 import MeteorField from './meteor_field.js';
 
 // Trigger a special flash when reaching these cleared chunk counts
-// Include the second chunk to show the new "RUN!" message
-const MIDPOINTS = [2, 5, 10, 15, 20, 30, 40, 50];
+// Include the first chunk to show the new "RUN!" message
+const MIDPOINTS = [1, 5, 10, 15, 20, 30, 40, 50];
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;

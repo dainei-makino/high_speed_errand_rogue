@@ -153,7 +153,7 @@ export default class UIScene extends Phaser.Scene {
       onComplete: () => flash.destroy()
     });
 
-    const str = num === 2 ? 'RUN!' : num.toString();
+    const str = num === 1 ? 'RUN!' : num.toString();
     const style = {
       fontFamily: 'monospace',
       fontSize: '192px',
