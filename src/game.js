@@ -722,6 +722,11 @@ class GameScene extends Phaser.Scene {
       this.rivalTimer.remove();
       this.rivalTimer = null;
     }
+    if (this.rivalAnimTimer) {
+      this.rivalAnimTimer.remove();
+      this.rivalAnimTimer = null;
+    }
+    this.tweens.killTweensOf(this.rivalSprite);
     const size = this.mazeManager.tileSize;
     const evaporate = () => {
       evaporateArea(
