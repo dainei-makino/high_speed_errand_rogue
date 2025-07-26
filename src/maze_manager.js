@@ -49,7 +49,6 @@ export default class MazeManager {
     const chunk = createChunk(this._nextSeed(), size, 'W');
     this._ensureEntrance(chunk);
     this._addOxygenConsole(chunk);
-    this._addBrokenSleepPod(chunk);
     return this.addChunk(chunk, 0, 0);
   }
 
@@ -118,13 +117,6 @@ export default class MazeManager {
             // using the same tile sprite.
             sprite = Characters.createWall(this.scene);
 
-            if (
-              chunk.brokenPod &&
-              chunk.brokenPod.x === x &&
-              chunk.brokenPod.y === y
-            ) {
-              sprite = Characters.createSleepPodBroken(this.scene);
-            }
             break;
           }
           case TILE.SPECIAL:
@@ -612,22 +604,7 @@ export default class MazeManager {
     }
   }
 
-  _addBrokenSleepPod(chunk) {
-    const size = chunk.size;
-    const t = chunk.tiles;
-    const candidates = [];
-    for (let y = 1; y < size - 1; y++) {
-      for (let x = 1; x < size - 1; x++) {
-        if (t[y * size + x] !== TILE.WALL) continue;
-        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
-        candidates.push({ x, y });
-      }
-    }
-    if (candidates.length) {
-      const spot = candidates[Math.floor(Math.random() * candidates.length)];
-      chunk.brokenPod = { x: spot.x, y: spot.y };
-    }
-  }
+  // Removed broken sleep pod generation for debugging purposes
 
   _addSpikes(chunk) {
     const size = chunk.size;
