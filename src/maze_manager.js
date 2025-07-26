@@ -331,8 +331,6 @@ export default class MazeManager {
                   const ey =
                     obj.offsetY + ty * this.tileSize + this.tileSize / 2;
                   this._createLightning(cx, cy, ex, ey, 2);
-                  this._flashTile(obj, machine.x, machine.y);
-                  this._flashTile(obj, tx, ty);
                 }
               }
             }
@@ -346,7 +344,6 @@ export default class MazeManager {
               const ex = cx + Math.cos(angle) * dist;
               const ey = cy + Math.sin(angle) * dist;
               this._createLightning(cx, cy, ex, ey, 1);
-              this._flashTile(obj, machine.x, machine.y);
             }
           }
         }
@@ -818,25 +815,7 @@ export default class MazeManager {
     return gfx;
   }
 
-  _flashTile(info, x, y) {
-    const size = this.tileSize;
-    const rect = this.scene.add.rectangle(
-      info.offsetX + x * size + size / 2,
-      info.offsetY + y * size + size / 2,
-      size,
-      size,
-      0xff0000,
-      0.3
-    );
-    rect.setBlendMode(Phaser.BlendModes.ADD);
-    this.scene.worldLayer.add(rect);
-    this.scene.tweens.add({
-      targets: rect,
-      alpha: 0,
-      duration: 200,
-      onComplete: () => rect.destroy()
-    });
-  }
+
 
   openDoor(info) {
     if (info && info.doorSprite) {
