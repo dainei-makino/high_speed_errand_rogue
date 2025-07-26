@@ -75,6 +75,9 @@ export default class MazeManager {
       sprites: []
     };
     this.renderChunk(chunk, info);
+    if (info.index === 0) {
+      this._addHeroPosters(info);
+    }
     // Fade sprites in similar to the old container
     info.sprites.forEach(s => (s.alpha = 0));
     this.scene.tweens.add({ targets: info.sprites, alpha: 1, duration: 400 });
@@ -986,6 +989,42 @@ export default class MazeManager {
       if (Math.random() < 0.1 && candidates.length) {
         addMachine();
       }
+    }
+  }
+
+  _addHeroPosters(info) {
+    const chunk = info.chunk;
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y) continue;
+        if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y) continue;
+        if (chunk.heroSleepPods && chunk.heroSleepPods.some(p => p.x === x && p.y === y)) continue;
+        if (chunk.electricMachines && chunk.electricMachines.some(m => m.x === x && m.y === y)) continue;
+        candidates.push({ x, y });
+      }
+    }
+
+    info.heroPosterSprites = [];
+    const count = Math.min(2, candidates.length);
+    for (let i = 0; i < count; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const spot = candidates.splice(idx, 1)[0];
+      const sprite = Characters.createHeroSpacesuit(this.scene);
+      const ratio = sprite.height / sprite.width;
+      sprite.setDisplaySize(this.tileSize, this.tileSize * ratio);
+      const posX = info.offsetX + spot.x * this.tileSize;
+      const posY = info.offsetY + spot.y * this.tileSize + this.tileSize - sprite.displayHeight;
+      sprite.setPosition(posX, posY);
+      sprite.setDepth(1);
+      sprite.alpha = 0;
+      this.scene.worldLayer.add(sprite);
+      info.sprites.push(sprite);
+      info.heroPosterSprites.push({ x: spot.x, y: spot.y, sprite });
     }
   }
 
