@@ -103,3 +103,18 @@ export function evaporateArea(scene, x, y, width, height, color = 0xffffff) {
     });
   }
 }
+
+// Simple cross-shaped electric effect used by electric machines
+export function createElectricCross(scene, x, y, size) {
+  const gfx = scene.add.graphics();
+  const half = size / 2;
+  gfx.lineStyle(2, 0x66ccff, 1);
+  gfx.beginPath();
+  gfx.moveTo(x - half, y);
+  gfx.lineTo(x + half, y);
+  gfx.moveTo(x, y - half);
+  gfx.lineTo(x, y + half);
+  gfx.strokePath();
+  gfx.setDepth(5);
+  return gfx;
+}

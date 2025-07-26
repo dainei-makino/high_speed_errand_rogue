@@ -1,7 +1,7 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import { pickMazeConfig } from './maze_table.js';
-import { evaporateChunk } from './effects.js';
+import { evaporateChunk, createElectricCross } from './effects.js';
 
 export default class MazeManager {
   constructor(scene) {
@@ -57,6 +57,7 @@ export default class MazeManager {
       silverDoors: [],
       autoGates: [],
       spikeSprites: [],
+      electricMachines: [],
       sprites: []
     };
     this.renderChunk(chunk, info);
@@ -85,7 +86,14 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL:
-            sprite = Characters.createWall(this.scene);
+            if (
+              chunk.electricMachines &&
+              chunk.electricMachines.find(v => v.x === x && v.y === y)
+            ) {
+              sprite = Characters.createElectricMachine(this.scene);
+            } else {
+              sprite = Characters.createWall(this.scene);
+            }
             break;
           case TILE.SPECIAL:
             sprite = Characters.createOxygenConsole(this.scene);
@@ -136,6 +144,39 @@ export default class MazeManager {
           sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
           this.scene.worldLayer.add(sprite);
           info.sprites.push(sprite);
+          if (
+            chunk.electricMachines &&
+            chunk.electricMachines.find(v => v.x === x && v.y === y)
+          ) {
+            const m = chunk.electricMachines.find(v => v.x === x && v.y === y);
+            const cx = info.offsetX + x * size + size / 2;
+            const cy = info.offsetY + y * size + size / 2;
+            const effects = [];
+            const dirs = [
+              { dx: 1, dy: 0 },
+              { dx: -1, dy: 0 },
+              { dx: 0, dy: 1 },
+              { dx: 0, dy: -1 }
+            ];
+            for (const d of dirs) {
+              const ex = info.offsetX + (x + d.dx) * size + size / 2;
+              const ey = info.offsetY + (y + d.dy) * size + size / 2;
+              const e = createElectricCross(this.scene, ex, ey, size);
+              e.setVisible(false);
+              this.scene.worldLayer.add(e);
+              info.sprites.push(e);
+              effects.push(e);
+            }
+            info.electricMachines.push({
+              x,
+              y,
+              sprite,
+              effects,
+              timer: Math.random() * 4000,
+              active: false
+            });
+            Object.assign(m, { sprite, effects, timer: Math.random() * 4000, active: false });
+          }
         }
 
         if (chunk.spikes) {
@@ -190,6 +231,17 @@ export default class MazeManager {
               gate.sprite.setTexture('auto_gate_closed');
             }
             this.scene.sound.play('door_open');
+          }
+        }
+      }
+      if (obj.electricMachines && obj.electricMachines.length) {
+        for (const m of obj.electricMachines) {
+          m.timer += delta;
+          if (m.timer >= 4000) m.timer -= 4000;
+          const active = m.timer >= 3000;
+          if (active !== m.active) {
+            m.active = active;
+            if (m.effects) m.effects.forEach(e => e.setVisible(active));
           }
         }
       }
@@ -322,6 +374,9 @@ export default class MazeManager {
     }
     if (progress >= 2) {
       this._addSpikes(chunk);
+    }
+    if (progress >= 14) {
+      this._addElectricMachine(chunk);
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
@@ -538,6 +593,25 @@ export default class MazeManager {
     );
     t[y * size + x] = TILE.OXYGEN;
     chunk.airTank = { x, y, collected: false };
+  }
+
+  _addElectricMachine(chunk) {
+    if (Math.random() >= 0.3) return;
+    const size = chunk.size;
+    const t = chunk.tiles;
+    const candidates = [];
+    for (let y = 1; y < size - 1; y++) {
+      for (let x = 1; x < size - 1; x++) {
+        if (t[y * size + x] !== TILE.WALL) continue;
+        if (this._isNearEntranceOrExit(chunk, x, y)) continue;
+        candidates.push({ x, y });
+      }
+    }
+    if (candidates.length) {
+      const spot = candidates[Math.floor(Math.random() * candidates.length)];
+      if (!chunk.electricMachines) chunk.electricMachines = [];
+      chunk.electricMachines.push({ x: spot.x, y: spot.y, timer: 0, active: false });
+    }
   }
 
   _addOxygenConsole(chunk) {

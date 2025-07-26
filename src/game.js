@@ -32,6 +32,7 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
+    this.lastElectricMachine = null;
     this.oxygenLine = null;
     this.oxygenConsole = null;
   }
@@ -45,6 +46,7 @@ class GameScene extends Phaser.Scene {
     this.isMoving = false;
     this.isGameOver = false;
     this.lastSpikeTile = null;
+    this.lastElectricMachine = null;
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
@@ -324,6 +326,40 @@ class GameScene extends Phaser.Scene {
           };
         } else if (!hit) {
           this.lastSpikeTile = null;
+        }
+      }
+
+      if (curTile.chunk.chunk.electricMachines) {
+        const em = curTile.chunk.chunk.electricMachines.find(m => {
+          const dx = Math.abs(m.x - curTile.tx);
+          const dy = Math.abs(m.y - curTile.ty);
+          return dx + dy <= 1 && m.active;
+        });
+        const sameEM =
+          em &&
+          this.lastElectricMachine &&
+          this.lastElectricMachine.chunkIndex === curTile.chunk.index &&
+          this.lastElectricMachine.x === em.x &&
+          this.lastElectricMachine.y === em.y;
+        if (em && !sameEM) {
+          this.cameras.main.flash(100, 0, 0, 0);
+          this.cameraManager.shakeSmall();
+          this.sound.play('spike_damage');
+          this.hero.oxygen = Math.max(this.hero.oxygen - 3, 0);
+          this.events.emit(
+            'updateOxygen',
+            this.hero.oxygen / this.hero.maxOxygen
+          );
+          if (this.hero.oxygen <= 0) {
+            this.handleGameOver();
+          }
+          this.lastElectricMachine = {
+            chunkIndex: curTile.chunk.index,
+            x: em.x,
+            y: em.y
+          };
+        } else if (!em) {
+          this.lastElectricMachine = null;
         }
       }
 

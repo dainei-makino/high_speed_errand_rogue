@@ -29,7 +29,8 @@ const SPRITES = {
   meteor: 'meteor.svg',
   meteor_explosion1: 'meteor_explosion1.svg',
   meteor_explosion2: 'meteor_explosion2.svg',
-  meteor_explosion3: 'meteor_explosion3.svg'
+  meteor_explosion3: 'meteor_explosion3.svg',
+  electric_machine: 'electric_machine.svg'
 };
 
 const canvases = {};
@@ -118,6 +119,10 @@ function createSpike(scene) {
   return scene.add.image(0, 0, 'spikes').setOrigin(0);
 }
 
+function createElectricMachine(scene) {
+  return scene.add.image(0, 0, 'electric_machine').setOrigin(0);
+}
+
 function createSleepPod(scene) {
   return scene.add.image(0, 0, 'sleep_pod').setOrigin(0);
 }
@@ -158,6 +163,7 @@ export default {
   createAirTank,
   createOxygenConsole,
   createSpike,
+  createElectricMachine,
   createSleepPod,
   createMeteor,
   createMeteorExplosion,
