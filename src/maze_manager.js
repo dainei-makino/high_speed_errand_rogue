@@ -790,10 +790,11 @@ export default class MazeManager {
     }
   }
 
-  _createLightning(x1, y1, x2, y2, width = 2) {
+  _createLightning(x1, y1, x2, y2, width = 2, depth = 1) {
     const gfx = this.scene.add.graphics();
     gfx.lineStyle(width, 0xffff66, 1);
     gfx.setBlendMode(Phaser.BlendModes.ADD);
+    gfx.setDepth(depth);
     gfx.beginPath();
     const segs = 3;
     gfx.moveTo(x1, y1);
