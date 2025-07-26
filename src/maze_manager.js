@@ -831,6 +831,8 @@ export default class MazeManager {
         if (this._isNearEntranceOrExit(chunk, x, y)) continue;
         if (chunk.oxygenConsole && chunk.oxygenConsole.x === x && chunk.oxygenConsole.y === y)
           continue;
+        if (chunk.brokenPod && chunk.brokenPod.x === x && chunk.brokenPod.y === y)
+          continue;
         candidates.push({ x, y });
       }
     }
