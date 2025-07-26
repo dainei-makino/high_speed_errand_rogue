@@ -907,6 +907,14 @@ export default class MazeManager {
     }
   }
 
+  openAllSilverDoors(info) {
+    if (info && info.silverDoors) {
+      for (const door of info.silverDoors) {
+        this.openSilverDoor(info, door.x, door.y);
+      }
+    }
+  }
+
   removeChest(info) {
     if (info && info.chestSprite) {
       this.scene.tweens.add({
