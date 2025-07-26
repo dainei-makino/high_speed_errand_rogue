@@ -121,6 +121,17 @@ export default class MazeManager {
               info.electricMachineSprites.push(machine);
               break;
             }
+            // Display a broken sleep pod instead of a wall if this position
+            // is marked as such. This must be done before creating any wall
+            // sprites to avoid leaving unused wall graphics in the scene.
+            if (
+              chunk.brokenPod &&
+              chunk.brokenPod.x === x &&
+              chunk.brokenPod.y === y
+            ) {
+              sprite = Characters.createSleepPodBroken(this.scene);
+              break;
+            }
             // Count surrounding wall-like tiles (including doors) in all 8 directions
             const isWallLike = t =>
               t === TILE.WALL ||
@@ -183,14 +194,6 @@ export default class MazeManager {
               }
             } else {
               sprite = Characters.createWall(this.scene);
-            }
-
-            if (
-              chunk.brokenPod &&
-              chunk.brokenPod.x === x &&
-              chunk.brokenPod.y === y
-            ) {
-              sprite = Characters.createSleepPodBroken(this.scene);
             }
             break;
           }
