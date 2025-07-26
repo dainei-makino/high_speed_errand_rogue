@@ -1,7 +1,7 @@
 import { createChunk, TILE } from './maze_generator_core.js';
 import Characters from './characters.js';
 import { pickMazeConfig } from './maze_table.js';
-import { evaporateChunk } from './effects.js';
+import { evaporateChunk, addReactorPulse } from './effects.js';
 
 const DECAL_KEYS = [
   'floor_crack1',
@@ -302,6 +302,10 @@ export default class MazeManager {
           }
           this.scene.worldLayer.add(sprite);
           info.sprites.push(sprite);
+          if (sprite === info.reactorSprite) {
+            const pulse = addReactorPulse(this.scene, sprite, size * 1.5);
+            info.sprites.push(pulse);
+          }
         }
 
         if (chunk.spikes) {
