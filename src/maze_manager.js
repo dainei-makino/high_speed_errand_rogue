@@ -544,8 +544,10 @@ export default class MazeManager {
       this._addSpikes(chunk);
       this._addElectricMachine(chunk, progress);
     }
-    if (!isRestPoint && progress >= 5 && Math.random() < 0.9) {
-      this._addItemSwitch(chunk);
+    if (!isRestPoint && progress >= 20) {
+      if (progress === 20 || Math.random() < 0.3) {
+        this._addItemSwitch(chunk);
+      }
     }
 
     const info = this.addChunk(chunk, offsetX, offsetY);
