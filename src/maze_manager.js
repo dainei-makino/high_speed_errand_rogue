@@ -593,6 +593,18 @@ export default class MazeManager {
       }
     }
 
+    if (!isRestPoint && !isBossRoom) {
+      if (progress === 25) {
+        this._addSleepPodsWithHero(chunk, 1);
+      } else if (progress === 26) {
+        this._addSleepPodsWithHero(chunk, 3);
+      } else if (progress === 27) {
+        this._addSleepPodsWithHero(chunk, 5);
+      } else if (progress === 28) {
+        this._addSleepPodsWithHero(chunk, 10);
+      }
+    }
+
     const info = this.addChunk(chunk, offsetX, offsetY);
     if (chunk.restPoint) {
       info.restPoint = true;
