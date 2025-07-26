@@ -92,12 +92,12 @@ export default class MazeManager {
               t === TILE.DOOR ||
               t === TILE.SILVER_DOOR ||
               t === TILE.AUTO_GATE;
-            const check = (cx, cy) => {
-              if (cx < 0 || cy < 0 || cx >= chunk.size || cy >= chunk.size) {
-                return true;
-              }
-              return isWallLike(chunk.tiles[cy * chunk.size + cx]);
-            };
+            const check = (cx, cy) =>
+              cx >= 0 &&
+              cy >= 0 &&
+              cx < chunk.size &&
+              cy < chunk.size &&
+              isWallLike(chunk.tiles[cy * chunk.size + cx]);
 
             const west = check(x - 1, y);
             const east = check(x + 1, y);
