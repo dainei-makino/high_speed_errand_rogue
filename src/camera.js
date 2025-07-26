@@ -112,11 +112,12 @@ export default class CameraManager {
    * @param {object} info - chunk info from MazeManager
    */
   expandBounds(info) {
-    const size = this.mazeManager.tileSize * info.chunk.size;
+    const widthPx = this.mazeManager.tileSize * info.chunk.width;
+    const heightPx = this.mazeManager.tileSize * info.chunk.height;
     const minX = Math.min(this.bounds.minX, info.offsetX);
     const minY = Math.min(this.bounds.minY, info.offsetY);
-    const maxX = Math.max(this.bounds.maxX, info.offsetX + size);
-    const maxY = Math.max(this.bounds.maxY, info.offsetY + size);
+    const maxX = Math.max(this.bounds.maxX, info.offsetX + widthPx);
+    const maxY = Math.max(this.bounds.maxY, info.offsetY + heightPx);
     this.bounds = { minX, minY, maxX, maxY };
     this.cam.setBounds(minX, minY, maxX - minX, maxY - minY);
   }
