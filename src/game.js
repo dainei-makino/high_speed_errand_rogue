@@ -202,7 +202,7 @@ class GameScene extends Phaser.Scene {
           const entranceClosed =
             tileInfo &&
             tileInfo.chunk.entranceDoorSprite &&
-            tileInfo.chunk.entranceDoorSprite.texture.key === 'exit' &&
+            !tileInfo.chunk.entranceDoorSprite.isOpen &&
             tileInfo.tx === tileInfo.chunk.chunk.entrance.x &&
             tileInfo.ty === tileInfo.chunk.chunk.entrance.y;
           const blocked =

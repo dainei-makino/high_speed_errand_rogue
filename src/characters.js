@@ -116,9 +116,15 @@ function _createSlidingDoor(scene, orientation) {
   const root = dom.node;
   const query = id => root.querySelector(`#${id}`);
 
+  dom.isOpen = false;
+
   if (orientation === 'vertical') {
     const left = query('left');
     const right = query('right');
+    const reset = () => {
+      left.setAttribute('transform', 'translate(0,0)');
+      right.setAttribute('transform', 'translate(0,0)');
+    };
     dom.open = () => {
       scene.tweens.addCounter({
         from: 0,
@@ -128,12 +134,23 @@ function _createSlidingDoor(scene, orientation) {
           const v = tween.getValue();
           left.setAttribute('transform', `translate(${-v},0)`);
           right.setAttribute('transform', `translate(${v},0)`);
+        },
+        onComplete: () => {
+          dom.isOpen = true;
         }
       });
+    };
+    dom.close = () => {
+      reset();
+      dom.isOpen = false;
     };
   } else {
     const top = query('top');
     const bottom = query('bottom');
+    const reset = () => {
+      top.setAttribute('transform', 'translate(0,0)');
+      bottom.setAttribute('transform', 'translate(0,0)');
+    };
     dom.open = () => {
       scene.tweens.addCounter({
         from: 0,
@@ -143,8 +160,15 @@ function _createSlidingDoor(scene, orientation) {
           const v = tween.getValue();
           top.setAttribute('transform', `translate(0,${-v})`);
           bottom.setAttribute('transform', `translate(0,${v})`);
+        },
+        onComplete: () => {
+          dom.isOpen = true;
         }
       });
+    };
+    dom.close = () => {
+      reset();
+      dom.isOpen = false;
     };
   }
 

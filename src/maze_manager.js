@@ -781,8 +781,8 @@ export default class MazeManager {
     if (info && info.doorSprite && info.doorSprite.open) {
       info.doorSprite.open();
     }
-    if (info && info.entranceDoorSprite && info.entranceDoorSprite.open) {
-      info.entranceDoorSprite.open();
+    if (info && info.entranceDoorSprite && info.entranceDoorSprite.close) {
+      info.entranceDoorSprite.close();
     }
   }
 
