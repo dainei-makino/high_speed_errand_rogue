@@ -609,6 +609,9 @@ export default class MazeManager {
     if (chunk.restPoint) {
       info.restPoint = true;
     }
+    if (isBossRoom) {
+      info.isBossRoom = true;
+    }
     info.entranceDoorSprite = fromObj.doorSprite;
     if (fromObj.doorSprite) {
       fromObj.sprites = fromObj.sprites.filter(s => s !== fromObj.doorSprite);
