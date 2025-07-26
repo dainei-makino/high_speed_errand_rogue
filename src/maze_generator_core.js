@@ -50,17 +50,20 @@ const DIRS = [
   { dx: -1, dy: 0, name: 'W' }
 ];
 
-function index(x, y, size) {
-  return y * size + x;
+function index(x, y, width) {
+  return y * width + x;
 }
 
 export class MazeChunk {
-  constructor(seed = 'seed', size = 13, entry = 'W') {
-    if (size % 2 === 0) size += 1; // ensure odd size to avoid double walls
-    this.size = size;
+  constructor(seed = 'seed', width = 13, height = 13, entry = 'W') {
+    if (width % 2 === 0) width += 1;
+    if (height % 2 === 0) height += 1;
+    this.width = width;
+    this.height = height;
+    this.size = Math.max(width, height);
     this.seed = seed;
     this.entry = entry;
-    this.tiles = new Uint8Array(size * size);
+    this.tiles = new Uint8Array(width * height);
     this.door = null;
     this.chest = null;
     this._generate();
@@ -68,7 +71,7 @@ export class MazeChunk {
 
   _generate() {
     const rng = new RNG(this.seed);
-    const size = this.size;
+    const { width, height } = this;
     const tiles = this.tiles;
     tiles.fill(TILE.WALL);
 
@@ -76,11 +79,12 @@ export class MazeChunk {
     // ensure starting position is on an odd tile so that the
     // maze paths reach the very first interior row/column
     // (avoids double-thick walls on the north and west edges)
-    const maxIdx = Math.floor((size - 1) / 2);
-    const startX = rng.nextInt(maxIdx) * 2 + 1;
-    const startY = rng.nextInt(maxIdx) * 2 + 1;
+    const maxX = Math.floor((width - 1) / 2);
+    const maxY = Math.floor((height - 1) / 2);
+    const startX = rng.nextInt(maxX) * 2 + 1;
+    const startY = rng.nextInt(maxY) * 2 + 1;
     stack.push({ x: startX, y: startY });
-    tiles[index(startX, startY, size)] = TILE.FLOOR;
+    tiles[index(startX, startY, width)] = TILE.FLOOR;
 
     while (stack.length) {
       const { x, y } = stack[stack.length - 1];
@@ -89,16 +93,19 @@ export class MazeChunk {
         const nx = x + dir.dx * 2;
         const ny = y + dir.dy * 2;
         if (
-          nx > 0 && ny > 0 && nx < size - 1 && ny < size - 1 &&
-          tiles[index(nx, ny, size)] === TILE.WALL
+          nx > 0 &&
+          ny > 0 &&
+          nx < width - 1 &&
+          ny < height - 1 &&
+          tiles[index(nx, ny, width)] === TILE.WALL
         ) {
           neighbors.push({ dir, nx, ny });
         }
       }
       if (neighbors.length) {
         const n = neighbors[rng.nextInt(neighbors.length)];
-        tiles[index(x + n.dir.dx, y + n.dir.dy, size)] = TILE.FLOOR;
-        tiles[index(n.nx, n.ny, size)] = TILE.FLOOR;
+        tiles[index(x + n.dir.dx, y + n.dir.dy, width)] = TILE.FLOOR;
+        tiles[index(n.nx, n.ny, width)] = TILE.FLOOR;
         stack.push({ x: n.nx, y: n.ny });
       } else {
         stack.pop();
@@ -110,21 +117,21 @@ export class MazeChunk {
   }
 
   _randomFloor(rng) {
-    const size = this.size;
+    const { width, height } = this;
     let x, y;
     do {
-      x = rng.nextInt(size - 2) + 1;
-      y = rng.nextInt(size - 2) + 1;
-    } while (this.tiles[index(x, y, size)] !== TILE.FLOOR);
+      x = rng.nextInt(width - 2) + 1;
+      y = rng.nextInt(height - 2) + 1;
+    } while (this.tiles[index(x, y, width)] !== TILE.FLOOR);
     return { x, y };
   }
 
   _placeSpecials(rng) {
-    const size = this.size;
+    const { width, height } = this;
     const tiles = this.tiles;
     // place chest
     const chest = this._randomFloor(rng);
-    this.tiles[index(chest.x, chest.y, size)] = TILE.CHEST;
+    this.tiles[index(chest.x, chest.y, width)] = TILE.CHEST;
     this.chest = chest;
 
     // place door on a side not equal to entry
@@ -135,10 +142,10 @@ export class MazeChunk {
     // carve a passage leading to the door if necessary
     const ix = door.x - back.dx;
     const iy = door.y - back.dy;
-    if (tiles[index(ix, iy, size)] === TILE.WALL) {
-      tiles[index(ix, iy, size)] = TILE.FLOOR;
+    if (tiles[index(ix, iy, width)] === TILE.WALL) {
+      tiles[index(ix, iy, width)] = TILE.FLOOR;
     }
-    tiles[index(door.x, door.y, size)] = TILE.DOOR;
+    tiles[index(door.x, door.y, width)] = TILE.DOOR;
     this.door = { dir: side, x: door.x, y: door.y };
 
     // verify reachability; if not reachable, regenerate with different seed
@@ -149,19 +156,19 @@ export class MazeChunk {
   }
 
   _addDetours(rng) {
-    const size = this.size;
+    const { width, height } = this;
     const tiles = this.tiles;
-    const max = Math.max(1, Math.floor(size / 3));
+    const max = Math.max(1, Math.floor(Math.max(width, height) / 3));
     let count = rng.nextInt(max) + 1;
-    if (size >= 13) {
+    if (Math.max(width, height) >= 13) {
       count += 2;
-    } else if (size >= 11) {
+    } else if (Math.max(width, height) >= 11) {
       count += 1;
     }
     for (let i = 0; i < count; i++) {
-      const x = rng.nextInt(size - 2) + 1;
-      const y = rng.nextInt(size - 2) + 1;
-      const idx = index(x, y, size);
+      const x = rng.nextInt(width - 2) + 1;
+      const y = rng.nextInt(height - 2) + 1;
+      const idx = index(x, y, width);
       if (tiles[idx] === TILE.WALL) {
         tiles[idx] = TILE.FLOOR;
       }
@@ -169,26 +176,26 @@ export class MazeChunk {
   }
 
   _doorPosition(side, rng) {
-    const size = this.size;
+    const { width, height } = this;
     switch (side) {
       case 'N':
-        return { x: rng.nextInt(size - 2) + 1, y: 0 };
+        return { x: rng.nextInt(width - 2) + 1, y: 0 };
       case 'S':
-        return { x: rng.nextInt(size - 2) + 1, y: size - 1 };
+        return { x: rng.nextInt(width - 2) + 1, y: height - 1 };
       case 'W':
-        return { x: 0, y: rng.nextInt(size - 2) + 1 };
+        return { x: 0, y: rng.nextInt(height - 2) + 1 };
       case 'E':
       default:
-        return { x: size - 1, y: rng.nextInt(size - 2) + 1 };
+        return { x: width - 1, y: rng.nextInt(height - 2) + 1 };
     }
   }
 
   _isReachable(start, goal) {
-    const size = this.size;
+    const { width, height } = this;
     const tiles = this.tiles;
-    const visited = new Uint8Array(size * size);
+    const visited = new Uint8Array(width * height);
     const queue = [start];
-    visited[index(start.x, start.y, size)] = 1;
+    visited[index(start.x, start.y, width)] = 1;
 
     while (queue.length) {
       const { x, y } = queue.shift();
@@ -197,11 +204,14 @@ export class MazeChunk {
         const nx = x + dir.dx;
         const ny = y + dir.dy;
         if (
-          nx >= 0 && ny >= 0 && nx < size && ny < size &&
-          !visited[index(nx, ny, size)] &&
-          tiles[index(nx, ny, size)] !== TILE.WALL
+          nx >= 0 &&
+          ny >= 0 &&
+          nx < width &&
+          ny < height &&
+          !visited[index(nx, ny, width)] &&
+          tiles[index(nx, ny, width)] !== TILE.WALL
         ) {
-          visited[index(nx, ny, size)] = 1;
+          visited[index(nx, ny, width)] = 1;
           queue.push({ x: nx, y: ny });
         }
       }
@@ -210,7 +220,8 @@ export class MazeChunk {
   }
 }
 
-export function createChunk(seed, size = 13, entry = 'W') {
-  if (size % 2 === 0) size += 1; // enforce odd sizes consistently
-  return new MazeChunk(seed, size, entry);
+export function createChunk(seed, width = 13, height = width, entry = 'W') {
+  if (width % 2 === 0) width += 1;
+  if (height % 2 === 0) height += 1;
+  return new MazeChunk(seed, width, height, entry);
 }
