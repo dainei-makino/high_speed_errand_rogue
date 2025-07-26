@@ -15,6 +15,7 @@ import Shield from './shield.js';
 import MeteorField from './meteor_field.js';
 
 const MIDPOINTS = [5, 10, 15, 20, 30, 40, 50];
+const ELECTRIC_DAMAGE = 3;
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
@@ -345,7 +346,7 @@ class GameScene extends Phaser.Scene {
           this.cameras.main.flash(100, 0, 0, 0);
           this.cameraManager.shakeSmall();
           this.sound.play('spike_damage');
-          this.hero.oxygen = Math.max(this.hero.oxygen - 3, 0);
+          this.hero.oxygen = Math.max(this.hero.oxygen - ELECTRIC_DAMAGE, 0);
           this.events.emit(
             'updateOxygen',
             this.hero.oxygen / this.hero.maxOxygen
