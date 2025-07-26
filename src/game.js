@@ -690,7 +690,10 @@ class GameScene extends Phaser.Scene {
       let dirs = null;
       const target = this._findNearestRivalTarget();
       if (target) {
-        dirs = this._dirsToward(target.x, target.y);
+        const best = this._nextDirToward(target.x, target.y);
+        const rest = ['up', 'down', 'left', 'right'].filter(d => d !== best);
+        Phaser.Utils.Array.Shuffle(rest);
+        dirs = [best, ...rest];
       } else {
         dirs = Phaser.Utils.Array.Shuffle(['up', 'down', 'left', 'right']);
       }
@@ -855,7 +858,7 @@ class GameScene extends Phaser.Scene {
       delay: 1000,
       loop: true,
       callback: () => {
-        this.rival.oxygen -= 1.5;
+        this.rival.oxygen -= 2;
         this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
         if (this.rival.oxygen <= 0) {
           this.handleRivalDeath();
@@ -951,6 +954,71 @@ class GameScene extends Phaser.Scene {
       if (!dirs.includes(d)) dirs.push(d);
     }
     return dirs;
+  }
+
+  _nextDirToward(tx, ty) {
+    const size = this.mazeManager.tileSize;
+    const start = this.mazeManager.worldToTile(
+      this.rivalSprite.x,
+      this.rivalSprite.y
+    );
+    const target = this.mazeManager.worldToTile(tx, ty);
+    if (!start || !target) {
+      return this._dirsToward(tx, ty)[0];
+    }
+    const queue = [start];
+    const visited = new Set();
+    const key = n => `${n.chunk.index}:${n.tx}:${n.ty}`;
+    visited.add(key(start));
+    const parent = new Map();
+    const dirs = [
+      { dir: 'up', dx: 0, dy: -1 },
+      { dir: 'down', dx: 0, dy: 1 },
+      { dir: 'left', dx: -1, dy: 0 },
+      { dir: 'right', dx: 1, dy: 0 }
+    ];
+    let found = null;
+    while (queue.length && !found) {
+      const cur = queue.shift();
+      for (const { dir, dx, dy } of dirs) {
+        const nx = cur.chunk.offsetX + (cur.tx + dx) * size + size / 2;
+        const ny = cur.chunk.offsetY + (cur.ty + dy) * size + size / 2;
+        if (nx === this.heroSprite.x && ny === this.heroSprite.y) continue;
+        const info = this.mazeManager.worldToTile(nx, ny);
+        if (!info) continue;
+        const k = key(info);
+        if (visited.has(k)) continue;
+        const cell = info.cell;
+        const blocked =
+          cell === TILE.WALL ||
+          cell === TILE.REACTOR ||
+          cell === TILE.SILVER_DOOR ||
+          cell === TILE.DOOR ||
+          (cell === TILE.AUTO_GATE &&
+            info.chunk.chunk.autoGates &&
+            info.chunk.chunk.autoGates.find(
+              g => g.x === info.tx && g.y === info.ty && g.closed
+            ));
+        if (blocked) continue;
+        visited.add(k);
+        parent.set(k, { from: key(cur), dir });
+        if (info.chunk === target.chunk && info.tx === target.tx && info.ty === target.ty) {
+          found = k;
+          break;
+        }
+        queue.push(info);
+      }
+    }
+    if (!found) {
+      return this._dirsToward(tx, ty)[0];
+    }
+    let step = found;
+    let prev = parent.get(step);
+    while (prev && prev.from !== key(start)) {
+      step = prev.from;
+      prev = parent.get(step);
+    }
+    return prev ? prev.dir : this._dirsToward(tx, ty)[0];
   }
 
   spawnRival(info) {
