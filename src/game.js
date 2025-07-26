@@ -33,7 +33,7 @@ class GameScene extends Phaser.Scene {
     this.bgm = null;
     this.isGameOver = false;
     this.lastSpikeTile = null;
-    this.lastElectricMachine = null;
+    this.lastElectricTile = null;
     this.oxygenLine = null;
     this.oxygenConsole = null;
   }
@@ -47,7 +47,7 @@ class GameScene extends Phaser.Scene {
     this.isMoving = false;
     this.isGameOver = false;
     this.lastSpikeTile = null;
-    this.lastElectricMachine = null;
+    this.lastElectricTile = null;
 
     this.sound.stopAll();
     this.bgm = this.sound.add('bgm', { loop: true });
@@ -331,18 +331,18 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.chunk.chunk.electricMachines) {
-        const em = curTile.chunk.chunk.electricMachines.find(m => {
+        const active = curTile.chunk.chunk.electricMachines.some(m => {
           const dx = Math.abs(m.x - curTile.tx);
           const dy = Math.abs(m.y - curTile.ty);
           return dx + dy <= 1 && m.active;
         });
-        const sameEM =
-          em &&
-          this.lastElectricMachine &&
-          this.lastElectricMachine.chunkIndex === curTile.chunk.index &&
-          this.lastElectricMachine.x === em.x &&
-          this.lastElectricMachine.y === em.y;
-        if (em && !sameEM) {
+        const sameTile =
+          active &&
+          this.lastElectricTile &&
+          this.lastElectricTile.chunkIndex === curTile.chunk.index &&
+          this.lastElectricTile.x === curTile.tx &&
+          this.lastElectricTile.y === curTile.ty;
+        if (active && !sameTile) {
           this.cameras.main.flash(100, 0, 0, 0);
           this.cameraManager.shakeSmall();
           this.sound.play('spike_damage');
@@ -354,13 +354,13 @@ class GameScene extends Phaser.Scene {
           if (this.hero.oxygen <= 0) {
             this.handleGameOver();
           }
-          this.lastElectricMachine = {
+          this.lastElectricTile = {
             chunkIndex: curTile.chunk.index,
-            x: em.x,
-            y: em.y
+            x: curTile.tx,
+            y: curTile.ty
           };
-        } else if (!em) {
-          this.lastElectricMachine = null;
+        } else if (!active) {
+          this.lastElectricTile = null;
         }
       }
 
