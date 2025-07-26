@@ -93,12 +93,24 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL: {
-            // Count surrounding wall-like tiles (including doors) in all 8 directions
-            const isWallLike = t =>
-              t === TILE.WALL ||
-              t === TILE.DOOR ||
-              t === TILE.SILVER_DOOR ||
-              t === TILE.AUTO_GATE;
+            if (isCorner) {
+              sprite = Characters.createWallCorner(this.scene);
+              if (x === 0 && y === 0) {
+                sprite.setAngle(0);
+              } else if (x === chunk.size - 1 && y === 0) {
+                sprite.setAngle(90);
+              } else if (x === 0 && y === chunk.size - 1) {
+                sprite.setAngle(270);
+              } else {
+                sprite.setAngle(180);
+              }
+            } else {
+              // Count surrounding wall-like tiles (including doors) in all 8 directions
+              const isWallLike = t =>
+                t === TILE.WALL ||
+                t === TILE.DOOR ||
+                t === TILE.SILVER_DOOR ||
+                t === TILE.AUTO_GATE;
             const check = (cx, cy) =>
               cx >= 0 &&
               cy >= 0 &&
@@ -155,6 +167,7 @@ export default class MazeManager {
               }
             } else {
               sprite = Characters.createWall(this.scene);
+            }
             }
 
             if (
