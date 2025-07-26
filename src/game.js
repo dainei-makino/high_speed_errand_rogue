@@ -1017,7 +1017,13 @@ class GameScene extends Phaser.Scene {
     };
     evaporate();
     const evapTimer = this.time.addEvent({ delay: 100, repeat: 5, callback: evaporate });
+    const dropX = this.rivalSprite.x;
+    const dropY = this.rivalSprite.y;
     this.rivalSprite.setVisible(false);
+    const tile = this.mazeManager.worldToTile(dropX, dropY);
+    if (tile) {
+      this.mazeManager.spawnKeyDrop(tile.chunk, tile.tx, tile.ty);
+    }
     this.events.emit('updateRivalOxygen', 0);
     this.time.delayedCall(1000, () => {
       evapTimer.remove();
