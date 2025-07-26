@@ -108,13 +108,28 @@ export function evaporateArea(scene, x, y, width, height, color = 0xffffff) {
 export function createElectricCross(scene, x, y, size) {
   const gfx = scene.add.graphics();
   const half = size / 2;
-  gfx.lineStyle(2, 0x66ccff, 1);
-  gfx.beginPath();
-  gfx.moveTo(x - half, y);
-  gfx.lineTo(x + half, y);
-  gfx.moveTo(x, y - half);
-  gfx.lineTo(x, y + half);
-  gfx.strokePath();
+  const color = 0x66ccff;
+  gfx.lineStyle(2, color, 1);
+
+  const drawJagged = (x1, y1, x2, y2, steps = 3) => {
+    gfx.beginPath();
+    gfx.moveTo(x1, y1);
+    for (let i = 1; i < steps; i++) {
+      const t = i / steps;
+      const nx = Phaser.Math.Linear(x1, x2, t) + Phaser.Math.Between(-2, 2);
+      const ny = Phaser.Math.Linear(y1, y2, t) + Phaser.Math.Between(-2, 2);
+      gfx.lineTo(nx, ny);
+    }
+    gfx.lineTo(x2, y2);
+    gfx.strokePath();
+  };
+
+  drawJagged(x - half, y, x + half, y);
+  drawJagged(x, y - half, x, y + half);
+  drawJagged(x - half * 0.7, y - half * 0.7, x + half * 0.7, y + half * 0.7);
+  drawJagged(x - half * 0.7, y + half * 0.7, x + half * 0.7, y - half * 0.7);
+
   gfx.setDepth(5);
+  gfx.setBlendMode(Phaser.BlendModes.ADD);
   return gfx;
 }

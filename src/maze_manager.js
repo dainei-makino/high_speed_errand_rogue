@@ -159,23 +159,50 @@ export default class MazeManager {
               { dx: 0, dy: -1 }
             ];
             for (const d of dirs) {
-              const ex = info.offsetX + (x + d.dx) * size + size / 2;
-              const ey = info.offsetY + (y + d.dy) * size + size / 2;
+              const nx = x + d.dx;
+              const ny = y + d.dy;
+              if (
+                nx < 0 ||
+                ny < 0 ||
+                nx >= chunk.size ||
+                ny >= chunk.size ||
+                chunk.tiles[ny * chunk.size + nx] === TILE.WALL
+              ) {
+                continue;
+              }
+              const ex = info.offsetX + nx * size + size / 2;
+              const ey = info.offsetY + ny * size + size / 2;
               const e = createElectricCross(this.scene, ex, ey, size);
               e.setVisible(false);
               this.scene.worldLayer.add(e);
               info.sprites.push(e);
               effects.push(e);
             }
+            const center = createElectricCross(this.scene, cx, cy, size * 0.6);
+            center.setVisible(false);
+            this.scene.worldLayer.add(center);
+            info.sprites.push(center);
+
             info.electricMachines.push({
               x,
               y,
               sprite,
               effects,
+              centerEffect: center,
               timer: Math.random() * 4000,
+              sparkTimer: Math.random() * 1000,
+              sparkDuration: 0,
               active: false
             });
-            Object.assign(m, { sprite, effects, timer: Math.random() * 4000, active: false });
+            Object.assign(m, {
+              sprite,
+              effects,
+              centerEffect: center,
+              timer: Math.random() * 4000,
+              sparkTimer: Math.random() * 1000,
+              sparkDuration: 0,
+              active: false
+            });
           }
         }
 
@@ -242,6 +269,25 @@ export default class MazeManager {
           if (active !== m.active) {
             m.active = active;
             if (m.effects) m.effects.forEach(e => e.setVisible(active));
+            if (m.centerEffect) m.centerEffect.setVisible(false);
+          }
+
+          if (!active) {
+            m.sparkTimer += delta;
+            if (m.sparkTimer >= 1000) {
+              m.sparkTimer -= 1000;
+              if (m.centerEffect) {
+                m.centerEffect.setVisible(true);
+                m.sparkDuration = 200;
+              }
+            }
+          }
+
+          if (m.centerEffect && m.centerEffect.visible) {
+            m.sparkDuration -= delta;
+            if (m.sparkDuration <= 0) {
+              m.centerEffect.setVisible(false);
+            }
           }
         }
       }
@@ -610,7 +656,14 @@ export default class MazeManager {
     if (candidates.length) {
       const spot = candidates[Math.floor(Math.random() * candidates.length)];
       if (!chunk.electricMachines) chunk.electricMachines = [];
-      chunk.electricMachines.push({ x: spot.x, y: spot.y, timer: 0, active: false });
+      chunk.electricMachines.push({
+        x: spot.x,
+        y: spot.y,
+        timer: 0,
+        sparkTimer: 0,
+        sparkDuration: 0,
+        active: false
+      });
     }
   }
 
