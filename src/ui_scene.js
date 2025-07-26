@@ -1,5 +1,6 @@
 import { evaporateArea } from './effects.js';
 import Characters from './characters.js';
+import { DEBUG_CHUNK_COUNTER } from './debug_flags.js';
 
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
@@ -19,23 +20,37 @@ export default class UIScene extends Phaser.Scene {
     const { width, height } = this.scale.gameSize;
     this.cameras.main.setViewport((width - VIRTUAL_WIDTH * 2) / 2, (height - VIRTUAL_HEIGHT * 2) / 2, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2);
 
-    // Display cleared chunk count; left aligned with no zero padding
+    // Display cleared chunk count; primarily used for debugging
     this.chunkText = this.add.text(12, 8, 'CHUNK 0', {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#ffffff'
     }).setVisible(false);
 
+    this.debugChunkText = this.add
+      .text(VIRTUAL_WIDTH * 2 - 12, 8, 'CHUNK 0', {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#ffffff'
+      })
+      .setOrigin(1, 0)
+      .setVisible(false);
+
     const gameScene = this.scene.get('GameScene');
     gameScene.events.on('updateChunks', this.updateChunks, this);
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
     gameScene.events.on('updateKeys', this.updateKeys, this);
+    this.debugVisibleHandler = visible => {
+      if (this.debugChunkText) this.debugChunkText.setVisible(visible);
+    };
+    gameScene.events.on('showDebugChunks', this.debugVisibleHandler, this);
 
     this.shutdownHandler = () => {
       this.scale.off('resize', this.resizeHandler);
       gameScene.events.off('updateChunks', this.updateChunks, this);
       gameScene.events.off('updateOxygen', this.updateOxygen, this);
       gameScene.events.off('updateKeys', this.updateKeys, this);
+      gameScene.events.off('showDebugChunks', this.debugVisibleHandler, this);
     };
     this.events.once('shutdown', this.shutdownHandler);
 
@@ -73,6 +88,10 @@ export default class UIScene extends Phaser.Scene {
 
     // Show the intro text once UI elements are ready
     this.showIntroText();
+
+    if (DEBUG_CHUNK_COUNTER) {
+      this.debugChunkText.setVisible(true);
+    }
   }
 
   update() {
@@ -82,8 +101,12 @@ export default class UIScene extends Phaser.Scene {
   }
 
   updateChunks(count) {
-    if (!this.chunkText || !this.chunkText.setText) return;
-    this.chunkText.setText('CHUNK ' + count.toString());
+    if (this.chunkText && this.chunkText.setText) {
+      this.chunkText.setText('CHUNK ' + count.toString());
+    }
+    if (this.debugChunkText && this.debugChunkText.setText) {
+      this.debugChunkText.setText('CHUNK ' + count.toString());
+    }
   }
 
   updateKeys(count) {
