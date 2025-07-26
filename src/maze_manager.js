@@ -1286,6 +1286,25 @@ export default class MazeManager {
     });
   }
 
+  spawnItemSwitch(info) {
+    if (!info || (info.itemSwitchSprite && info.chunk.itemSwitch && !info.chunk.itemSwitch.triggered)) {
+      return;
+    }
+    const spot = this._findDropSpot(info.chunk);
+    if (!spot) return;
+    const { x, y } = spot;
+    const size = this.tileSize;
+    const sprite = Characters.createItemSwitch(this.scene);
+    sprite.setDisplaySize(size, size);
+    sprite.setPosition(info.offsetX + x * size, info.offsetY + y * size);
+    sprite.alpha = 0;
+    this.scene.worldLayer.add(sprite);
+    this.scene.tweens.add({ targets: sprite, alpha: 1, duration: 200 });
+    info.itemSwitchSprite = sprite;
+    info.itemSwitchPosition = { x, y };
+    info.chunk.itemSwitch = { x, y, triggered: false };
+  }
+
   _findDropSpot(chunk) {
     const w = chunk.width;
     const h = chunk.height;
