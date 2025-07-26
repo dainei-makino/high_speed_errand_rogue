@@ -421,7 +421,7 @@ export default class MazeManager {
     if (progress >= 2) {
       this._addSpikes(chunk);
     }
-    if (progress >= 2) {
+    if (progress >= 14) {
       this._addElectricMachine(chunk);
     }
 

@@ -330,7 +330,7 @@ class GameScene extends Phaser.Scene {
         }
       }
 
-      if (curTile.chunk.chunk.electricMachines) {
+      {
         const tileSize = this.mazeManager.tileSize;
         const heroX = this.heroSprite.x;
         const heroY = this.heroSprite.y;
