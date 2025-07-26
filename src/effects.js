@@ -103,3 +103,29 @@ export function evaporateArea(scene, x, y, width, height, color = 0xffffff) {
     });
   }
 }
+
+// Reactor core glow animation
+export function addReactorPulse(scene, sprite, size) {
+  const container = scene.add.container(sprite.x, sprite.y);
+  container.setDepth(sprite.depth + 1);
+  scene.worldLayer.add(container);
+
+  const createPulse = delay => {
+    const circle = scene.add.circle(0, 0, size, 0xff3300, 0.5);
+    circle.setBlendMode(Phaser.BlendModes.ADD);
+    container.add(circle);
+    scene.tweens.add({
+      targets: circle,
+      scale: 2,
+      alpha: 0,
+      duration: 2000,
+      ease: 'Sine.easeOut',
+      repeat: -1,
+      delay
+    });
+  };
+
+  createPulse(0);
+  createPulse(1000);
+  return container;
+}

@@ -79,6 +79,12 @@ export default class MeteorField {
     m.destroy();
   }
 
+  clear() {
+    for (const m of [...this.active]) {
+      this.removeMeteor(m);
+    }
+  }
+
   showExplosion(x, y) {
     const img = this.scene.add.image(x, y, 'meteor_explosion1').setOrigin(0.5);
     img.setDepth(1);

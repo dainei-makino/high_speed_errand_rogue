@@ -69,7 +69,7 @@ class GameScene extends Phaser.Scene {
     this.cameraManager = new CameraManager(this, this.mazeManager);
     this.starField = new StarField(this);
     this.shield = new Shield(this);
-    this.meteorField = new MeteorField(this, this.shield, gameState.clearedMazes >= 40);
+    this.meteorField = new MeteorField(this, this.shield, false);
     this._seenFirstChunk = false;
     this.mazeManager.events.on('chunk-created', info => {
       this.cameraManager.expandBounds(info);
@@ -277,7 +277,7 @@ class GameScene extends Phaser.Scene {
               (tileInfo.cell === TILE.WALL ||
                 tileInfo.cell === TILE.REACTOR ||
                 (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-                (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited) ||
+                (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.exited && !tileInfo.chunk.chunk.doorOpen) ||
                 (tileInfo.cell === TILE.AUTO_GATE &&
                   tileInfo.chunk.chunk.autoGates &&
                   tileInfo.chunk.chunk.autoGates.find(
@@ -481,7 +481,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-        if (this.hero.useKey()) {
+        if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
           this.mazeManager.openDoor(curTile.chunk);
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
@@ -639,12 +639,25 @@ class GameScene extends Phaser.Scene {
       this.oxygenLine.setDepth(hy > cy ? 9 : 11);
     }
 
+    const inBossRoom = this._isInBossRoom();
+
     if (this.shield) {
-      this.shield.update();
+      this.shield.sprite.setVisible(inBossRoom);
+      if (inBossRoom) {
+        this.shield.update();
+      }
     }
 
     if (this.meteorField) {
-      this.meteorField.update();
+      if (inBossRoom) {
+        if (this.meteorField.spawnTimer && this.meteorField.spawnTimer.paused) {
+          this.meteorField.start();
+        }
+        this.meteorField.update();
+      } else {
+        this.meteorField.stop();
+        this.meteorField.clear();
+      }
     }
 
     // Prevent camera drift by re-centering if needed
@@ -652,6 +665,13 @@ class GameScene extends Phaser.Scene {
     this.sortWorldObjects();
   }
 
+  _isInBossRoom() {
+    const curTile = this.mazeManager.worldToTile(
+      this.heroSprite.x,
+      this.heroSprite.y
+    );
+    return curTile && curTile.chunk && curTile.chunk.isBossRoom;
+  }
 
   startOxygenTimer() {
     this.events.emit('updateOxygen', this.hero.oxygen / this.hero.maxOxygen);
@@ -753,13 +773,14 @@ class GameScene extends Phaser.Scene {
   }
 
   checkMeteorFieldActivation() {
-    if (
-      this.meteorField &&
-      this.meteorField.spawnTimer &&
-      this.meteorField.spawnTimer.paused &&
-      gameState.clearedMazes >= 40
-    ) {
-      this.meteorField.start();
+    if (this.meteorField && this.meteorField.spawnTimer) {
+      const inBossRoom = this._isInBossRoom();
+      if (inBossRoom && this.meteorField.spawnTimer.paused) {
+        this.meteorField.start();
+      } else if (!inBossRoom && !this.meteorField.spawnTimer.paused) {
+        this.meteorField.stop();
+        this.meteorField.clear();
+      }
     }
   }
 
