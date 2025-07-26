@@ -519,7 +519,7 @@ export default class MazeManager {
       chunk = createChunk(this._nextSeed(), width, height, entryDir);
       if (progress === 30 || progress === 31) {
         if (chunk.chest) {
-          const idx = chunk.chest.y * size + chunk.chest.x;
+          const idx = chunk.chest.y * chunk.width + chunk.chest.x;
           chunk.tiles[idx] = TILE.FLOOR;
           chunk.chest = null;
         }
