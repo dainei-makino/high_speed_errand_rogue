@@ -92,13 +92,37 @@ export default class MazeManager {
         let sprite = null;
         switch (tile) {
           case TILE.WALL: {
-            const west = x > 0 && chunk.tiles[y * chunk.size + (x - 1)] === TILE.WALL;
-            const east = x < chunk.size - 1 && chunk.tiles[y * chunk.size + (x + 1)] === TILE.WALL;
-            const north = y > 0 && chunk.tiles[(y - 1) * chunk.size + x] === TILE.WALL;
-            const south =
-              y < chunk.size - 1 && chunk.tiles[(y + 1) * chunk.size + x] === TILE.WALL;
+            // Count surrounding wall-like tiles (including doors) in all 8 directions
+            const isWallLike = t =>
+              t === TILE.WALL ||
+              t === TILE.DOOR ||
+              t === TILE.SILVER_DOOR ||
+              t === TILE.AUTO_GATE;
+            const check = (cx, cy) =>
+              cx >= 0 &&
+              cy >= 0 &&
+              cx < chunk.size &&
+              cy < chunk.size &&
+              isWallLike(chunk.tiles[cy * chunk.size + cx]);
+
+            const west = check(x - 1, y);
+            const east = check(x + 1, y);
+            const north = check(x, y - 1);
+            const south = check(x, y + 1);
+            const nw = check(x - 1, y - 1);
+            const ne = check(x + 1, y - 1);
+            const sw = check(x - 1, y + 1);
+            const se = check(x + 1, y + 1);
+
             const neighborCount =
-              (west ? 1 : 0) + (east ? 1 : 0) + (north ? 1 : 0) + (south ? 1 : 0);
+              (west ? 1 : 0) +
+              (east ? 1 : 0) +
+              (north ? 1 : 0) +
+              (south ? 1 : 0) +
+              (nw ? 1 : 0) +
+              (ne ? 1 : 0) +
+              (sw ? 1 : 0) +
+              (se ? 1 : 0);
 
             if (neighborCount === 1) {
               sprite = Characters.createWallEnd(this.scene);
