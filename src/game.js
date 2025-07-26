@@ -79,7 +79,11 @@ class GameScene extends Phaser.Scene {
         this.cameraManager.zoomBump();
       }
       this._seenFirstChunk = true;
-      if (info.index === 32) {
+      // Spawn the rival once the boss room (which contains a reactor core)
+      // is generated. Previously we checked for chunk index 32, but the exact
+      // index can vary. Using the presence of a reactor core makes this robust
+      // if the chunk order changes.
+      if (info.chunk.reactorCore) {
         this.spawnRival(info);
       }
     });
