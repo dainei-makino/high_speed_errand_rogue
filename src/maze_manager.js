@@ -1106,6 +1106,32 @@ export default class MazeManager {
             : TILE.FLOOR;
       }
     }
+    // add an exit door on a random side that is not the entrance
+    const sides = ['N', 'E', 'S', 'W'].filter(s => s !== entryDir);
+    const side = sides[Math.floor(Math.random() * sides.length)];
+    let doorX = 0;
+    let doorY = 0;
+    switch (side) {
+      case 'N':
+        doorX = Math.floor(Math.random() * (size - 2)) + 1;
+        doorY = 0;
+        break;
+      case 'S':
+        doorX = Math.floor(Math.random() * (size - 2)) + 1;
+        doorY = size - 1;
+        break;
+      case 'W':
+        doorX = 0;
+        doorY = Math.floor(Math.random() * (size - 2)) + 1;
+        break;
+      case 'E':
+      default:
+        doorX = size - 1;
+        doorY = Math.floor(Math.random() * (size - 2)) + 1;
+        break;
+    }
+    chunk.tiles[doorY * size + doorX] = TILE.DOOR;
+    chunk.door = { dir: side, x: doorX, y: doorY };
     this._addReactorCore(chunk);
     return chunk;
   }
