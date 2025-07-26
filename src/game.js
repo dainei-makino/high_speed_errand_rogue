@@ -127,13 +127,21 @@ class GameScene extends Phaser.Scene {
       this.sound.play('chunk_generate_2');
 
       if (data.info && data.info.restPoint) {
-        const size = this.mazeManager.tileSize;
-        const cx = data.info.offsetX + data.info.oxygenPosition.x * size + size / 2;
-        const cy = data.info.offsetY + data.info.oxygenPosition.y * size + size / 2;
-        this.oxygenConsole = { x: cx, y: cy };
-        if (!this.oxygenLine) {
-          this.oxygenLine = this.add.graphics();
-          this.worldLayer.add(this.oxygenLine);
+        if (data.info.oxygenPosition) {
+          const size = this.mazeManager.tileSize;
+          const cx = data.info.offsetX + data.info.oxygenPosition.x * size + size / 2;
+          const cy = data.info.offsetY + data.info.oxygenPosition.y * size + size / 2;
+          this.oxygenConsole = { x: cx, y: cy };
+          if (!this.oxygenLine) {
+            this.oxygenLine = this.add.graphics();
+            this.worldLayer.add(this.oxygenLine);
+          }
+        } else {
+          this.oxygenConsole = null;
+          if (this.oxygenLine) {
+            this.oxygenLine.destroy();
+            this.oxygenLine = null;
+          }
         }
         if (this.bgm && this.bgm.isPlaying) {
           this.bgm.stop();
