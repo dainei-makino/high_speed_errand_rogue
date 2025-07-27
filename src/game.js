@@ -863,8 +863,11 @@ class GameScene extends Phaser.Scene {
       delay: 1000,
       loop: true,
       callback: () => {
-        this.rival.oxygen -= 2;
-        this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
+        this.rival.oxygen -= 1.2;
+        this.events.emit(
+          'updateRivalOxygen',
+          this.rival.oxygen / this.rival.maxOxygen
+        );
         if (this.rival.oxygen <= 0) {
           this.handleRivalDeath();
         }
