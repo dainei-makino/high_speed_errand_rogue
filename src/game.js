@@ -713,6 +713,7 @@ class GameScene extends Phaser.Scene {
         this.rivalMoving = true;
         const duration = (size / this.rival.speed) * 1000;
         const spawnTrail = () => {
+          if (!this.rivalImage) return;
           spawnAfterimage(
             this,
             this.rivalImage.texture.key,
@@ -763,8 +764,10 @@ class GameScene extends Phaser.Scene {
               this.rivalTrailTimer.remove();
               this.rivalTrailTimer = null;
             }
-            spawnTrail();
-            this.rivalImage.setTexture(frames[0]);
+            if (this.rivalImage) {
+              spawnTrail();
+              this.rivalImage.setTexture(frames[0]);
+            }
           }
         });
         return true;
