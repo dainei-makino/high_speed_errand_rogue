@@ -230,7 +230,7 @@ class GameScene extends Phaser.Scene {
             this.heroImage.setFlipX(false);
             this.hero.direction = 'down';
             this._spawnEndingClones(data.info);
-            this.cameraManager.cam.zoomTo(0.25, 4000);
+            this.cameraManager.cam.zoomTo(0.5, 4000);
             this.cameraManager.cam.once('camerazoomcomplete', () => {
               this._startEndingCredits();
             });
@@ -1202,11 +1202,11 @@ class GameScene extends Phaser.Scene {
       const offX =
         cam.scrollX +
         (Math.random() < 0.5 ? -1 : 1) *
-          Phaser.Math.Between(w * 1.2, w * 1.8);
+          Phaser.Math.Between(w * 0.6, w * 1.0);
       const offY =
         cam.scrollY +
         (Math.random() < 0.5 ? -1 : 1) *
-          Phaser.Math.Between(h * 1.2, h * 1.8);
+          Phaser.Math.Between(h * 0.6, h * 1.0);
       const chunkClone = JSON.parse(JSON.stringify(info.chunk));
       const cloneInfo = {
         chunk: chunkClone,
