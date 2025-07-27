@@ -122,6 +122,29 @@ export default class CameraManager {
     this.cam.setBounds(minX, minY, maxX - minX, maxY - minY);
   }
 
+  /**
+   * 固定サイズのマップ境界を設定する
+   * @param {number} tileW - タイル数 (幅)
+   * @param {number} tileH - タイル数 (高さ)
+   */
+  setFixedBounds(tileW, tileH) {
+    const size = this.mazeManager.tileSize;
+    const halfW = Math.floor(tileW / 2) * size;
+    const halfH = Math.floor(tileH / 2) * size;
+    this.bounds = {
+      minX: -halfW,
+      minY: -halfH,
+      maxX: halfW,
+      maxY: halfH
+    };
+    this.cam.setBounds(
+      this.bounds.minX,
+      this.bounds.minY,
+      this.bounds.maxX - this.bounds.minX,
+      this.bounds.maxY - this.bounds.minY
+    );
+  }
+
   setZoom(zoom, duration = 0) {
     this.defaultZoom = zoom;
     if (duration > 0) {
