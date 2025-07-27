@@ -53,6 +53,7 @@ class GameScene extends Phaser.Scene {
     this.rivalSpikeTimer = null;
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
+    this.inEnding = false;
   }
 
   preload() {
@@ -63,6 +64,7 @@ class GameScene extends Phaser.Scene {
     this.hero = new HeroState();
     this.isMoving = false;
     this.isGameOver = false;
+    this.inEnding = false;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
 
@@ -189,9 +191,50 @@ class GameScene extends Phaser.Scene {
           this.oxygenTimer.remove();
           this.oxygenTimer = null;
         }
+        this.inEnding = true;
+        this.inputBuffer.clear();
+        this.input.keyboard.enabled = false;
+        if (this.bgm && this.bgm.isPlaying) this.bgm.stop();
+        if (this.bossBgm1 && this.bossBgm1.isPlaying) this.bossBgm1.stop();
+        if (this.bossBgm2 && this.bossBgm2.isPlaying) this.bossBgm2.stop();
+        const center = this.mazeManager.getChunkCenter(data.info);
+        const dist = Phaser.Math.Distance.Between(
+          this.heroSprite.x,
+          this.heroSprite.y,
+          center.x,
+          center.y
+        );
+        const duration = (dist / this.hero.speed) * 1000;
+        this.isMoving = true;
+        const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
+        this.heroAnimIndex = 0;
+        this.heroImage.setTexture(frames[0]);
+        this.heroAnimationTimer = this.time.addEvent({
+          delay: duration / frames.length,
+          loop: true,
+          callback: () => {
+            this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+            this.heroImage.setTexture(frames[this.heroAnimIndex]);
+          }
+        });
+        this.tweens.add({
+          targets: this.heroSprite,
+          x: center.x,
+          y: center.y,
+          duration,
+          onComplete: () => {
+            this.isMoving = false;
+            if (this.heroAnimationTimer) {
+              this.heroAnimationTimer.remove();
+              this.heroAnimationTimer = null;
+            }
+            this.heroImage.setTexture(frames[0]);
+            this.cameraManager.cam.zoomTo(0.5, 4000);
+          }
+        });
       }
 
-      if (!data.info || !data.info.restPoint) {
+      else if (!data.info || !data.info.restPoint) {
         if (data.info && data.info.isBossRoom) {
           if (this.bgm && this.bgm.isPlaying) {
             this.bgm.stop();
@@ -304,7 +347,7 @@ class GameScene extends Phaser.Scene {
       this.stopTile = null;
     }
 
-    if (!this.isMoving && !this.isGameOver) {
+    if (!this.isMoving && !this.isGameOver && !this.inEnding) {
       const entry = this.inputBuffer.consume();
       if (entry) {
         const size = this.mazeManager.tileSize;
