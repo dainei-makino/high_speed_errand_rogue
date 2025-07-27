@@ -198,40 +198,84 @@ class GameScene extends Phaser.Scene {
         if (this.bossBgm1 && this.bossBgm1.isPlaying) this.bossBgm1.stop();
         if (this.bossBgm2 && this.bossBgm2.isPlaying) this.bossBgm2.stop();
         const center = this.mazeManager.getChunkCenter(data.info);
-        const dist = Phaser.Math.Distance.Between(
-          this.heroSprite.x,
-          this.heroSprite.y,
-          center.x,
-          center.y
-        );
-        const duration = (dist / this.hero.speed) * 1000;
+        const size = this.mazeManager.tileSize;
+
+        const buildPath = () => {
+          const steps = [];
+          const dx = Math.round((center.x - this.heroSprite.x) / size);
+          const dy = Math.round((center.y - this.heroSprite.y) / size);
+          for (let i = 0; i < Math.abs(dx); i++) {
+            steps.push(dx > 0 ? 'right' : 'left');
+          }
+          for (let i = 0; i < Math.abs(dy); i++) {
+            steps.push(dy > 0 ? 'down' : 'up');
+          }
+          return steps;
+        };
+
+        const stepDuration = (size / this.hero.speed) * 1000;
+        const frameMap = {
+          down: ['hero_walk1', 'hero_walk2', 'hero_walk3'],
+          up: ['hero_back_walk1', 'hero_back_walk2', 'hero_back_walk3'],
+          right: ['hero_right_walk1', 'hero_right_walk2', 'hero_right_walk3']
+        };
+
+        const path = buildPath();
         this.isMoving = true;
-        const frames = ['hero_walk1', 'hero_walk2', 'hero_walk3'];
-        this.heroAnimIndex = 0;
-        this.heroImage.setTexture(frames[0]);
-        this.heroAnimationTimer = this.time.addEvent({
-          delay: duration / frames.length,
-          loop: true,
-          callback: () => {
-            this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
-            this.heroImage.setTexture(frames[this.heroAnimIndex]);
-          }
-        });
-        this.tweens.add({
-          targets: this.heroSprite,
-          x: center.x,
-          y: center.y,
-          duration,
-          onComplete: () => {
+
+        const walkNext = () => {
+          if (!path.length) {
             this.isMoving = false;
-            if (this.heroAnimationTimer) {
-              this.heroAnimationTimer.remove();
-              this.heroAnimationTimer = null;
-            }
-            this.heroImage.setTexture(frames[0]);
+            this.heroImage.setTexture('hero_idle');
+            this.heroImage.setFlipX(false);
+            this.hero.direction = 'down';
+            this._spawnEndingClones(data.info);
             this.cameraManager.cam.zoomTo(0.5, 4000);
+            return;
           }
-        });
+
+          const dir = path.shift();
+          let orientation = dir;
+          if (dir === 'left') orientation = 'right';
+          this.hero.direction = orientation;
+          const frames = frameMap[orientation];
+          this.heroImage.setFlipX(dir === 'left');
+          this.heroAnimIndex = 0;
+          this.heroImage.setTexture(frames[0]);
+          if (this.heroAnimationTimer) this.heroAnimationTimer.remove();
+          this.heroAnimationTimer = this.time.addEvent({
+            delay: stepDuration / frames.length,
+            loop: true,
+            callback: () => {
+              this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+              this.heroImage.setTexture(frames[this.heroAnimIndex]);
+            }
+          });
+
+          let dx = 0,
+            dy = 0;
+          if (dir === 'left') dx = -size;
+          else if (dir === 'right') dx = size;
+          else if (dir === 'up') dy = -size;
+          else if (dir === 'down') dy = size;
+
+          this.tweens.add({
+            targets: this.heroSprite,
+            x: this.heroSprite.x + dx,
+            y: this.heroSprite.y + dy,
+            duration: stepDuration,
+            onComplete: () => {
+              if (this.heroAnimationTimer) {
+                this.heroAnimationTimer.remove();
+                this.heroAnimationTimer = null;
+              }
+              this.heroImage.setTexture(frames[0]);
+              this.time.delayedCall(1000, walkNext);
+            }
+          });
+        };
+
+        walkNext();
       }
 
       else if (!data.info || !data.info.restPoint) {
@@ -1144,6 +1188,37 @@ class GameScene extends Phaser.Scene {
       this.rivalImage = null;
       this.rival = null;
     });
+  }
+
+  _spawnEndingClones(info) {
+    const size = this.mazeManager.tileSize;
+    const cam = this.cameras.main;
+    const w = cam.width;
+    const h = cam.height;
+    for (let i = 0; i < 8; i++) {
+      const offX =
+        cam.scrollX +
+        (Math.random() < 0.5 ? -1 : 1) *
+          Phaser.Math.Between(w * 1.2, w * 1.8);
+      const offY =
+        cam.scrollY +
+        (Math.random() < 0.5 ? -1 : 1) *
+          Phaser.Math.Between(h * 1.2, h * 1.8);
+      const chunkClone = JSON.parse(JSON.stringify(info.chunk));
+      const cloneInfo = {
+        chunk: chunkClone,
+        offsetX: offX,
+        offsetY: offY,
+        sprites: []
+      };
+      this.mazeManager.renderChunk(chunkClone, cloneInfo);
+      const img = Characters.createHero(this);
+      img.setDisplaySize(this.heroImage.displayWidth, this.heroImage.displayHeight);
+      const hx = offX + (info.chunk.width * size) / 2;
+      const hy = offY + (info.chunk.height * size) / 2;
+      const container = this.add.container(hx, hy, [img]);
+      this.worldLayer.add(container);
+    }
   }
 
   checkMeteorFieldActivation() {
