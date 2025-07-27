@@ -62,6 +62,38 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    // Reset rival-related state in case the scene is restarting
+    if (this.rivalSprite) {
+      this.rivalSprite.destroy();
+    }
+    if (this.rivalTrailTimer) {
+      this.rivalTrailTimer.remove();
+    }
+    if (this.rivalSwitchTimer) {
+      this.rivalSwitchTimer.remove();
+    }
+    if (this.rivalSpikeTimer) {
+      this.rivalSpikeTimer.remove();
+    }
+    if (this.rivalPauseTimer) {
+      this.rivalPauseTimer.remove();
+    }
+    if (this.rivalAnimTimer) {
+      this.rivalAnimTimer.remove();
+    }
+    this.rival = null;
+    this.rivalSprite = null;
+    this.rivalImage = null;
+    this.rivalMoving = false;
+    this.rivalAnimTimer = null;
+    this.rivalAnimIndex = 0;
+    this.rivalTrailTimer = null;
+    this.rivalSwitchTimer = null;
+    this.rivalSpikeTimer = null;
+    this.rivalPauseTimer = null;
+    this.rivalPaused = false;
+    this.lastRivalSpikeTile = null;
+
     this.hero = new HeroState();
     this.isMoving = false;
     this.isGameOver = false;
