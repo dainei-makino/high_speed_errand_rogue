@@ -270,13 +270,7 @@ class GameScene extends Phaser.Scene {
       this.events.emit('showDebugChunks', true);
     }
 
-    this.input.keyboard.on('keydown-Q', () => {
-      this.cameraManager.setZoom(Math.min(this.cameraManager.cam.zoom + 0.1, 2), 100);
-    });
-
-    this.input.keyboard.on('keydown-E', () => {
-      this.cameraManager.setZoom(Math.max(this.cameraManager.cam.zoom - 0.1, 0.5), 100);
-    });
+    // Removed manual camera zoom controls (Q/E)
 
     this.checkMeteorFieldActivation();
   }
