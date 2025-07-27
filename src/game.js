@@ -757,7 +757,9 @@ class GameScene extends Phaser.Scene {
           loop: true,
           callback: () => {
             this.rivalAnimIndex = (this.rivalAnimIndex + 1) % frames.length;
-            this.rivalImage.setTexture(frames[this.rivalAnimIndex]);
+            if (this.rivalImage) {
+              this.rivalImage.setTexture(frames[this.rivalAnimIndex]);
+            }
           }
         });
         this.tweens.add({
