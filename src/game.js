@@ -1194,6 +1194,8 @@ class GameScene extends Phaser.Scene {
   }
 
   _spawnEndingClones(info) {
+    // Expand the map to a fixed 200x200 tiles before placing clones
+    this.cameraManager.setFixedBounds(200, 200);
     const size = this.mazeManager.tileSize;
     const cam = this.cameras.main;
     const w = cam.width;
