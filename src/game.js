@@ -1258,7 +1258,7 @@ class GameScene extends Phaser.Scene {
       color: '#ffffff'
     };
     const firstText = this.add
-      .text(cam.midPoint.x, cam.midPoint.y, '「」', textStyle)
+      .text(cam.midPoint.x, cam.midPoint.y, 'YOU TOOK A BREATH', textStyle)
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(1001);
