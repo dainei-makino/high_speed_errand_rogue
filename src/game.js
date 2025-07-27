@@ -862,8 +862,11 @@ class GameScene extends Phaser.Scene {
       delay: 1000,
       loop: true,
       callback: () => {
-        this.rival.oxygen -= 2;
-        this.events.emit('updateRivalOxygen', this.rival.oxygen / this.rival.maxOxygen);
+        this.rival.oxygen -= 1.2;
+        this.events.emit(
+          'updateRivalOxygen',
+          this.rival.oxygen / this.rival.maxOxygen
+        );
         if (this.rival.oxygen <= 0) {
           this.handleRivalDeath();
         }
@@ -1066,6 +1069,7 @@ class GameScene extends Phaser.Scene {
     const worldY = info.offsetY + spot.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
 
     this.rival = new RivalState();
+    this.rival.speed = this.hero.speed * 0.85;
     this.rivalImage = Characters.createRival(this);
     const ratio = this.rivalImage.height / this.rivalImage.width;
     this.rivalImage.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize * ratio);
