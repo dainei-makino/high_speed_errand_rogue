@@ -911,7 +911,7 @@ class GameScene extends Phaser.Scene {
     if (!this.rival) return;
     const schedule = () => {
       this.rivalPauseTimer = this.time.delayedCall(
-        Phaser.Math.Between(1000, 3000),
+        Phaser.Math.Between(333, 1000),
         () => {
           if (!this.rival || this.isGameOver) return;
           this.rivalPaused = true;
