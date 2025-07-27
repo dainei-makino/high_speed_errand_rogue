@@ -224,6 +224,11 @@ class GameScene extends Phaser.Scene {
         if (ui && ui.showMidpoint) {
           ui.showMidpoint('SURVIVE!');
         }
+        this.time.delayedCall(3000, () => {
+          for (let i = 0; i < 6; i++) {
+            this.mazeManager.spawnAirTankDrop(data.info);
+          }
+        });
       }
 
       if (data.info && data.info.index === 1) {
