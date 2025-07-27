@@ -230,7 +230,7 @@ class GameScene extends Phaser.Scene {
             this.heroImage.setFlipX(false);
             this.hero.direction = 'down';
             this._spawnEndingClones(data.info);
-            this.cameraManager.cam.zoomTo(0.0625, 4000);
+            this.cameraManager.cam.zoomTo(0.25, 4000);
             this.cameraManager.cam.once('camerazoomcomplete', () => {
               this._startEndingCredits();
             });
