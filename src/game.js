@@ -230,7 +230,10 @@ class GameScene extends Phaser.Scene {
             this.heroImage.setFlipX(false);
             this.hero.direction = 'down';
             this._spawnEndingClones(data.info);
-            this.cameraManager.cam.zoomTo(0.5, 4000);
+            this.cameraManager.cam.zoomTo(0.0625, 4000);
+            this.cameraManager.cam.once('camerazoomcomplete', () => {
+              this._startEndingCredits();
+            });
             return;
           }
 
@@ -1219,6 +1222,76 @@ class GameScene extends Phaser.Scene {
       const container = this.add.container(hx, hy, [img]);
       this.worldLayer.add(container);
     }
+  }
+
+  _startEndingCredits() {
+    const cam = this.cameras.main;
+    const mask = this.add
+      .rectangle(cam.midPoint.x, cam.midPoint.y, cam.width, cam.height, 0x000000)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setAlpha(0);
+    this.tweens.add({ targets: mask, alpha: 0.5, duration: 500 });
+
+    const textStyle = {
+      fontFamily: 'monospace',
+      fontSize: '96px',
+      color: '#ffffff'
+    };
+    const firstText = this.add
+      .text(cam.midPoint.x, cam.midPoint.y, '「」', textStyle)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+    this.time.delayedCall(5000, () => {
+      evaporateArea(
+        this,
+        firstText.x - firstText.width / 2,
+        firstText.y - firstText.height / 2,
+        firstText.width,
+        firstText.height,
+        0xffffff
+      );
+      firstText.destroy();
+
+      this.time.delayedCall(2000, () => {
+        const dirStyle = {
+          fontFamily: 'monospace',
+          fontSize: '48px',
+          color: '#ffffff'
+        };
+        const dirText = this.add
+          .text(cam.midPoint.x, cam.midPoint.y, 'DIRECTOR: DAINEI MAKINO', dirStyle)
+          .setOrigin(0.5)
+          .setScrollFactor(0)
+          .setDepth(1001);
+
+        this.time.delayedCall(10000, () => {
+          evaporateArea(
+            this,
+            dirText.x - dirText.width / 2,
+            dirText.y - dirText.height / 2,
+            dirText.width,
+            dirText.height,
+            0xffffff
+          );
+          dirText.destroy();
+
+          this.time.delayedCall(2000, () => {
+            mask.destroy();
+            this.inEnding = false;
+            this.scene.stop('GameScene');
+            this.scene.stop('UIScene');
+            gameState.reset();
+            this.scene.start('GameScene');
+            this.scene.launch('UIScene');
+            this.scene.bringToTop('UIScene');
+          });
+        });
+      });
+    });
   }
 
   checkMeteorFieldActivation() {
