@@ -1198,15 +1198,31 @@ class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const w = cam.width;
     const h = cam.height;
+    const placed = [];
+    const chunkW = info.chunk.width * size;
+    const chunkH = info.chunk.height * size;
     for (let i = 0; i < 8; i++) {
-      const offX =
-        cam.scrollX +
-        (Math.random() < 0.5 ? -1 : 1) *
-          Phaser.Math.Between(w * 0.6, w * 1.0);
-      const offY =
-        cam.scrollY +
-        (Math.random() < 0.5 ? -1 : 1) *
-          Phaser.Math.Between(h * 0.6, h * 1.0);
+      let offX, offY, rect;
+      let attempts = 0;
+      do {
+        offX =
+          cam.scrollX +
+          (Math.random() < 0.5 ? -1 : 1) *
+            Phaser.Math.Between(w * 0.6, w * 1.0);
+        offY =
+          cam.scrollY +
+          (Math.random() < 0.5 ? -1 : 1) *
+            Phaser.Math.Between(h * 0.6, h * 1.0);
+        rect = new Phaser.Geom.Rectangle(offX, offY, chunkW, chunkH);
+        attempts++;
+      } while (
+        attempts < 20 &&
+        placed.some(r => Phaser.Geom.Intersects.RectangleToRectangle(r, rect))
+      );
+      if (placed.some(r => Phaser.Geom.Intersects.RectangleToRectangle(r, rect))) {
+        continue;
+      }
+      placed.push(rect);
       const chunkClone = JSON.parse(JSON.stringify(info.chunk));
       const cloneInfo = {
         chunk: chunkClone,
@@ -1217,8 +1233,8 @@ class GameScene extends Phaser.Scene {
       this.mazeManager.renderChunk(chunkClone, cloneInfo);
       const img = Characters.createHero(this);
       img.setDisplaySize(this.heroImage.displayWidth, this.heroImage.displayHeight);
-      const hx = offX + (info.chunk.width * size) / 2;
-      const hy = offY + (info.chunk.height * size) / 2;
+      const hx = offX + chunkW / 2;
+      const hy = offY + chunkH / 2;
       const container = this.add.container(hx, hy, [img]);
       this.worldLayer.add(container);
     }
