@@ -1052,6 +1052,7 @@ class GameScene extends Phaser.Scene {
     const worldY = info.offsetY + spot.y * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
 
     this.rival = new RivalState();
+    this.rival.speed = this.hero.speed * 0.85;
     this.rivalImage = Characters.createRival(this);
     const ratio = this.rivalImage.height / this.rivalImage.width;
     this.rivalImage.setDisplaySize(this.mazeManager.tileSize, this.mazeManager.tileSize * ratio);
