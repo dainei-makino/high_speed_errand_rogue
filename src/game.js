@@ -51,6 +51,8 @@ class GameScene extends Phaser.Scene {
     this.rivalTrailTimer = null;
     this.rivalSwitchTimer = null;
     this.rivalSpikeTimer = null;
+    this.rivalPauseTimer = null;
+    this.rivalPaused = false;
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
   }
@@ -691,7 +693,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-    if (this.rivalSprite && !this.rivalMoving && !this.isGameOver) {
+    if (this.rivalSprite && !this.rivalMoving && !this.rivalPaused && !this.isGameOver) {
       let dirs = null;
       const target = this._findNearestRivalTarget();
       if (target) {
@@ -905,6 +907,24 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  startRivalPauseTimer() {
+    if (!this.rival) return;
+    const schedule = () => {
+      this.rivalPauseTimer = this.time.delayedCall(
+        Phaser.Math.Between(1000, 3000),
+        () => {
+          if (!this.rival || this.isGameOver) return;
+          this.rivalPaused = true;
+          this.time.delayedCall(200, () => {
+            this.rivalPaused = false;
+            schedule();
+          });
+        }
+      );
+    };
+    schedule();
+  }
+
   _findNearestRivalTarget() {
     if (!this.rivalSprite) return null;
     const rx = this.rivalSprite.x;
@@ -1057,6 +1077,7 @@ class GameScene extends Phaser.Scene {
     this.startRivalOxygenTimer();
     this.startRivalSwitchTimer();
     this.startRivalSpikeTimer();
+    this.startRivalPauseTimer();
     this.events.emit('updateRivalOxygen', 1);
   }
 
@@ -1074,6 +1095,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalSpikeTimer) {
       this.rivalSpikeTimer.remove();
       this.rivalSpikeTimer = null;
+    }
+    if (this.rivalPauseTimer) {
+      this.rivalPauseTimer.remove();
+      this.rivalPauseTimer = null;
     }
     if (this.rivalAnimTimer) {
       this.rivalAnimTimer.remove();
@@ -1138,6 +1163,10 @@ class GameScene extends Phaser.Scene {
     if (this.rivalSpikeTimer) {
       this.rivalSpikeTimer.remove();
       this.rivalSpikeTimer = null;
+    }
+    if (this.rivalPauseTimer) {
+      this.rivalPauseTimer.remove();
+      this.rivalPauseTimer = null;
     }
     if (this.bgm) {
       this.bgm.stop();
