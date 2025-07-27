@@ -547,8 +547,10 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-        if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
-          this.mazeManager.openDoor(curTile.chunk);
+        if (this.hero.useKey()) {
+          if (!curTile.chunk.chunk.doorOpen) {
+            this.mazeManager.openDoor(curTile.chunk);
+          }
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
