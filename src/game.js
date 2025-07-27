@@ -53,6 +53,7 @@ class GameScene extends Phaser.Scene {
     this.rivalSpikeTimer = null;
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
+    this.inEnding = false;
   }
 
   preload() {
@@ -63,6 +64,7 @@ class GameScene extends Phaser.Scene {
     this.hero = new HeroState();
     this.isMoving = false;
     this.isGameOver = false;
+    this.inEnding = false;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
 
@@ -189,9 +191,97 @@ class GameScene extends Phaser.Scene {
           this.oxygenTimer.remove();
           this.oxygenTimer = null;
         }
+        this.inEnding = true;
+        this.inputBuffer.clear();
+        this.input.keyboard.enabled = false;
+        if (this.bgm && this.bgm.isPlaying) this.bgm.stop();
+        if (this.bossBgm1 && this.bossBgm1.isPlaying) this.bossBgm1.stop();
+        if (this.bossBgm2 && this.bossBgm2.isPlaying) this.bossBgm2.stop();
+        const center = this.mazeManager.getChunkCenter(data.info);
+        const size = this.mazeManager.tileSize;
+
+        const buildPath = () => {
+          const steps = [];
+          const dx = Math.round((center.x - this.heroSprite.x) / size);
+          const dy = Math.round((center.y - this.heroSprite.y) / size);
+          for (let i = 0; i < Math.abs(dx); i++) {
+            steps.push(dx > 0 ? 'right' : 'left');
+          }
+          for (let i = 0; i < Math.abs(dy); i++) {
+            steps.push(dy > 0 ? 'down' : 'up');
+          }
+          return steps;
+        };
+
+        const stepDuration = (size / this.hero.speed) * 1000;
+        const frameMap = {
+          down: ['hero_walk1', 'hero_walk2', 'hero_walk3'],
+          up: ['hero_back_walk1', 'hero_back_walk2', 'hero_back_walk3'],
+          right: ['hero_right_walk1', 'hero_right_walk2', 'hero_right_walk3']
+        };
+
+        const path = buildPath();
+        this.isMoving = true;
+
+        const walkNext = () => {
+          if (!path.length) {
+            this.isMoving = false;
+            this.heroImage.setTexture('hero_idle');
+            this.heroImage.setFlipX(false);
+            this.hero.direction = 'down';
+            this._spawnEndingClones(data.info);
+            this.cameraManager.cam.zoomTo(0.5, 4000);
+            this.cameraManager.cam.once('camerazoomcomplete', () => {
+              this._startEndingCredits();
+            });
+            return;
+          }
+
+          const dir = path.shift();
+          let orientation = dir;
+          if (dir === 'left') orientation = 'right';
+          this.hero.direction = orientation;
+          const frames = frameMap[orientation];
+          this.heroImage.setFlipX(dir === 'left');
+          this.heroAnimIndex = 0;
+          this.heroImage.setTexture(frames[0]);
+          if (this.heroAnimationTimer) this.heroAnimationTimer.remove();
+          this.heroAnimationTimer = this.time.addEvent({
+            delay: stepDuration / frames.length,
+            loop: true,
+            callback: () => {
+              this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+              this.heroImage.setTexture(frames[this.heroAnimIndex]);
+            }
+          });
+
+          let dx = 0,
+            dy = 0;
+          if (dir === 'left') dx = -size;
+          else if (dir === 'right') dx = size;
+          else if (dir === 'up') dy = -size;
+          else if (dir === 'down') dy = size;
+
+          this.tweens.add({
+            targets: this.heroSprite,
+            x: this.heroSprite.x + dx,
+            y: this.heroSprite.y + dy,
+            duration: stepDuration,
+            onComplete: () => {
+              if (this.heroAnimationTimer) {
+                this.heroAnimationTimer.remove();
+                this.heroAnimationTimer = null;
+              }
+              this.heroImage.setTexture(frames[0]);
+              this.time.delayedCall(1000, walkNext);
+            }
+          });
+        };
+
+        walkNext();
       }
 
-      if (!data.info || !data.info.restPoint) {
+      else if (!data.info || !data.info.restPoint) {
         if (data.info && data.info.isBossRoom) {
           if (this.bgm && this.bgm.isPlaying) {
             this.bgm.stop();
@@ -304,7 +394,7 @@ class GameScene extends Phaser.Scene {
       this.stopTile = null;
     }
 
-    if (!this.isMoving && !this.isGameOver) {
+    if (!this.isMoving && !this.isGameOver && !this.inEnding) {
       const entry = this.inputBuffer.consume();
       if (entry) {
         const size = this.mazeManager.tileSize;
@@ -1100,6 +1190,107 @@ class GameScene extends Phaser.Scene {
       this.rivalSprite = null;
       this.rivalImage = null;
       this.rival = null;
+    });
+  }
+
+  _spawnEndingClones(info) {
+    const size = this.mazeManager.tileSize;
+    const cam = this.cameras.main;
+    const w = cam.width;
+    const h = cam.height;
+    for (let i = 0; i < 8; i++) {
+      const offX =
+        cam.scrollX +
+        (Math.random() < 0.5 ? -1 : 1) *
+          Phaser.Math.Between(w * 0.6, w * 1.0);
+      const offY =
+        cam.scrollY +
+        (Math.random() < 0.5 ? -1 : 1) *
+          Phaser.Math.Between(h * 0.6, h * 1.0);
+      const chunkClone = JSON.parse(JSON.stringify(info.chunk));
+      const cloneInfo = {
+        chunk: chunkClone,
+        offsetX: offX,
+        offsetY: offY,
+        sprites: []
+      };
+      this.mazeManager.renderChunk(chunkClone, cloneInfo);
+      const img = Characters.createHero(this);
+      img.setDisplaySize(this.heroImage.displayWidth, this.heroImage.displayHeight);
+      const hx = offX + (info.chunk.width * size) / 2;
+      const hy = offY + (info.chunk.height * size) / 2;
+      const container = this.add.container(hx, hy, [img]);
+      this.worldLayer.add(container);
+    }
+  }
+
+  _startEndingCredits() {
+    const cam = this.cameras.main;
+    const mask = this.add
+      .rectangle(cam.midPoint.x, cam.midPoint.y, cam.width, cam.height, 0x000000)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setAlpha(0);
+    this.tweens.add({ targets: mask, alpha: 0.5, duration: 500 });
+
+    const textStyle = {
+      fontFamily: 'monospace',
+      fontSize: '96px',
+      color: '#ffffff'
+    };
+    const firstText = this.add
+      .text(cam.midPoint.x, cam.midPoint.y, '「」', textStyle)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+    this.time.delayedCall(5000, () => {
+      evaporateArea(
+        this,
+        firstText.x - firstText.width / 2,
+        firstText.y - firstText.height / 2,
+        firstText.width,
+        firstText.height,
+        0xffffff
+      );
+      firstText.destroy();
+
+      this.time.delayedCall(2000, () => {
+        const dirStyle = {
+          fontFamily: 'monospace',
+          fontSize: '48px',
+          color: '#ffffff'
+        };
+        const dirText = this.add
+          .text(cam.midPoint.x, cam.midPoint.y, 'DIRECTOR: DAINEI MAKINO', dirStyle)
+          .setOrigin(0.5)
+          .setScrollFactor(0)
+          .setDepth(1001);
+
+        this.time.delayedCall(10000, () => {
+          evaporateArea(
+            this,
+            dirText.x - dirText.width / 2,
+            dirText.y - dirText.height / 2,
+            dirText.width,
+            dirText.height,
+            0xffffff
+          );
+          dirText.destroy();
+
+          this.time.delayedCall(2000, () => {
+            mask.destroy();
+            this.inEnding = false;
+            this.scene.stop('GameScene');
+            this.scene.stop('UIScene');
+            gameState.reset();
+            this.scene.start('GameScene');
+            this.scene.launch('UIScene');
+            this.scene.bringToTop('UIScene');
+          });
+        });
+      });
     });
   }
 
