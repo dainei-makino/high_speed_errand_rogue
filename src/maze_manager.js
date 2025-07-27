@@ -1372,6 +1372,32 @@ export default class MazeManager {
     });
   }
 
+  spawnKeyDrop(info, x, y) {
+    if (!info) return;
+    const size = this.tileSize;
+    const sprite = Characters.createKey(this.scene);
+    sprite.setDisplaySize(size, size);
+    const startY = this.scene.cameras.main.worldView.y - size;
+    sprite.setPosition(info.offsetX + x * size, startY);
+    sprite.alpha = 0;
+    this.scene.worldLayer.add(sprite);
+    info.sprites.push(sprite);
+    this.scene.tweens.add({ targets: sprite, alpha: 1, duration: 200 });
+    this.scene.tweens.add({
+      targets: sprite,
+      y: info.offsetY + y * size,
+      duration: 400,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        info.chestSprite = sprite;
+        info.chestPosition = { x, y };
+        const idx = y * info.chunk.width + x;
+        info.chunk.tiles[idx] = TILE.CHEST;
+        info.chunk.chest = { x, y };
+      }
+    });
+  }
+
   spawnItemSwitch(info) {
     if (!info || (info.itemSwitchSprite && info.chunk.itemSwitch && !info.chunk.itemSwitch.triggered)) {
       return;

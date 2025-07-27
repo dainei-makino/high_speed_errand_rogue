@@ -730,6 +730,7 @@ class GameScene extends Phaser.Scene {
         this.rivalMoving = true;
         const duration = (size / this.rival.speed) * 1000;
         const spawnTrail = () => {
+          if (!this.rivalImage) return;
           spawnAfterimage(
             this,
             this.rivalImage.texture.key,
@@ -780,8 +781,10 @@ class GameScene extends Phaser.Scene {
               this.rivalTrailTimer.remove();
               this.rivalTrailTimer = null;
             }
-            spawnTrail();
-            this.rivalImage.setTexture(frames[0]);
+            if (this.rivalImage) {
+              spawnTrail();
+              this.rivalImage.setTexture(frames[0]);
+            }
           }
         });
         return true;
@@ -1122,7 +1125,13 @@ class GameScene extends Phaser.Scene {
     };
     evaporate();
     const evapTimer = this.time.addEvent({ delay: 100, repeat: 5, callback: evaporate });
+    const dropX = this.rivalSprite.x;
+    const dropY = this.rivalSprite.y;
     this.rivalSprite.setVisible(false);
+    const tile = this.mazeManager.worldToTile(dropX, dropY);
+    if (tile) {
+      this.mazeManager.spawnKeyDrop(tile.chunk, tile.tx, tile.ty);
+    }
     this.events.emit('updateRivalOxygen', 0);
     this.time.delayedCall(1000, () => {
       evapTimer.remove();
