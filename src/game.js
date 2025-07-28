@@ -23,6 +23,9 @@ const MIDPOINTS = [1, 5, 10, 15, 20, 30, 40, 50];
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
+// Master volume applied to all sounds (70%)
+const MASTER_VOLUME = 0.7;
+
 // Global state for tracking overall game progress
 
 class GameScene extends Phaser.Scene {
@@ -55,6 +58,10 @@ class GameScene extends Phaser.Scene {
     this.rivalPaused = false;
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
+  }
+
+  playSound(key, config = {}) {
+    return this.sound.play(key, { volume: MASTER_VOLUME, ...config });
   }
 
   preload() {
@@ -101,11 +108,11 @@ class GameScene extends Phaser.Scene {
     this.lastShockTile = null;
 
     this.sound.stopAll();
-    // Lower the overall volume to 50% for all sound effects and music
-    this.sound.volume = 0.5;
-    this.bgm = this.sound.add('bgm', { loop: true });
-    this.bossBgm1 = this.sound.add('boss_bgm_1', { loop: true });
-    this.bossBgm2 = this.sound.add('boss_bgm_2', { loop: true });
+    // Apply master volume to all sound effects and music
+    this.sound.setVolume(MASTER_VOLUME);
+    this.bgm = this.sound.add('bgm', { loop: true, volume: MASTER_VOLUME });
+    this.bossBgm1 = this.sound.add('boss_bgm_1', { loop: true, volume: MASTER_VOLUME });
+    this.bossBgm2 = this.sound.add('boss_bgm_2', { loop: true, volume: MASTER_VOLUME });
 
     this.worldLayer = this.add.container(0, 0);
     this.mazeManager = new MazeManager(this);
@@ -133,7 +140,7 @@ class GameScene extends Phaser.Scene {
     });
 
     const firstInfo = this.mazeManager.spawnInitial();
-    this.sound.play('chunk_generate_1');
+    this.playSound('chunk_generate_1');
 
     this.heroImage = Characters.createHero(this);
     const heroRatio = this.heroImage.height / this.heroImage.width;
@@ -162,7 +169,7 @@ class GameScene extends Phaser.Scene {
     // Handle transitions for door exit
     this.mazeManager.events.on('spawn-next', data => {
       newChunkTransition(this, data.doorDir, data.doorWorldX, data.doorWorldY);
-      this.sound.play('chunk_generate_2');
+      this.playSound('chunk_generate_2');
 
       if (data.info && data.info.restPoint) {
         if (data.info.oxygenPosition) {
@@ -190,7 +197,7 @@ class GameScene extends Phaser.Scene {
         if (this.bossBgm2 && this.bossBgm2.isPlaying) {
           this.bossBgm2.stop();
         }
-        this.sound.play('pick_up');
+        this.playSound('pick_up');
         this.hero.oxygen = this.hero.maxOxygen;
         this.events.emit('updateOxygen', 1);
         if (this.oxygenTimer) {
@@ -255,7 +262,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (data.info && data.info.isBossRoom) {
-        this.sound.play('midpoint');
+        this.playSound('midpoint');
         const ui = this.scene.get('UIScene');
         if (ui && ui.showMidpoint) {
           ui.showMidpoint('SURVIVE!');
@@ -401,7 +408,7 @@ class GameScene extends Phaser.Scene {
           this.isMoving = true;
           const pixelsPerSecond = this.hero.speed;
           const duration = (size / pixelsPerSecond) * 1000;
-          this.sound.play('hero_walk');
+          this.playSound('hero_walk');
 
           let orientation = moveDir;
           if (moveDir === 'left') orientation = 'right';
@@ -448,7 +455,7 @@ class GameScene extends Phaser.Scene {
     if (curTile) {
       if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
         curTile.chunk.chunk.chestOpened = true;
-        this.sound.play('chest_open');
+        this.playSound('chest_open');
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
         this.mazeManager.openAllSilverDoors(curTile.chunk);
@@ -465,7 +472,7 @@ class GameScene extends Phaser.Scene {
         tank.collected = true;
         this.mazeManager.removeAirTank(curTile.chunk, tank.x, tank.y);
         const advanced = tank.advanced;
-        this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
+        this.playSound('pick_up', { rate: advanced ? 0.8 : 1 });
         const amount = advanced ? 8 : 5;
         this.hero.oxygen = Math.min(
           this.hero.oxygen + amount,
@@ -484,7 +491,7 @@ class GameScene extends Phaser.Scene {
         curTile.chunk.chunk.itemSwitch.y === curTile.ty
       ) {
         this.mazeManager.removeItemSwitch(curTile.chunk);
-        this.sound.play('item_spawn');
+        this.playSound('item_spawn');
         const advanced = Math.random() < 0.5;
         this.mazeManager.spawnAirTankDrop(curTile.chunk, advanced);
       }
@@ -502,7 +509,7 @@ class GameScene extends Phaser.Scene {
         if (hit && !sameTile) {
           this.cameras.main.flash(100, 0, 0, 0);
           this.cameraManager.shakeSmall();
-          this.sound.play('spike_damage');
+          this.playSound('spike_damage');
           this.hero.oxygen = Math.max(this.hero.oxygen - 1, 0);
           this.events.emit(
             'updateOxygen',
@@ -545,7 +552,7 @@ class GameScene extends Phaser.Scene {
         if (hitMachine && !sameElectric) {
           this.cameras.main.flash(100, 0, 0, 0);
           this.cameraManager.shakeSmall();
-          this.sound.play('spike_damage');
+          this.playSound('spike_damage');
           this.hero.oxygen = Math.max(this.hero.oxygen - 3, 0);
           this.events.emit(
             'updateOxygen',
@@ -573,20 +580,20 @@ class GameScene extends Phaser.Scene {
             curTile.tx,
             curTile.ty
           );
-          this.sound.play('door_open');
+          this.playSound('door_open');
         }
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
         if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
           this.mazeManager.openDoor(curTile.chunk);
-          this.sound.play('door_open');
+          this.playSound('door_open');
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
           this.checkMeteorFieldActivation();
           if (MIDPOINTS.includes(gameState.clearedMazes)) {
-            this.sound.play('midpoint');
+            this.playSound('midpoint');
             const ui = this.scene.get('UIScene');
             if (ui && ui.showMidpoint) {
               ui.showMidpoint(gameState.clearedMazes);
@@ -660,7 +667,7 @@ class GameScene extends Phaser.Scene {
         tank.collected = true;
         this.mazeManager.removeAirTank(rTile.chunk, tank.x, tank.y);
         const advanced = tank.advanced;
-        this.sound.play('pick_up', { rate: advanced ? 0.8 : 1 });
+        this.playSound('pick_up', { rate: advanced ? 0.8 : 1 });
         const amount = advanced ? 8 : 5;
         this.rival.oxygen = Math.min(
           this.rival.oxygen + amount,
@@ -679,7 +686,7 @@ class GameScene extends Phaser.Scene {
         rTile.chunk.chunk.itemSwitch.y === rTile.ty
       ) {
         this.mazeManager.removeItemSwitch(rTile.chunk);
-        this.sound.play('item_spawn');
+        this.playSound('item_spawn');
         const adv = Math.random() < 0.5;
         this.mazeManager.spawnAirTankDrop(rTile.chunk, adv);
       }
@@ -695,7 +702,7 @@ class GameScene extends Phaser.Scene {
           this.lastRivalSpikeTile.x === rTile.tx &&
           this.lastRivalSpikeTile.y === rTile.ty;
         if (hit && !sameTile) {
-          this.sound.play('spike_damage');
+          this.playSound('spike_damage');
           this.rival.oxygen = Math.max(this.rival.oxygen - 1, 0);
           this.events.emit(
             'updateRivalOxygen',
@@ -1120,7 +1127,7 @@ class GameScene extends Phaser.Scene {
 
   handleRivalDeath() {
     if (!this.rivalSprite) return;
-    this.sound.play('game_over');
+    this.playSound('game_over');
     if (this.rivalTimer) {
       this.rivalTimer.remove();
       this.rivalTimer = null;
@@ -1221,7 +1228,7 @@ class GameScene extends Phaser.Scene {
       this.bossBgm2.stop();
     }
     this.sound.stopAll();
-    this.sound.play('game_over');
+    this.playSound('game_over');
 
     this.tweens.killTweensOf(this.heroSprite);
     if (this.rivalSprite) {
