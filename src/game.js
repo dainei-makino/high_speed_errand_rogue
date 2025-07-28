@@ -450,6 +450,8 @@ class GameScene extends Phaser.Scene {
         this.mazeManager.removeChest(curTile.chunk);
         this.hero.addKey();
         this.mazeManager.openAllSilverDoors(curTile.chunk);
+        this.mazeManager.openDoor(curTile.chunk);
+        curTile.chunk.chunk.doorOpen = true;
         this.events.emit('updateKeys', this.hero.keys);
       }
 
@@ -576,8 +578,13 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-        if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
-          this.mazeManager.openDoor(curTile.chunk);
+        if (this.hero.keys > 0) {
+          if (!curTile.chunk.chunk.doorOpen) {
+            this.mazeManager.openDoor(curTile.chunk);
+            curTile.chunk.chunk.doorOpen = true;
+          }
+          this.hero.useKey();
+          this.events.emit('updateKeys', this.hero.keys);
           this.sound.play('door_open');
           this.cameraManager.zoomHeroFocus();
           curTile.chunk.chunk.exited = true;
