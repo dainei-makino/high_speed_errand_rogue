@@ -1261,9 +1261,9 @@ export default class MazeManager {
   openDoor(info) {
     if (info && info.doorSprite) {
       info.doorSprite.setTexture('door_open');
-    }
-    if (info && info.entranceDoorSprite) {
-      info.entranceDoorSprite.setTexture('exit');
+      if (info.chunk) {
+        info.chunk.doorOpen = true;
+      }
     }
   }
 
