@@ -38,6 +38,7 @@ class GameScene extends Phaser.Scene {
     this.bossBgm1 = null;
     this.bossBgm2 = null;
     this.isGameOver = false;
+    this.isEnding = false;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
     this.oxygenLine = null;
@@ -223,6 +224,7 @@ class GameScene extends Phaser.Scene {
           this.oxygenTimer.remove();
           this.oxygenTimer = null;
         }
+        this.startEndingSequence(data.info);
       }
 
       if (!data.info || !data.info.restPoint) {
@@ -337,7 +339,7 @@ class GameScene extends Phaser.Scene {
       this.stopTile = null;
     }
 
-    if (!this.isMoving && !this.isGameOver) {
+    if (!this.isMoving && !this.isGameOver && !this.isEnding) {
       const entry = this.inputBuffer.consume();
       if (entry) {
         const size = this.mazeManager.tileSize;
@@ -719,7 +721,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-    if (this.rivalSprite && !this.rivalMoving && !this.rivalPaused && !this.isGameOver) {
+    if (this.rivalSprite && !this.rivalMoving && !this.rivalPaused && !this.isGameOver && !this.isEnding) {
       let dirs = null;
       const target = this._findNearestRivalTarget();
       if (target) {
@@ -914,7 +916,7 @@ class GameScene extends Phaser.Scene {
       this.rivalSwitchTimer = this.time.delayedCall(
         Phaser.Math.Between(2000, 4000),
         () => {
-          if (!this.rival || this.isGameOver) return;
+          if (!this.rival || this.isGameOver || this.isEnding) return;
           const tile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
           if (tile) {
             this.mazeManager.spawnItemSwitch(tile.chunk);
@@ -932,7 +934,7 @@ class GameScene extends Phaser.Scene {
       delay: 3000,
       loop: true,
       callback: () => {
-        if (!this.rival || this.isGameOver) return;
+        if (!this.rival || this.isGameOver || this.isEnding) return;
         const tile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
         if (tile) {
           this.mazeManager.spawnSpike(tile.chunk, true);
@@ -947,7 +949,7 @@ class GameScene extends Phaser.Scene {
       this.rivalPauseTimer = this.time.delayedCall(
         Phaser.Math.Between(333, 1000),
         () => {
-          if (!this.rival || this.isGameOver) return;
+          if (!this.rival || this.isGameOver || this.isEnding) return;
           this.rivalPaused = true;
           this.time.delayedCall(200, () => {
             this.rivalPaused = false;
@@ -1184,6 +1186,157 @@ class GameScene extends Phaser.Scene {
         this.meteorField.clear();
       }
     }
+  }
+
+  async startEndingSequence(info) {
+    if (this.isEnding) return;
+    this.isEnding = true;
+    this.inputBuffer.clear();
+    if (this.oxygenTimer) {
+      this.oxygenTimer.remove();
+      this.oxygenTimer = null;
+    }
+    if (this.bgm && this.bgm.isPlaying) this.bgm.stop();
+    if (this.bossBgm1 && this.bossBgm1.isPlaying) this.bossBgm1.stop();
+    if (this.bossBgm2 && this.bossBgm2.isPlaying) this.bossBgm2.stop();
+    this.sound.stopAll();
+
+    const size = this.mazeManager.tileSize;
+    const centerTx = Math.floor(info.chunk.width / 2);
+    const centerTy = Math.floor(info.chunk.height / 2);
+    let tx = info.chunk.entrance.x;
+    let ty = info.chunk.entrance.y;
+    let sx = tx;
+    let sy = ty;
+    switch (info.chunk.entry) {
+      case 'N':
+        sy += 1;
+        break;
+      case 'S':
+        sy -= 1;
+        break;
+      case 'W':
+        sx += 1;
+        break;
+      case 'E':
+      default:
+        sx -= 1;
+        break;
+    }
+
+    const path = [];
+    path.push({ tx: sx, ty: sy });
+    tx = sx;
+    ty = sy;
+    while (tx !== centerTx || ty !== centerTy) {
+      if (tx < centerTx) tx += 1;
+      else if (tx > centerTx) tx -= 1;
+      else if (ty < centerTy) ty += 1;
+      else if (ty > centerTy) ty -= 1;
+      path.push({ tx, ty });
+    }
+
+    const moveStep = async step => {
+      return new Promise(resolve => {
+        const worldX = info.offsetX + step.tx * size + size / 2;
+        const worldY = info.offsetY + step.ty * size + size / 2;
+        let dir = 'down';
+        if (worldX > this.heroSprite.x) dir = 'right';
+        else if (worldX < this.heroSprite.x) dir = 'left';
+        else if (worldY < this.heroSprite.y) dir = 'up';
+        const pixelsPerSecond = this.hero.speed;
+        const duration = (size / pixelsPerSecond) * 1000;
+        let orientation = dir;
+        if (dir === 'left') orientation = 'right';
+        this.hero.direction = orientation;
+        const frameMap = {
+          down: ['hero_walk1', 'hero_walk2', 'hero_walk3'],
+          up: ['hero_back_walk1', 'hero_back_walk2', 'hero_back_walk3'],
+          right: ['hero_right_walk1', 'hero_right_walk2', 'hero_right_walk3']
+        };
+        const frames = frameMap[orientation];
+        this.heroImage.setFlipX(dir === 'left');
+        this.heroAnimIndex = 0;
+        this.heroImage.setTexture(frames[0]);
+        this.heroAnimationTimer = this.time.addEvent({
+          delay: duration / frames.length,
+          loop: true,
+          callback: () => {
+            this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+            this.heroImage.setTexture(frames[this.heroAnimIndex]);
+          }
+        });
+        this.isMoving = true;
+        this.tweens.add({
+          targets: this.heroSprite,
+          x: worldX,
+          y: worldY,
+          duration,
+          onComplete: () => {
+            this.isMoving = false;
+            if (this.heroAnimationTimer) {
+              this.heroAnimationTimer.remove();
+              this.heroAnimationTimer = null;
+            }
+            this.heroImage.setTexture(frames[0]);
+            resolve();
+          }
+        });
+      });
+    };
+
+    for (const step of path) {
+      await moveStep(step);
+      await new Promise(r => this.time.delayedCall(1000, r));
+    }
+
+    this.hero.direction = 'down';
+    this.heroImage.setFlipX(false);
+    this.heroImage.setTexture('hero_walk1');
+
+    const mask = this.add
+      .rectangle(0, 0, VIRTUAL_WIDTH * 2, VIRTUAL_HEIGHT * 2, 0x000000)
+      .setOrigin(0)
+      .setAlpha(0);
+    mask.setDepth(1000);
+    this.tweens.add({ targets: mask, alpha: 0.5, duration: 500 });
+
+    const style = { fontFamily: 'monospace', fontSize: '48px', color: '#ffffff' };
+    const text = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 'YOU TOOK  A BREATH', style).setOrigin(0.5);
+    text.setDepth(1001);
+    this.cameras.main.zoomTo(1, 5000);
+    await new Promise(r => this.time.delayedCall(5000, r));
+    evaporateArea(
+      this,
+      text.x - text.width / 2,
+      text.y - text.height / 2,
+      text.width,
+      text.height,
+      0xffffff
+    );
+    text.destroy();
+
+    const text2 = this.add
+      .text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 'DIRECTOR DAINEI MAKINO', style)
+      .setOrigin(0.5);
+    text2.setDepth(1001);
+    await new Promise(r => this.time.delayedCall(5000, r));
+    evaporateArea(
+      this,
+      text2.x - text2.width / 2,
+      text2.y - text2.height / 2,
+      text2.width,
+      text2.height,
+      0xffffff
+    );
+    text2.destroy();
+    this.time.delayedCall(500, () => {
+      this.scene.stop('UIScene');
+      gameState.reset();
+      this.scene.start('GameScene');
+      this.scene.launch('UIScene');
+      this.scene.bringToTop('UIScene');
+    });
   }
 
   handleGameOver() {
