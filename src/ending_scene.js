@@ -34,7 +34,8 @@ export default class EndingScene extends Phaser.Scene {
 
     const gameScene = this.scene.get('GameScene');
     if (gameScene && gameScene.cameraManager) {
-      gameScene.cameraManager.setZoom(1, 10000);
+      // Gradually zoom out over the entire ending sequence
+      gameScene.cameraManager.setZoom(0.6, 20000);
     }
 
     this.time.delayedCall(10000, () => {
