@@ -1302,13 +1302,16 @@ class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: mask, alpha: 0.5, duration: 500 });
 
     const style = { fontFamily: 'monospace', fontSize: '48px', color: '#ffffff' };
-    const text = this.add.text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 'YOU TOOK  A BREATH', style).setOrigin(0.5);
+    const uiScene = this.scene.get('UIScene');
+    const text = uiScene.add
+      .text(24, VIRTUAL_HEIGHT, 'YOU TOOK  A BREATH', style)
+      .setOrigin(0, 0.5);
     text.setDepth(1001);
     this.cameras.main.zoomTo(1, 5000);
     await new Promise(r => this.time.delayedCall(5000, r));
     evaporateArea(
-      this,
-      text.x - text.width / 2,
+      uiScene,
+      text.x,
       text.y - text.height / 2,
       text.width,
       text.height,
@@ -1316,14 +1319,14 @@ class GameScene extends Phaser.Scene {
     );
     text.destroy();
 
-    const text2 = this.add
-      .text(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 'DIRECTOR DAINEI MAKINO', style)
-      .setOrigin(0.5);
+    const text2 = uiScene.add
+      .text(24, VIRTUAL_HEIGHT, 'DIRECTOR DAINEI MAKINO', style)
+      .setOrigin(0, 0.5);
     text2.setDepth(1001);
-    await new Promise(r => this.time.delayedCall(5000, r));
+    await new Promise(r => this.time.delayedCall(10000, r));
     evaporateArea(
-      this,
-      text2.x - text2.width / 2,
+      uiScene,
+      text2.x,
       text2.y - text2.height / 2,
       text2.width,
       text2.height,
