@@ -101,6 +101,8 @@ class GameScene extends Phaser.Scene {
     this.lastShockTile = null;
 
     this.sound.stopAll();
+    // Lower the overall volume for all sound effects and music
+    this.sound.volume = 0.7;
     this.bgm = this.sound.add('bgm', { loop: true });
     this.bossBgm1 = this.sound.add('boss_bgm_1', { loop: true });
     this.bossBgm2 = this.sound.add('boss_bgm_2', { loop: true });
