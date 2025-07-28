@@ -1270,6 +1270,15 @@ export default class MazeManager {
   closeEntranceDoor(info) {
     if (info && info.entranceDoorSprite) {
       info.entranceDoorSprite.setTexture('exit');
+      const doorTile = this.worldToTile(
+        info.entranceDoorSprite.x,
+        info.entranceDoorSprite.y
+      );
+      if (doorTile) {
+        const dIdx =
+          doorTile.ty * doorTile.chunk.chunk.width + doorTile.tx;
+        doorTile.chunk.chunk.tiles[dIdx] = TILE.WALL;
+      }
     }
     if (info && info.chunk && info.chunk.entrance) {
       const idx =
