@@ -1,6 +1,7 @@
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 import { evaporateArea } from './effects.js';
+import gameState from './game-state.js';
 
 export default class EndingScene extends Phaser.Scene {
   constructor() {
@@ -69,6 +70,17 @@ export default class EndingScene extends Phaser.Scene {
         0xffffff
       );
       this.credit.destroy();
+      this.restartGame();
     });
+  }
+
+  restartGame() {
+    this.scene.stop('GameScene');
+    this.scene.stop('UIScene');
+    gameState.reset();
+    this.scene.start('GameScene');
+    this.scene.launch('UIScene');
+    this.scene.bringToTop('UIScene');
+    this.scene.stop();
   }
 }
