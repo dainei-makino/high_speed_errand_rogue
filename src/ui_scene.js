@@ -219,6 +219,14 @@ export default class UIScene extends Phaser.Scene {
     this.rivalLabel.setVisible(ratio > 0);
   }
 
+  hideOxygenUI() {
+    if (this.oxygenGfx) this.oxygenGfx.setVisible(false);
+    if (this.o2Label) this.o2Label.setVisible(false);
+    if (this.keyContainer) this.keyContainer.setVisible(false);
+    if (this.rivalOxygenGfx) this.rivalOxygenGfx.setVisible(false);
+    if (this.rivalLabel) this.rivalLabel.setVisible(false);
+  }
+
   showMidpoint(num) {
     const flash = this.add.rectangle(
       VIRTUAL_WIDTH,
