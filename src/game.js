@@ -57,6 +57,7 @@ class GameScene extends Phaser.Scene {
     this.stopTile = null;
     this.controlsDisabled = false;
     this.endingTarget = null;
+    this.pendingEnding = null;
   }
 
   preload() {
@@ -340,6 +341,10 @@ class GameScene extends Phaser.Scene {
     ) {
       this.inputBuffer.clear();
       this.stopTile = null;
+      if (this.pendingEnding) {
+        this.startEndingCutscene(this.pendingEnding);
+        this.pendingEnding = null;
+      }
     }
 
     if (!this.isMoving && !this.isGameOver && !this.controlsDisabled) {
@@ -626,7 +631,7 @@ class GameScene extends Phaser.Scene {
             ty: sy
           };
           if (nextInfo.isEndingRoom) {
-            this.startEndingCutscene(nextInfo);
+            this.pendingEnding = nextInfo;
           }
           if (
             (gameState.clearedMazes === 1 ||
@@ -1277,7 +1282,7 @@ class GameScene extends Phaser.Scene {
     const stepDir = opp[info.chunk.entry] || 'down';
     this._moveHero(stepDir, () => {
       this.time.delayedCall(1000, () => this.processEndingStep());
-    });
+    }, false);
   }
 
   processEndingStep() {
@@ -1307,10 +1312,10 @@ class GameScene extends Phaser.Scene {
     }
     this._moveHero(dir, () => {
       this.time.delayedCall(1000, () => this.processEndingStep());
-    });
+    }, false);
   }
 
-  _moveHero(dir, onComplete) {
+  _moveHero(dir, onComplete, animate = true) {
     this.isMoving = true;
     const size = this.mazeManager.tileSize;
     let dx = 0,
@@ -1321,7 +1326,7 @@ class GameScene extends Phaser.Scene {
     else if (dir === 'down') dy = 1;
     const targetX = this.heroSprite.x + dx * size;
     const targetY = this.heroSprite.y + dy * size;
-    this.sound.play('hero_walk');
+    if (animate) this.sound.play('hero_walk');
     let orientation = dir;
     if (dir === 'left') orientation = 'right';
     this.hero.direction = orientation;
@@ -1335,14 +1340,16 @@ class GameScene extends Phaser.Scene {
     this.heroAnimIndex = 0;
     this.heroImage.setTexture(frames[0]);
     const duration = (size / this.hero.speed) * 1000;
-    this.heroAnimationTimer = this.time.addEvent({
-      delay: duration / frames.length,
-      loop: true,
-      callback: () => {
-        this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
-        this.heroImage.setTexture(frames[this.heroAnimIndex]);
-      }
-    });
+    if (animate) {
+      this.heroAnimationTimer = this.time.addEvent({
+        delay: duration / frames.length,
+        loop: true,
+        callback: () => {
+          this.heroAnimIndex = (this.heroAnimIndex + 1) % frames.length;
+          this.heroImage.setTexture(frames[this.heroAnimIndex]);
+        }
+      });
+    }
     this.tweens.add({
       targets: this.heroSprite,
       x: targetX,
