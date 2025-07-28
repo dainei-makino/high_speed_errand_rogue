@@ -191,6 +191,7 @@ class GameScene extends Phaser.Scene {
           this.oxygenTimer.remove();
           this.oxygenTimer = null;
         }
+        this.events.emit('setOxygenVisible', false);
         this.inEnding = true;
         this.inputBuffer.clear();
         this.input.keyboard.enabled = false;
@@ -1300,6 +1301,8 @@ class GameScene extends Phaser.Scene {
           this.time.delayedCall(2000, () => {
             mask.destroy();
             this.inEnding = false;
+            this.input.keyboard.enabled = true;
+            this.events.emit('setOxygenVisible', true);
             this.scene.stop('GameScene');
             this.scene.stop('UIScene');
             gameState.reset();

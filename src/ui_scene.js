@@ -42,6 +42,7 @@ export default class UIScene extends Phaser.Scene {
     gameScene.events.on('updateOxygen', this.updateOxygen, this);
     gameScene.events.on('updateRivalOxygen', this.updateRivalOxygen, this);
     gameScene.events.on('updateKeys', this.updateKeys, this);
+    gameScene.events.on('setOxygenVisible', this.setOxygenVisible, this);
     this.debugVisibleHandler = visible => {
       if (this.debugChunkText) this.debugChunkText.setVisible(visible);
     };
@@ -54,6 +55,7 @@ export default class UIScene extends Phaser.Scene {
       gameScene.events.off('updateRivalOxygen', this.updateRivalOxygen, this);
       gameScene.events.off('updateKeys', this.updateKeys, this);
       gameScene.events.off('showDebugChunks', this.debugVisibleHandler, this);
+      gameScene.events.off('setOxygenVisible', this.setOxygenVisible, this);
     };
     this.events.once('shutdown', this.shutdownHandler);
 
@@ -217,6 +219,11 @@ export default class UIScene extends Phaser.Scene {
     }
     this.rivalOxygenGfx.setVisible(ratio > 0);
     this.rivalLabel.setVisible(ratio > 0);
+  }
+
+  setOxygenVisible(visible) {
+    if (this.oxygenGfx) this.oxygenGfx.setVisible(visible);
+    if (this.o2Label) this.o2Label.setVisible(visible);
   }
 
   showMidpoint(num) {
