@@ -453,14 +453,16 @@ class GameScene extends Phaser.Scene {
     this.mazeManager.update(delta, this.heroSprite);
     const curTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
     if (curTile) {
-      if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
-        curTile.chunk.chunk.chestOpened = true;
-        this.playSound('chest_open');
-        this.mazeManager.removeChest(curTile.chunk);
-        this.hero.addKey();
-        this.mazeManager.openAllSilverDoors(curTile.chunk);
-        this.events.emit('updateKeys', this.hero.keys);
-      }
+        if (curTile.cell === TILE.CHEST && !curTile.chunk.chunk.chestOpened) {
+          curTile.chunk.chunk.chestOpened = true;
+          this.playSound('chest_open');
+          this.mazeManager.removeChest(curTile.chunk);
+          this.hero.addKey();
+          this.mazeManager.openAllSilverDoors(curTile.chunk);
+          this.mazeManager.openDoor(curTile.chunk);
+          this.playSound('door_open');
+          this.events.emit('updateKeys', this.hero.keys);
+        }
 
       const tank =
         curTile.cell === TILE.OXYGEN &&
