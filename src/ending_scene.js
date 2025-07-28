@@ -34,7 +34,16 @@ export default class EndingScene extends Phaser.Scene {
 
     const gameScene = this.scene.get('GameScene');
     if (gameScene && gameScene.cameraManager) {
-      gameScene.cameraManager.setZoom(1, 10000);
+      // Gradually zoom out over the entire ending sequence.
+      // The GameScene is paused, so create the tween on this scene
+      // and manually update the camera manager's default zoom.
+      gameScene.cameraManager.defaultZoom = 0.6;
+      this.tweens.add({
+        targets: gameScene.cameras.main,
+        zoom: 0.6,
+        duration: 20000,
+        ease: 'Sine.easeInOut'
+      });
     }
 
     this.time.delayedCall(10000, () => {
