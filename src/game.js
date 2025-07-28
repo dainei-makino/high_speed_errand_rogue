@@ -56,8 +56,7 @@ class GameScene extends Phaser.Scene {
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
     this.controlsDisabled = false;
-    this.endingPath = null;
-    this.endingPathIndex = 0;
+    this.endingTarget = null;
   }
 
   preload() {
@@ -1089,6 +1088,70 @@ class GameScene extends Phaser.Scene {
     return prev ? prev.dir : this._dirsToward(tx, ty)[0];
   }
 
+  _nextHeroDirToward(tx, ty) {
+    const size = this.mazeManager.tileSize;
+    const start = this.mazeManager.worldToTile(
+      this.heroSprite.x,
+      this.heroSprite.y
+    );
+    const target = this.mazeManager.worldToTile(tx, ty);
+    if (!start || !target) return null;
+    const queue = [start];
+    const visited = new Set();
+    const key = n => `${n.chunk.index}:${n.tx}:${n.ty}`;
+    visited.add(key(start));
+    const parent = new Map();
+    const dirs = [
+      { dir: 'up', dx: 0, dy: -1 },
+      { dir: 'down', dx: 0, dy: 1 },
+      { dir: 'left', dx: -1, dy: 0 },
+      { dir: 'right', dx: 1, dy: 0 }
+    ];
+    let found = null;
+    while (queue.length && !found) {
+      const cur = queue.shift();
+      for (const { dir, dx, dy } of dirs) {
+        const nx = cur.chunk.offsetX + (cur.tx + dx) * size + size / 2;
+        const ny = cur.chunk.offsetY + (cur.ty + dy) * size + size / 2;
+        const info = this.mazeManager.worldToTile(nx, ny);
+        if (!info) continue;
+        const k = key(info);
+        if (visited.has(k)) continue;
+        const cell = info.cell;
+        const blocked =
+          cell === TILE.WALL ||
+          cell === TILE.REACTOR ||
+          cell === TILE.SILVER_DOOR ||
+          cell === TILE.DOOR ||
+          (cell === TILE.AUTO_GATE &&
+            info.chunk.chunk.autoGates &&
+            info.chunk.chunk.autoGates.find(
+              g => g.x === info.tx && g.y === info.ty && g.closed
+            ));
+        if (blocked) continue;
+        visited.add(k);
+        parent.set(k, { from: key(cur), dir });
+        if (
+          info.chunk === target.chunk &&
+          info.tx === target.tx &&
+          info.ty === target.ty
+        ) {
+          found = k;
+          break;
+        }
+        queue.push(info);
+      }
+    }
+    if (!found) return null;
+    let step = found;
+    let prev = parent.get(step);
+    while (prev && prev.from !== key(start)) {
+      step = prev.from;
+      prev = parent.get(step);
+    }
+    return prev ? prev.dir : null;
+  }
+
   spawnRival(info) {
     if (this.rival) return;
     const chunk = info.chunk;
@@ -1204,39 +1267,44 @@ class GameScene extends Phaser.Scene {
     const ui = this.scene.get('UIScene');
     if (ui && ui.hideOxygenUI) ui.hideOxygenUI();
 
-    const centerX = Math.floor(info.chunk.width / 2);
-    const centerY = Math.floor(info.chunk.height / 2);
-    const startTile = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
-    this.endingPath = [];
-    let tx = startTile.tx;
-    let ty = startTile.ty;
-    while (tx !== centerX || ty !== centerY) {
-      if (tx < centerX) {
-        this.endingPath.push('right');
-        tx += 1;
-      } else if (tx > centerX) {
-        this.endingPath.push('left');
-        tx -= 1;
-      } else if (ty < centerY) {
-        this.endingPath.push('down');
-        ty += 1;
-      } else if (ty > centerY) {
-        this.endingPath.push('up');
-        ty -= 1;
-      }
-    }
-    this.endingPathIndex = 0;
-    this.processEndingStep();
+    const centerTileX = Math.floor(info.chunk.width / 2);
+    const centerTileY = Math.floor(info.chunk.height / 2);
+    const worldX = info.offsetX + centerTileX * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    const worldY = info.offsetY + centerTileY * this.mazeManager.tileSize + this.mazeManager.tileSize / 2;
+    this.endingTarget = { x: worldX, y: worldY };
+
+    const opp = { N: 'down', S: 'up', W: 'right', E: 'left' };
+    const stepDir = opp[info.chunk.entry] || 'down';
+    this._moveHero(stepDir, () => {
+      this.time.delayedCall(1000, () => this.processEndingStep());
+    });
   }
 
   processEndingStep() {
-    if (!this.endingPath || this.endingPathIndex >= this.endingPath.length) {
+    if (!this.endingTarget) return;
+    const cur = this.mazeManager.worldToTile(this.heroSprite.x, this.heroSprite.y);
+    const goal = this.mazeManager.worldToTile(this.endingTarget.x, this.endingTarget.y);
+    if (
+      cur &&
+      goal &&
+      cur.chunk === goal.chunk &&
+      cur.tx === goal.tx &&
+      cur.ty === goal.ty
+    ) {
       this.heroImage.setTexture('hero_idle');
       this.heroImage.setFlipX(false);
       this.hero.direction = 'down';
+      this.endingTarget = null;
       return;
     }
-    const dir = this.endingPath[this.endingPathIndex++];
+    const dir = this._nextHeroDirToward(this.endingTarget.x, this.endingTarget.y);
+    if (!dir) {
+      this.heroImage.setTexture('hero_idle');
+      this.heroImage.setFlipX(false);
+      this.hero.direction = 'down';
+      this.endingTarget = null;
+      return;
+    }
     this._moveHero(dir, () => {
       this.time.delayedCall(1000, () => this.processEndingStep());
     });
