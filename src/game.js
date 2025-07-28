@@ -321,11 +321,13 @@ class GameScene extends Phaser.Scene {
           const targetY = this.heroSprite.y + dy * size;
           const tileInfo = this.mazeManager.worldToTile(targetX, targetY);
           const entranceClosed =
+            tileHere &&
+            tileHere.chunk.entranceDoorSprite &&
+            tileHere.chunk.entranceDoorSprite.texture.key === 'exit' &&
             tileInfo &&
-            tileInfo.chunk.entranceDoorSprite &&
-            tileInfo.chunk.entranceDoorSprite.texture.key === 'exit' &&
-            tileInfo.tx === tileInfo.chunk.chunk.entrance.x &&
-            tileInfo.ty === tileInfo.chunk.chunk.entrance.y;
+            tileInfo.chunk === tileHere.chunk &&
+            tileInfo.tx === tileHere.chunk.chunk.entrance.x &&
+            tileInfo.ty === tileHere.chunk.chunk.entrance.y;
           const rivalBlock =
             this.rivalSprite &&
             this.rivalSprite.x === targetX &&
