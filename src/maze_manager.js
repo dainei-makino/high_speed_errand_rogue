@@ -1267,6 +1267,12 @@ export default class MazeManager {
     }
     if (info && info.chunk) {
       info.chunk.doorOpen = true;
+      const chunkData = info.chunk;
+      if (chunkData.entrance && chunkData.tiles) {
+        const idx =
+          chunkData.entrance.y * chunkData.width + chunkData.entrance.x;
+        chunkData.tiles[idx] = TILE.WALL;
+      }
     }
   }
 
