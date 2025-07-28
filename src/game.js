@@ -58,6 +58,7 @@ class GameScene extends Phaser.Scene {
     this.rivalPauseTimer = null;
     this.rivalPaused = false;
     this.lastRivalSpikeTile = null;
+    this.rivalDead = false;
     this.stopTile = null;
     this.controlsDisabled = false;
     this.endingTarget = null;
@@ -104,6 +105,7 @@ class GameScene extends Phaser.Scene {
     this.rivalPauseTimer = null;
     this.rivalPaused = false;
     this.lastRivalSpikeTile = null;
+    this.rivalDead = false;
 
     // Re-enable controls when restarting the game
     this.controlsDisabled = false;
@@ -676,7 +678,7 @@ class GameScene extends Phaser.Scene {
 
 
   this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
-  if (this.rival && this.rivalSprite) {
+  if (this.rival && this.rivalSprite && !this.rivalDead) {
     this.rival.moveTo(this.rivalSprite.x, this.rivalSprite.y);
     const rTile = this.mazeManager.worldToTile(this.rivalSprite.x, this.rivalSprite.y);
     if (rTile) {
@@ -751,7 +753,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-    if (this.rivalSprite && !this.rivalMoving && !this.rivalPaused && !this.isGameOver) {
+    if (this.rivalSprite && !this.rivalDead && !this.rivalMoving && !this.rivalPaused && !this.isGameOver) {
       let dirs = null;
       const target = this._findNearestRivalTarget();
       if (target) {
@@ -1178,6 +1180,7 @@ class GameScene extends Phaser.Scene {
 
   spawnRival(info) {
     if (this.rival) return;
+    this.rivalDead = false;
     const chunk = info.chunk;
     const size = chunk.size;
     const t = chunk.tiles;
@@ -1213,7 +1216,8 @@ class GameScene extends Phaser.Scene {
   }
 
   handleRivalDeath() {
-    if (!this.rivalSprite) return;
+    if (this.rivalDead || !this.rivalSprite) return;
+    this.rivalDead = true;
     this.playSound('game_over');
     if (this.rivalTimer) {
       this.rivalTimer.remove();
