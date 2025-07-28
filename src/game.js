@@ -11,6 +11,7 @@ import { newChunkTransition, evaporateArea, spawnAfterimage } from './effects.js
 import LoadingScene from './loading_scene.js';
 import StarField from './star_field.js';
 import GameOverScene from './game_over_scene.js';
+import EndingScene from './ending_scene.js';
 import { computeTetherPoints, isHorizontal, isVertical } from './utils.js';
 import Shield from './shield.js';
 import MeteorField from './meteor_field.js';
@@ -103,6 +104,11 @@ class GameScene extends Phaser.Scene {
     this.rivalPauseTimer = null;
     this.rivalPaused = false;
     this.lastRivalSpikeTile = null;
+
+    // Re-enable controls when restarting the game
+    this.controlsDisabled = false;
+    this.endingTarget = null;
+    this.pendingEnding = null;
 
     this.hero = new HeroState();
     this.isMoving = false;
@@ -1309,6 +1315,9 @@ class GameScene extends Phaser.Scene {
       this.heroImage.setFlipX(false);
       this.hero.direction = 'down';
       this.endingTarget = null;
+      this.scene.launch('EndingScene');
+      this.scene.bringToTop('EndingScene');
+      this.scene.pause();
       return;
     }
     const dir = this._nextHeroDirToward(this.endingTarget.x, this.endingTarget.y);
@@ -1479,7 +1488,7 @@ const config = {
     width: VIRTUAL_WIDTH * 2,
     height: VIRTUAL_HEIGHT * 2
   },
-  scene: [LoadingScene, GameScene, UIScene, GameOverScene]
+  scene: [LoadingScene, GameScene, UIScene, GameOverScene, EndingScene]
 };
 
 Characters.ready.then(() => {
