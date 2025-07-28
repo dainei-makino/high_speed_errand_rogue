@@ -1267,6 +1267,17 @@ export default class MazeManager {
     }
   }
 
+  closeEntranceDoor(info) {
+    if (info && info.entranceDoorSprite) {
+      info.entranceDoorSprite.setTexture('exit');
+    }
+    if (info && info.chunk && info.chunk.entrance) {
+      const idx =
+        info.chunk.entrance.y * info.chunk.width + info.chunk.entrance.x;
+      info.chunk.tiles[idx] = TILE.WALL;
+    }
+  }
+
   openSilverDoor(info, x, y) {
     if (info && info.silverDoors) {
       const door = info.silverDoors.find(d => d.x === x && d.y === y);
