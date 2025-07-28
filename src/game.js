@@ -54,6 +54,8 @@ class GameScene extends Phaser.Scene {
     this.lastRivalSpikeTile = null;
     this.stopTile = null;
     this.inEnding = false;
+    this.overlayCam = null;
+    this.overlayContainer = null;
   }
 
   preload() {
@@ -65,6 +67,8 @@ class GameScene extends Phaser.Scene {
     this.isMoving = false;
     this.isGameOver = false;
     this.inEnding = false;
+    this.overlayCam = null;
+    this.overlayContainer = null;
     this.lastSpikeTile = null;
     this.lastShockTile = null;
 
@@ -1245,13 +1249,20 @@ class GameScene extends Phaser.Scene {
 
   _startEndingCredits() {
     const cam = this.cameras.main;
-    const mask = this.add
-      .rectangle(cam.midPoint.x, cam.midPoint.y, cam.width, cam.height, 0x000000)
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(1000)
-      .setAlpha(0);
-    this.tweens.add({ targets: mask, alpha: 0.5, duration: 500 });
+    // Overlay camera for masking and credits
+    this.overlayCam = this.cameras.add(0, 0, cam.width, cam.height);
+    this.overlayCam.setScroll(0, 0);
+    this.overlayCam.setBackgroundColor('#000000');
+    this.overlayCam.setAlpha(0);
+    this.overlayCam.ignore([
+      this.worldLayer,
+      this.starField.container,
+      this.shield.sprite,
+      this.meteorField.container
+    ]);
+    this.overlayContainer = this.add.container(0, 0).setScrollFactor(0);
+    cam.ignore(this.overlayContainer);
+    this.tweens.add({ targets: this.overlayCam, alpha: 0.5, duration: 500 });
 
     const textStyle = {
       fontFamily: 'monospace',
@@ -1260,9 +1271,8 @@ class GameScene extends Phaser.Scene {
     };
     const firstText = this.add
       .text(cam.midPoint.x, cam.midPoint.y, 'YOU TOOK A BREATH', textStyle)
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(1001);
+      .setOrigin(0.5);
+    this.overlayContainer.add(firstText);
 
     this.time.delayedCall(5000, () => {
       evaporateArea(
@@ -1283,9 +1293,8 @@ class GameScene extends Phaser.Scene {
         };
         const dirText = this.add
           .text(cam.midPoint.x, cam.midPoint.y, 'DIRECTOR: DAINEI MAKINO', dirStyle)
-          .setOrigin(0.5)
-          .setScrollFactor(0)
-          .setDepth(1001);
+          .setOrigin(0.5);
+        this.overlayContainer.add(dirText);
 
         this.time.delayedCall(10000, () => {
           evaporateArea(
@@ -1299,7 +1308,14 @@ class GameScene extends Phaser.Scene {
           dirText.destroy();
 
           this.time.delayedCall(2000, () => {
-            mask.destroy();
+            if (this.overlayCam) {
+              this.overlayCam.destroy();
+              this.overlayCam = null;
+            }
+            if (this.overlayContainer) {
+              this.overlayContainer.destroy();
+              this.overlayContainer = null;
+            }
             this.inEnding = false;
             this.input.keyboard.enabled = true;
             this.events.emit('setOxygenVisible', true);
