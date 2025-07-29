@@ -24,8 +24,8 @@ const MIDPOINTS = [1, 5, 10, 15, 20, 30, 40, 50];
 const VIRTUAL_WIDTH = 480;
 const VIRTUAL_HEIGHT = 270;
 
-// Master volume applied to all sounds, reduced by 20 dB (approx. 7%)
-const MASTER_VOLUME = 0.07;
+// Master volume applied to all sounds (40%)
+const MASTER_VOLUME = 0.4;
 
 // Global state for tracking overall game progress
 
