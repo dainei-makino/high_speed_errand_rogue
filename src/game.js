@@ -394,7 +394,7 @@ class GameScene extends Phaser.Scene {
               (tileInfo.cell === TILE.WALL ||
                 tileInfo.cell === TILE.REACTOR ||
                 (tileInfo.cell === TILE.SILVER_DOOR && this.hero.keys === 0) ||
-                (tileInfo.cell === TILE.DOOR && this.hero.keys === 0 && !tileInfo.chunk.chunk.doorOpen && !tileInfo.chunk.chunk.exited) ||
+                (tileInfo.cell === TILE.DOOR && !tileInfo.chunk.chunk.doorOpen && !tileInfo.chunk.chunk.exited) ||
                 (tileInfo.cell === TILE.AUTO_GATE &&
                   tileInfo.chunk.chunk.autoGates &&
                   tileInfo.chunk.chunk.autoGates.find(
@@ -605,13 +605,28 @@ class GameScene extends Phaser.Scene {
       }
 
       if (curTile.cell === TILE.DOOR && !curTile.chunk.chunk.exited) {
-        if (curTile.chunk.chunk.doorOpen || this.hero.useKey()) {
-          if (!curTile.chunk.chunk.doorOpen) {
+        if (!curTile.chunk.chunk.doorOpen) {
+          if (this.hero.useKey()) {
             this.mazeManager.openDoor(curTile.chunk);
             this.playSound('door_open');
+          } else {
+            if (curTile.chunk.doorSprite) {
+              this.tweens.add({
+                targets: curTile.chunk.doorSprite,
+                x: '+=2',
+                yoyo: true,
+                duration: 50,
+                repeat: 1
+              });
+            }
+            return;
           }
-          this.cameraManager.zoomHeroFocus();
-          curTile.chunk.chunk.exited = true;
+        }
+
+        // Door is open; consume a key if available when exiting
+        this.hero.useKey();
+        this.cameraManager.zoomHeroFocus();
+        curTile.chunk.chunk.exited = true;
           gameState.incrementMazeCount();
           this.checkMeteorFieldActivation();
           if (MIDPOINTS.includes(gameState.clearedMazes)) {
@@ -662,19 +677,8 @@ class GameScene extends Phaser.Scene {
           ) {
             this.startOxygenTimer();
           }
-        } else {
-          if (curTile.chunk.doorSprite) {
-            this.tweens.add({
-              targets: curTile.chunk.doorSprite,
-              x: '+=2',
-              yoyo: true,
-              duration: 50,
-              repeat: 1
-            });
-          }
         }
       }
-    }
 
 
   this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
