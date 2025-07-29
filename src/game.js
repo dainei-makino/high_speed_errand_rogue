@@ -679,7 +679,6 @@ class GameScene extends Phaser.Scene {
           }
         }
       }
-    }
 
 
   this.hero.moveTo(this.heroSprite.x, this.heroSprite.y);
